@@ -1,5 +1,5 @@
 # rollup-plugin-svelte changelog
 
-## 1.0.0
+## 0.0.2
 
 * First release
