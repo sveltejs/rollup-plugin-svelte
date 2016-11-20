@@ -36,5 +36,8 @@
     "mocha": "^3.1.2",
     "rollup": "^0.36.3",
     "rollup-plugin-buble": "^0.14.0"
+  },
+  "dependencies": {
+    "svelte": "0.0.2"
   }
 }
