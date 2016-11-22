@@ -38,6 +38,7 @@
     "rollup-plugin-buble": "^0.14.0"
   },
   "dependencies": {
+    "rollup-pluginutils": "^1.5.2",
     "svelte": "0.1.0"
   }
 }
