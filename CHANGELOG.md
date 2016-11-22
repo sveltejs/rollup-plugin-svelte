@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 0.1.1
+
+* Update Svelte
+
 ## 0.1.0
 
 * Update Svelte
