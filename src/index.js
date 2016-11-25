@@ -1,4 +1,4 @@
-import { extname } from 'path';
+import { basename, extname } from 'path';
 import { compile } from 'svelte';
 import { createFilter } from 'rollup-pluginutils';
 
@@ -14,7 +14,12 @@ export default function svelte ( options = {} ) {
 			if ( !filter( id ) ) return null;
 			if ( !~extensions.indexOf( extname( id ) ) ) return null;
 
-			return compile( code );
+			let name = basename( id ).replace( extname( id ), '' );
+			name = `${name[0].toUpperCase()}${name.slice( 1 )}`;
+
+			return compile( code, {
+				name
+			});
 		}
 	};
 }

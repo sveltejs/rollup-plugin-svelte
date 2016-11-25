@@ -1,5 +1,10 @@
 # rollup-plugin-svelte changelog
 
+## 0.2.0
+
+* Update Svelte
+* Set `options.name` to basename of file
+
 ## 0.1.1
 
 * Update Svelte
