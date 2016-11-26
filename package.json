@@ -39,6 +39,6 @@
   },
   "dependencies": {
     "rollup-pluginutils": "^1.5.2",
-    "svelte": "0.2.0"
+    "svelte": "^0.3.0"
   }
 }
