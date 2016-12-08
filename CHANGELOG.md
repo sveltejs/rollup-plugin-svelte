@@ -1,5 +1,10 @@
 # rollup-plugin-svelte changelog
 
+## 1.2.0
+
+* Update Svelte
+* Support `css` and `filename` options
+
 ## 1.0.0
 
 * Update Svelte

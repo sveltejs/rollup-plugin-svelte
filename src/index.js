@@ -18,7 +18,9 @@ export default function svelte ( options = {} ) {
 			name = `${name[0].toUpperCase()}${name.slice( 1 )}`;
 
 			return compile( code, {
-				name
+				name,
+				filename: id,
+				css: options.css
 			});
 		}
 	};
