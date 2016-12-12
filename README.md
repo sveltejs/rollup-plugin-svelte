@@ -27,7 +27,7 @@ export default {
 
       // You can restrict which files are compiled
       // using `include` and `exclude`
-      include: 'src/components/**.html'
+      include: 'src/components/**/*.html'
     })
   ]
 }
