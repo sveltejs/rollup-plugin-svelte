@@ -1,5 +1,10 @@
 # rollup-plugin-svelte changelog
 
+## 1.2.5
+
+* Update Svelte
+* Include code frame in error message
+
 ## 1.2.0
 
 * Update Svelte
