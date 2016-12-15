@@ -20,7 +20,17 @@ export default function svelte ( options = {} ) {
 			return compile( code, {
 				name,
 				filename: id,
-				css: options.css
+				css: options.css,
+
+				onerror ( err ) {
+					let message = ( err.loc ? `(${err.loc.line}:${err.loc.column}) ` : '' ) + err.message;
+					if ( err.frame ) message += `\n${err.frame}`;
+
+					const err2 = new Error( message );
+					err2.stack = err.stack;
+
+					throw err2;
+				}
 			});
 		}
 	};
