@@ -21,6 +21,8 @@ export default function svelte ( options = {} ) {
 				name,
 				filename: id,
 				css: options.css,
+				generate: options.generate,
+				format: 'es',
 
 				onerror ( err ) {
 					let message = ( err.loc ? `(${err.loc.line}:${err.loc.column}) ` : '' ) + err.message;
