@@ -1,5 +1,11 @@
 # rollup-plugin-svelte changelog
 
+## 1.3.0
+
+* Update Svelte
+* Add support for `generate: 'ssr'`
+* Enforce `es` format
+
 ## 1.2.5
 
 * Update Svelte
