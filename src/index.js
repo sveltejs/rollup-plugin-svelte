@@ -2,6 +2,19 @@ import { basename, extname } from 'path';
 import { compile } from 'svelte';
 import { createFilter } from 'rollup-pluginutils';
 
+function sanitize ( input ) {
+	return basename( input )
+		.replace( extname( input ), '' )
+		.replace( /[^a-zA-Z_$0-9]+/g, '_' )
+		.replace( /^_/, '' )
+		.replace( /_$/, '' )
+		.replace( /^(\d)/, '_$1' );
+}
+
+function capitalize ( str ) {
+	return str[0] + str.slice( 1 );
+}
+
 export default function svelte ( options = {} ) {
 	const filter = createFilter( options.include, options.exclude );
 
@@ -14,8 +27,7 @@ export default function svelte ( options = {} ) {
 			if ( !filter( id ) ) return null;
 			if ( !~extensions.indexOf( extname( id ) ) ) return null;
 
-			let name = basename( id ).replace( extname( id ), '' );
-			name = `${name[0].toUpperCase()}${name.slice( 1 )}`;
+			const name = capitalize( sanitize( id ) );
 
 			return compile( code, {
 				name,
