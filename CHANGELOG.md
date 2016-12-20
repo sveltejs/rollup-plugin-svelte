@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 1.3.1
+
+* Sanitize constructor names
+
 ## 1.3.0
 
 * Update Svelte
