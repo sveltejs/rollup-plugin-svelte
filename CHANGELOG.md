@@ -1,5 +1,10 @@
 # rollup-plugin-svelte changelog
 
+## 1.6.0
+
+* Update Svelte
+* Use shared helpers
+
 ## 1.3.1
 
 * Sanitize constructor names
