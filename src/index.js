@@ -35,6 +35,7 @@ export default function svelte ( options = {} ) {
 				css: options.css,
 				generate: options.generate,
 				format: 'es',
+				shared: require.resolve( 'svelte/shared.js' ),
 
 				onerror ( err ) {
 					let message = ( err.loc ? `(${err.loc.line}:${err.loc.column}) ` : '' ) + err.message;
