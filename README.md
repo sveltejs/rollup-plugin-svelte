@@ -39,7 +39,26 @@ export default {
     })
   ]
 }
+
+// src/main.js
+import ComboBox from './components/ComboBox.html';
+
+const app = {
+  start: function (categories) {
+    // eslint-disable-next-line no-unused-vars
+    const combobox = new ComboBox({
+      target: document.querySelector('category'),
+      data: {
+        items: categories
+      }
+    });
+  }
+};
+
+export default app;
+
 ```
+In your html web page, you can now include the 'bundle.js' file via script tag and call app.start(an_array_of_categories)
 
 ## License
 
