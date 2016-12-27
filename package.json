@@ -17,10 +17,7 @@
     "prebuild": "npm test",
     "lint": "eslint src"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/rollup/rollup-plugin-svelte.git"
-  },
+  "repository": "rollup/rollup-plugin-svelte",
   "keywords": [
     "svelte",
     "rollup"
