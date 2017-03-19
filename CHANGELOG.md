@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 1.6.1
+
+* Capitalize component names correctly
+
 ## 1.6.0
 
 * Update Svelte
