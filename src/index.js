@@ -15,10 +15,36 @@ function capitalize ( str ) {
 	return str[0].toUpperCase() + str.slice( 1 );
 }
 
+const pluginOptions = {
+	include: true,
+	exclude: true,
+	extensions: true
+};
+
 export default function svelte ( options = {} ) {
 	const filter = createFilter( options.include, options.exclude );
 
 	const extensions = options.extensions || [ '.html', '.svelte' ];
+
+	const fixedOptions = {};
+
+	Object.keys( options ).forEach( key => {
+		// add all options except include, exclude, extensions
+		if ( pluginOptions[ key ] ) return;
+		fixedOptions[ key ] = options[ key ];
+	});
+
+	fixedOptions.format = 'es';
+	fixedOptions.shared = require.resolve( 'svelte/shared.js' );
+	fixedOptions.onerror = err => {
+		let message = ( err.loc ? `(${err.loc.line}:${err.loc.column}) ` : '' ) + err.message;
+		if ( err.frame ) message += `\n${err.frame}`;
+
+		const err2 = new Error( message );
+		err2.stack = err.stack;
+
+		throw err2;
+	};
 
 	return {
 		name: 'svelte',
@@ -27,26 +53,10 @@ export default function svelte ( options = {} ) {
 			if ( !filter( id ) ) return null;
 			if ( !~extensions.indexOf( extname( id ) ) ) return null;
 
-			const name = capitalize( sanitize( id ) );
-
-			return compile( code, {
-				name,
-				filename: id,
-				css: options.css,
-				generate: options.generate,
-				format: 'es',
-				shared: require.resolve( 'svelte/shared.js' ),
-
-				onerror ( err ) {
-					let message = ( err.loc ? `(${err.loc.line}:${err.loc.column}) ` : '' ) + err.message;
-					if ( err.frame ) message += `\n${err.frame}`;
-
-					const err2 = new Error( message );
-					err2.stack = err.stack;
-
-					throw err2;
-				}
-			});
+			return compile( code, Object.assign( {}, fixedOptions, {
+				name: capitalize( sanitize( id ) ),
+				filename: id
+			}));
 		}
 	};
 }
