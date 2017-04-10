@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 1.7.0
+
+* Pass all options through to Svelte (e.g. `dev`)
+
 ## 1.6.1
 
 * Capitalize component names correctly
