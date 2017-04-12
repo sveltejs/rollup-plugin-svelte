@@ -1,3 +1,4 @@
+import { writeFileSync } from 'fs';
 import { basename, extname } from 'path';
 import { compile } from 'svelte';
 import { createFilter } from 'rollup-pluginutils';
@@ -46,6 +47,20 @@ export default function svelte ( options = {} ) {
 		throw err2;
 	};
 
+	// handle CSS extraction
+	if ( 'css' in options ) {
+		if ( typeof options.css !== 'function' && typeof options.css !== 'boolean' ) {
+			throw new Error( 'options.css must be a boolean or a function' );
+		}
+	}
+
+	let css = options.css && typeof options.css === 'function' ? options.css : null;
+	const cssLookup = new Map();
+
+	if ( css ) {
+		fixedOptions.css = false;
+	}
+
 	return {
 		name: 'svelte',
 
@@ -53,10 +68,27 @@ export default function svelte ( options = {} ) {
 			if ( !filter( id ) ) return null;
 			if ( !~extensions.indexOf( extname( id ) ) ) return null;
 
-			return compile( code, Object.assign( {}, fixedOptions, {
+			const compiled = compile( code, Object.assign( {}, fixedOptions, {
 				name: capitalize( sanitize( id ) ),
 				filename: id
 			}));
+
+			if ( css ) cssLookup.set( id, compiled.css );
+
+			return compiled;
+		},
+
+		ongenerate () {
+			if ( css ) {
+				// write out CSS file. TODO would be nice if there was a
+				// a more idiomatic way to do this in Rollup
+				let result = '';
+				for ( let chunk of cssLookup.values() ) {
+					result += chunk;
+				}
+
+				css( result );
+			}
 		}
 	};
 }

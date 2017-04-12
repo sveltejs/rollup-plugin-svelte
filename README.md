@@ -14,11 +14,12 @@ npm install --save-dev rollup-plugin-svelte
 
 ```js
 // rollup.config.js
+import * as fs from 'fs';
 import svelte from 'rollup-plugin-svelte';
 
 export default {
   entry: 'src/main.js',
-  dest: 'bundle.js',
+  dest: 'public/bundle.js',
   format: 'iife',
   plugins: [
     svelte({
@@ -33,13 +34,25 @@ export default {
       // can also use the server-side rendering compiler
       generate: 'ssr',
 
-      // If you're doing server-side rendering, you may want
-      // to prevent the client-side compiler from duplicating CSS
-      css: false
+      // Extract CSS into a separate file (recommended).
+      // See note below
+      css: function ( css ) {
+        fs.writeFileSync( 'public/main.css', css );
+      }
     })
   ]
 }
 ```
+
+
+## Extracting CSS
+
+If your Svelte components contain `<style>` tags, by default the compiler will add JavaScript that injects those styles into the page when the component is rendered. That's not ideal, because it adds weight to your JavaScript, prevents styles from being fetched in parallel with your code, and can even cause CSP violations.
+
+A better option is to extract the CSS into a separate file. Using the `css` option as shown above would cause a `public/main.css` file to be generated each time the bundle is built (or rebuilt, if you're using rollup-watch), with the normal scoping rules applied.
+
+Alternatively, if you're handling styles in some other way and just want to prevent the CSS being added to your JavaScript bundle, use `css: false`.
+
 
 ## License
 
