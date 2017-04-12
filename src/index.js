@@ -1,4 +1,3 @@
-import { writeFileSync } from 'fs';
 import { basename, extname } from 'path';
 import { compile } from 'svelte';
 import { createFilter } from 'rollup-pluginutils';
