@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 1.8.1
+
+* Handle components without `<style>` tags when concatenating CSS
+
 ## 1.8.0
 
 * Allow `options.css` to be a function that is called with extracted CSS when bundle is generated
