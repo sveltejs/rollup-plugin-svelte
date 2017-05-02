@@ -83,7 +83,7 @@ export default function svelte ( options = {} ) {
 				// a more idiomatic way to do this in Rollup
 				let result = '';
 				for ( let chunk of cssLookup.values() ) {
-					result += chunk;
+					result += chunk || '';
 				}
 
 				css( result );
