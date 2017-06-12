@@ -56,7 +56,7 @@ If you're importing a component from your node_modules folder, and that componen
   // this means 'some-component' resolves to 'some-component/src/SomeComponent.html'
   "svelte": "src/MyComponent.html",
 
-  // this means 'my-component/Foo.html' resolves to 'some-component/src/Foo.html';
+  // this means 'my-component/Foo.html' resolves to 'some-component/src/Foo.html'
   "svelte.root": "src"
 }
 ```
