@@ -12,10 +12,10 @@
   ],
   "scripts": {
     "test": "mocha",
+    "pretest": "npm run build",
     "prepublish": "npm run lint && npm run build",
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "prebuild": "npm test",
     "lint": "eslint src"
   },
   "repository": "rollup/rollup-plugin-svelte",
@@ -37,6 +37,7 @@
     "rollup-watch": "^3.2.2"
   },
   "dependencies": {
+    "require-relative": "^0.8.7",
     "rollup-pluginutils": "^2.0.1",
     "svelte": "^1.11.2"
   }
