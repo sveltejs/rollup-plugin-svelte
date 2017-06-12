@@ -1,10 +1,12 @@
-import { basename, extname } from 'path';
+import fs from 'fs';
+import path from 'path';
+import relative from 'require-relative';
 import { compile } from 'svelte';
 import { createFilter } from 'rollup-pluginutils';
 
 function sanitize ( input ) {
-	return basename( input )
-		.replace( extname( input ), '' )
+	return path.basename( input )
+		.replace( path.extname( input ), '' )
 		.replace( /[^a-zA-Z_$0-9]+/g, '_' )
 		.replace( /^_/, '' )
 		.replace( /_$/, '' )
@@ -20,6 +22,24 @@ const pluginOptions = {
 	exclude: true,
 	extensions: true
 };
+
+function tryRequire ( id ) {
+	try {
+		return require( id );
+	} catch ( err ) {
+		return null;
+	}
+}
+
+function exists ( file ) {
+	try {
+		fs.statSync( file );
+		return true;
+	} catch ( err ) {
+		if ( err.code === 'ENOENT' ) return false;
+		throw err;
+	}
+}
 
 export default function svelte ( options = {} ) {
 	const filter = createFilter( options.include, options.exclude );
@@ -63,9 +83,36 @@ export default function svelte ( options = {} ) {
 	return {
 		name: 'svelte',
 
+		resolveId ( importee, importer ) {
+			if ( !importer || path.isAbsolute( importee ) || importee[0] === '.' ) return null;
+
+			// if this is a bare import, see if there's a valid pkg.svelte
+			const parts = importee.split('/');
+			let name = parts.shift();
+			if ( name[0] === '@' ) name += `/${parts.shift()}`;
+
+			const resolved = relative.resolve( `${name}/package.json`, path.dirname( importer ) );
+			const pkg = tryRequire( resolved );
+			if ( !pkg ) return null;
+
+			const dir = path.dirname(resolved);
+
+			if ( parts.length === 0 ) {
+				// use pkg.svelte
+				if ( pkg.svelte ) {
+					return path.resolve(dir, pkg.svelte);
+				}
+			} else {
+				if ( pkg['svelte.root'] ) {
+					const sub = path.resolve(dir, pkg['svelte.root'], parts.join('/'));
+					if ( exists( sub ) ) return sub;
+				}
+			}
+		},
+
 		transform ( code, id ) {
 			if ( !filter( id ) ) return null;
-			if ( !~extensions.indexOf( extname( id ) ) ) return null;
+			if ( !~extensions.indexOf( path.extname( id ) ) ) return null;
 
 			const compiled = compile( code, Object.assign( {}, fixedOptions, {
 				name: capitalize( sanitize( id ) ),

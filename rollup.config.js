@@ -2,6 +2,12 @@ import buble from 'rollup-plugin-buble';
 
 export default {
 	entry: 'src/index.js',
+	external: [
+		'path',
+		'rollup-pluginutils',
+		'svelte',
+		'require-relative'
+	],
 	plugins: [
 		buble({
 			target: { node: 4 }
