@@ -19,4 +19,12 @@ describe('rollup-plugin-svelte', () => {
 			path.resolve('test/node_modules/widgets/src/Foo.html')
 		);
 	});
+
+	it('ignores built-in modules', () => {
+		const { resolveId } = plugin();
+		assert.equal(
+			resolveId('path', path.resolve('test/foo/main.js')),
+			null
+		);
+	});
 });

@@ -32,6 +32,15 @@ function tryRequire(id) {
 	}
 }
 
+function tryResolve(pkg, importer) {
+	try {
+		return relative.resolve(pkg, importer);
+	} catch (err) {
+		if (err.code === 'MODULE_NOT_FOUND') return null;
+		throw err;
+	}
+}
+
 function exists(file) {
 	try {
 		fs.statSync(file);
@@ -96,10 +105,11 @@ export default function svelte(options = {}) {
 			let name = parts.shift();
 			if (name[0] === '@') name += `/${parts.shift()}`;
 
-			const resolved = relative.resolve(
+			const resolved = tryResolve(
 				`${name}/package.json`,
 				path.dirname(importer)
 			);
+			if (!resolved) return null;
 			const pkg = tryRequire(resolved);
 			if (!pkg) return null;
 
