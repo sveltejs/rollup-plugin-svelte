@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 2.0.1
+
+* Prevent import of built-in modules from blowing up the resolver
+
 ## 2.0.0
 
 * Add support for `pkg.svelte` and `pkg['svelte.root']`
