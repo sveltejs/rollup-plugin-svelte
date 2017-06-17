@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 2.0.2
+
+* Only include `code` and `map` in object passed to Rollup
+
 ## 2.0.1
 
 * Prevent import of built-in modules from blowing up the resolver
