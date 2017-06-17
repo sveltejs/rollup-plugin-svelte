@@ -27,4 +27,10 @@ describe('rollup-plugin-svelte', () => {
 			null
 		);
 	});
+
+	it('creates a {code, map} object, excluding the AST etc', () => {
+		const { transform } = plugin();
+		const compiled = transform('', 'test.html');
+		assert.deepEqual(Object.keys(compiled), ['code', 'map']);
+	});
 });

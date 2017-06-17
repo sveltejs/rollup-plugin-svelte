@@ -142,7 +142,10 @@ export default function svelte(options = {}) {
 
 			if (css) cssLookup.set(id, compiled.css);
 
-			return compiled;
+			return {
+				code: compiled.code,
+				map: compiled.map
+			};
 		},
 
 		ongenerate() {
