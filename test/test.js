@@ -28,6 +28,14 @@ describe('rollup-plugin-svelte', () => {
 		);
 	});
 
+	it('ignores virtual modules', () => {
+		const { resolveId } = plugin();
+		assert.equal(
+			resolveId('path', path.resolve('\0some-plugin-generated-module')),
+			null
+		);
+	});
+
 	it('creates a {code, map} object, excluding the AST etc', () => {
 		const { transform } = plugin();
 		const compiled = transform('', 'test.html');

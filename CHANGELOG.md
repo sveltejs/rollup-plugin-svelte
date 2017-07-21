@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 2.0.3
+
+* Ignore virtual modules ([#13](https://github.com/rollup/rollup-plugin-svelte/issues/13))
+
 ## 2.0.2
 
 * Only include `code` and `map` in object passed to Rollup

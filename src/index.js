@@ -97,7 +97,7 @@ export default function svelte(options = {}) {
 		name: 'svelte',
 
 		resolveId(importee, importer) {
-			if (!importer || path.isAbsolute(importee) || importee[0] === '.')
+			if (!importer || importee[0] === '.' || importee[0] === '\0' || path.isAbsolute(importee))
 				return null;
 
 			// if this is a bare import, see if there's a valid pkg.svelte
