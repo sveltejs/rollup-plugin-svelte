@@ -38,7 +38,7 @@
     "rollup-watch": "^3.2.2",
     "sander": "^0.6.0",
     "source-map": "^0.5.6",
-    "svelte": "^1.25.0"
+    "svelte": "^1.25.1"
   },
   "dependencies": {
     "require-relative": "^0.8.7",
