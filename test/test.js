@@ -62,12 +62,18 @@ describe('rollup-plugin-svelte', () => {
 						const locator = getLocator(css.code);
 
 						const generatedFooLoc = locator('.foo');
+						const originalFooLoc = smc.originalPositionFor({
+							line: generatedFooLoc.line + 1,
+							column: generatedFooLoc.column
+						});
 
 						assert.deepEqual(
-							smc.originalPositionFor({
-								line: generatedFooLoc.line + 1,
-								column: generatedFooLoc.column
-							}),
+							{
+								source: originalFooLoc.source.replace(/\//g, path.sep),
+								line: originalFooLoc.line,
+								column: originalFooLoc.column,
+								name: originalFooLoc.name
+							},
 							{
 								source: path.resolve('test/sourcemap-test/src/Foo.html'),
 								line: 5,
@@ -77,12 +83,18 @@ describe('rollup-plugin-svelte', () => {
 						);
 
 						const generatedBarLoc = locator('.bar');
+						const originalBarLoc = smc.originalPositionFor({
+							line: generatedBarLoc.line + 1,
+							column: generatedBarLoc.column
+						});
 
 						assert.deepEqual(
-							smc.originalPositionFor({
-								line: generatedBarLoc.line + 1,
-								column: generatedBarLoc.column
-							}),
+							{
+								source: originalBarLoc.source.replace(/\//g, path.sep),
+								line: originalBarLoc.line,
+								column: originalBarLoc.column,
+								name: originalBarLoc.name
+							},
 							{
 								source: path.resolve('test/sourcemap-test/src/Bar.html'),
 								line: 4,
