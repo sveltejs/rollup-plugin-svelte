@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 3.0.0
+
+* CSS sourcemaps ([#14](https://github.com/rollup/rollup-plugin-svelte/issues/14))
+
 ## 2.0.3
 
 * Ignore virtual modules ([#13](https://github.com/rollup/rollup-plugin-svelte/issues/13))

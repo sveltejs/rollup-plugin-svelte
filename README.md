@@ -36,8 +36,13 @@ export default {
 
       // Extract CSS into a separate file (recommended).
       // See note below
-      css: function ( css ) {
-        fs.writeFileSync( 'public/main.css', css );
+      css: function (css) {
+        console.log(css.code); // the concatenated CSS
+        console.log(css.map); // a sourcemap
+
+        // creates `main.css` and `main.css.map` — pass `false`
+        // as the second argument if you don't want the sourcemap
+        css.write('public/main.css'); 
       }
     })
   ]
