@@ -1,0 +1,7 @@
+<p class='bar'>blue</p>
+
+<style>
+	.bar {
+		color: blue;
+	}
+</style>
