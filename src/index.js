@@ -3,6 +3,7 @@ import path from 'path';
 import relative from 'require-relative';
 import { compile } from 'svelte';
 import { createFilter } from 'rollup-pluginutils';
+import { encode, decode } from 'sourcemap-codec';
 
 function sanitize(input) {
 	return path
@@ -48,6 +49,59 @@ function exists(file) {
 	} catch (err) {
 		if (err.code === 'ENOENT') return false;
 		throw err;
+	}
+}
+
+function mkdirp(dir) {
+	const parent = path.dirname(dir);
+	if (parent === dir) return;
+
+	mkdirp(parent);
+
+	try {
+		fs.mkdirSync(dir);
+	} catch (err) {
+		if (err.code !== 'EEXIST') throw err;
+	}
+}
+
+class CssWriter {
+	constructor (code, map) {
+		this.code = code;
+		this.map = {
+			version: 3,
+			file: null,
+			sources: map.sources,
+			sourcesContent: map.sourcesContent,
+			names: [],
+			mappings: map.mappings
+		};
+	}
+
+	write(dest, map) {
+		dest = path.resolve(dest);
+		mkdirp(path.dirname(dest));
+
+		const basename = path.basename(dest);
+
+		if (map !== false) {
+			fs.writeFileSync(dest, `${this.code}\n/*# sourceMappingURL=${basename}.map */`);
+			fs.writeFileSync(`${dest}.map`, JSON.stringify({
+				version: 3,
+				file: basename,
+				sources: this.map.sources.map(source => path.relative(path.dirname(dest), source)),
+				sourcesContent: this.map.sourcesContent,
+				names: [],
+				mappings: this.map.mappings
+			}, null, '  '));
+		} else {
+			fs.writeFileSync(dest, this.code);
+		}
+	}
+
+	toString() {
+		console.log('[DEPRECATION] As of rollup-plugin-svelte@3, the argument to the `css` function is an object, not a string — use `css.write(file)`. Consult the documentation for more information: https://github.com/rollup/rollup-plugin-svelte'); // eslint-disable-line no-console
+		return this.code;
 	}
 }
 
@@ -140,7 +194,12 @@ export default function svelte(options = {}) {
 				})
 			);
 
-			if (css) cssLookup.set(id, compiled.css);
+			if (css) {
+				cssLookup.set(id, {
+					code: compiled.css,
+					map: compiled.cssMap
+				});
+			}
 
 			return {
 				code: compiled.code,
@@ -153,11 +212,42 @@ export default function svelte(options = {}) {
 				// write out CSS file. TODO would be nice if there was a
 				// a more idiomatic way to do this in Rollup
 				let result = '';
+
+				const mappings = [];
+				const sources = [];
+				const sourcesContent = [];
+
 				for (let chunk of cssLookup.values()) {
-					result += chunk || '';
+					if (!chunk.code) continue;
+
+					result += chunk.code + '\n';
+
+					if (chunk.map) {
+						const i = sources.length;
+						sources.push(chunk.map.sources[0]);
+						sourcesContent.push(chunk.map.sourcesContent[0]);
+
+						const decoded = decode(chunk.map.mappings);
+
+						if (i > 0) {
+							decoded.forEach(line => {
+								line.forEach(segment => {
+									segment[1] = i;
+								});
+							});
+						}
+
+						mappings.push(...decoded);
+					}
 				}
 
-				css(result);
+				const writer = new CssWriter(result, {
+					sources,
+					sourcesContent,
+					mappings: encode(mappings)
+				});
+
+				css(writer);
 			}
 		}
 	};

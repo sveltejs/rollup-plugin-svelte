@@ -1,5 +1,9 @@
 const path = require('path');
+const sander = require('sander');
 const assert = require('assert');
+const rollup = require('rollup');
+const { SourceMapConsumer } = require('source-map');
+const { getLocator } = require('locate-character');
 
 const plugin = require('../dist/rollup-plugin-svelte.cjs.js');
 
@@ -40,5 +44,60 @@ describe('rollup-plugin-svelte', () => {
 		const { transform } = plugin();
 		const compiled = transform('', 'test.html');
 		assert.deepEqual(Object.keys(compiled), ['code', 'map']);
+	});
+
+	it('generates a CSS sourcemap', () => {
+		sander.rimrafSync('test/sourcemap-test/dist');
+		sander.mkdirSync('test/sourcemap-test/dist');
+
+		return rollup.rollup({
+			entry: 'test/sourcemap-test/src/main.js',
+			plugins: [
+				plugin({
+					cascade: false,
+					css: css => {
+						css.write('test/sourcemap-test/dist/bundle.css');
+
+						const smc = new SourceMapConsumer(css.map);
+						const locator = getLocator(css.code);
+
+						const generatedFooLoc = locator('.foo');
+
+						assert.deepEqual(
+							smc.originalPositionFor({
+								line: generatedFooLoc.line + 1,
+								column: generatedFooLoc.column
+							}),
+							{
+								source: path.resolve('test/sourcemap-test/src/Foo.html'),
+								line: 5,
+								column: 1,
+								name: null
+							}
+						);
+
+						const generatedBarLoc = locator('.bar');
+
+						assert.deepEqual(
+							smc.originalPositionFor({
+								line: generatedBarLoc.line + 1,
+								column: generatedBarLoc.column
+							}),
+							{
+								source: path.resolve('test/sourcemap-test/src/Bar.html'),
+								line: 4,
+								column: 1,
+								name: null
+							}
+						);
+					}
+				})
+			]
+		}).then(bundle => {
+			return bundle.write({
+				format: 'iife',
+				dest: 'test/sourcemap-test/dist/bundle.js'
+			});
+		});
 	});
 });
