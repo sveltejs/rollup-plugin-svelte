@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 3.0.1
+
+* `svelte` should be a dependency, not a devDependency...
+
 ## 3.0.0
 
 * CSS sourcemaps ([#14](https://github.com/rollup/rollup-plugin-svelte/issues/14))
