@@ -1,5 +1,10 @@
 # rollup-plugin-svelte changelog
 
+## 3.1.0
+
+* Allow `shared` option to override default ([#16](https://github.com/rollup/rollup-plugin-svelte/pull/16))
+* Use `this.warn` and `this.error`, so Rollup can handle failures
+
 ## 3.0.1
 
 * `svelte` should be a dependency, not a devDependency...

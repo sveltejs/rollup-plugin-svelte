@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-svelte",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "Compile Svelte components with Rollup",
   "main": "dist/rollup-plugin-svelte.cjs.js",
   "module": "dist/rollup-plugin-svelte.es.js",
