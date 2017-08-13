@@ -22,7 +22,8 @@ function capitalize(str) {
 const pluginOptions = {
 	include: true,
 	exclude: true,
-	extensions: true
+	extensions: true,
+	shared: true
 };
 
 function tryRequire(id) {
@@ -113,13 +114,13 @@ export default function svelte(options = {}) {
 	const fixedOptions = {};
 
 	Object.keys(options).forEach(key => {
-		// add all options except include, exclude, extensions
+		// add all options except include, exclude, extensions, and shared
 		if (pluginOptions[key]) return;
 		fixedOptions[key] = options[key];
 	});
 
 	fixedOptions.format = 'es';
-	fixedOptions.shared = require.resolve('svelte/shared.js');
+	fixedOptions.shared = require.resolve(options.shared || 'svelte/shared.js');
 	fixedOptions.onerror = err => {
 		let message =
 			(err.loc ? `(${err.loc.line}:${err.loc.column}) ` : '') + err.message;
