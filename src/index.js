@@ -121,16 +121,6 @@ export default function svelte(options = {}) {
 
 	fixedOptions.format = 'es';
 	fixedOptions.shared = require.resolve(options.shared || 'svelte/shared.js');
-	fixedOptions.onerror = err => {
-		let message =
-			(err.loc ? `(${err.loc.line}:${err.loc.column}) ` : '') + err.message;
-		if (err.frame) message += `\n${err.frame}`;
-
-		const err2 = new Error(message);
-		err2.stack = err.stack;
-
-		throw err2;
-	};
 
 	// handle CSS extraction
 	if ('css' in options) {
@@ -146,6 +136,10 @@ export default function svelte(options = {}) {
 
 	if (css) {
 		fixedOptions.css = false;
+	}
+
+	if (options.onwarn) {
+		fixedOptions.onwarn = options.onwarn;
 	}
 
 	return {
@@ -189,7 +183,10 @@ export default function svelte(options = {}) {
 
 			const compiled = compile(
 				code,
-				Object.assign({}, fixedOptions, {
+				Object.assign({}, {
+					onwarn: warning => this.warn(warning),
+					onerror: error => this.error(error)
+				}, fixedOptions, {
 					name: capitalize(sanitize(id)),
 					filename: id
 				})
