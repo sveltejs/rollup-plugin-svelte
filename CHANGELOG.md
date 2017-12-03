@@ -1,5 +1,10 @@
 # rollup-plugin-svelte changelog
 
+## 3.2.0
+
+* Support `preprocess` option ([#21](https://github.com/rollup/rollup-plugin-svelte/issues/21))
+* Ignore unused CSS selector warnings if `css: false` ([#17](https://github.com/rollup/rollup-plugin-svelte/issues/17))
+
 ## 3.1.0
 
 * Allow `shared` option to override default ([#16](https://github.com/rollup/rollup-plugin-svelte/pull/16))
