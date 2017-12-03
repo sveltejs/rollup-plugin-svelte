@@ -112,4 +112,24 @@ describe('rollup-plugin-svelte', () => {
 			});
 		});
 	});
+
+	it('squelches CSS warnings if css: false', () => {
+		const { transform } = plugin({
+			css: false,
+			cascade: false
+		});
+
+		transform.call({
+			warn: warning => {
+				throw new Error(warning.message);
+			}
+		}, `
+			<div></div>
+			<style>
+				.unused {
+					color: red;
+				}
+			</style>
+		`, 'test.html');
+	});
 });

@@ -184,7 +184,11 @@ export default function svelte(options = {}) {
 			const compiled = compile(
 				code,
 				Object.assign({}, {
-					onwarn: warning => this.warn(warning),
+					onwarn: warning => {
+						// TODO replace this with warning.code, post sveltejs/svelte#824
+						if (options.css === false && warning.message === 'Unused CSS selector') return;
+						this.warn(warning);
+					},
 					onerror: error => this.error(error)
 				}, fixedOptions, {
 					name: capitalize(sanitize(id)),
