@@ -34,6 +34,14 @@ export default {
       // can also use the server-side rendering compiler
       generate: 'ssr',
 
+      // Optionally, preprocess components with svelte.preprocess:
+      // https://github.com/sveltejs/svelte#preprocessor-options
+      preprocess: {
+        style: ({ content }) => {
+          return transformStyles(content);
+        }
+      },
+
       // Extract CSS into a separate file (recommended).
       // See note below
       css: function (css) {
@@ -42,7 +50,7 @@ export default {
 
         // creates `main.css` and `main.css.map` — pass `false`
         // as the second argument if you don't want the sourcemap
-        css.write('public/main.css'); 
+        css.write('public/main.css');
       }
     })
   ]

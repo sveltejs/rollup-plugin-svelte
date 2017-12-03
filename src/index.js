@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import relative from 'require-relative';
-import { compile } from 'svelte';
+import { compile, preprocess } from 'svelte';
 import { createFilter } from 'rollup-pluginutils';
 import { encode, decode } from 'sourcemap-codec';
 
@@ -181,32 +181,34 @@ export default function svelte(options = {}) {
 			if (!filter(id)) return null;
 			if (!~extensions.indexOf(path.extname(id))) return null;
 
-			const compiled = compile(
-				code,
-				Object.assign({}, {
-					onwarn: warning => {
-						// TODO replace this with warning.code, post sveltejs/svelte#824
-						if (options.css === false && warning.message === 'Unused CSS selector') return;
-						this.warn(warning);
-					},
-					onerror: error => this.error(error)
-				}, fixedOptions, {
-					name: capitalize(sanitize(id)),
-					filename: id
-				})
-			);
+			return (options.preprocess ? preprocess(code, options.preprocess) : Promise.resolve(code)).then(code => {
+				const compiled = compile(
+					code.toString(),
+					Object.assign({}, {
+						onwarn: warning => {
+							// TODO replace this with warning.code, post sveltejs/svelte#824
+							if (options.css === false && warning.message === 'Unused CSS selector') return;
+							this.warn(warning);
+						},
+						onerror: error => this.error(error)
+					}, fixedOptions, {
+						name: capitalize(sanitize(id)),
+						filename: id
+					})
+				);
 
-			if (css) {
-				cssLookup.set(id, {
-					code: compiled.css,
-					map: compiled.cssMap
-				});
-			}
+				if (css) {
+					cssLookup.set(id, {
+						code: compiled.css,
+						map: compiled.cssMap
+					});
+				}
 
-			return {
-				code: compiled.code,
-				map: compiled.map
-			};
+				return {
+					code: compiled.code,
+					map: compiled.map
+				};
+			});
 		},
 
 		ongenerate() {
