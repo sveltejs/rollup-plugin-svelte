@@ -42,8 +42,9 @@ describe('rollup-plugin-svelte', () => {
 
 	it('creates a {code, map} object, excluding the AST etc', () => {
 		const { transform } = plugin();
-		const compiled = transform('', 'test.html');
-		assert.deepEqual(Object.keys(compiled), ['code', 'map']);
+		return transform('', 'test.html').then(compiled => {
+			assert.deepEqual(Object.keys(compiled), ['code', 'map']);
+		});
 	});
 
 	it('generates a CSS sourcemap', () => {
@@ -51,7 +52,7 @@ describe('rollup-plugin-svelte', () => {
 		sander.mkdirSync('test/sourcemap-test/dist');
 
 		return rollup.rollup({
-			entry: 'test/sourcemap-test/src/main.js',
+			input: 'test/sourcemap-test/src/main.js',
 			plugins: [
 				plugin({
 					cascade: false,
@@ -108,7 +109,7 @@ describe('rollup-plugin-svelte', () => {
 		}).then(bundle => {
 			return bundle.write({
 				format: 'iife',
-				dest: 'test/sourcemap-test/dist/bundle.js'
+				file: 'test/sourcemap-test/dist/bundle.js'
 			});
 		});
 	});
@@ -131,5 +132,23 @@ describe('rollup-plugin-svelte', () => {
 				}
 			</style>
 		`, 'test.html');
+	});
+
+	it('preprocesses components', () => {
+		const { transform } = plugin({
+			preprocess: {
+				markup: ({ content }) => {
+					return {
+						code: content.replace('__REPLACEME__', 'replaced')
+					};
+				}
+			}
+		});
+
+		return transform(`
+			<h1>Hello __REPLACEME__!</h1>
+		`, 'test.html').then(({ code }) => {
+			assert.equal(code.indexOf('__REPLACEME__'), -1);
+		});
 	});
 });

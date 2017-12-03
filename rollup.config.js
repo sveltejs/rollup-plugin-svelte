@@ -1,15 +1,16 @@
 import buble from 'rollup-plugin-buble';
+import pkg from './package.json';
 
 export default {
-	entry: 'src/index.js',
+	input: 'src/index.js',
+	output: [
+		{ file: pkg.main, format: 'cjs' },
+		{ file: pkg.module, format: 'es' }
+	],
 	external: ['path', 'rollup-pluginutils', 'svelte', 'require-relative'],
 	plugins: [
 		buble({
 			target: { node: 4 }
 		})
-	],
-	targets: [
-		{ dest: 'dist/rollup-plugin-svelte.cjs.js', format: 'cjs' },
-		{ dest: 'dist/rollup-plugin-svelte.es.js', format: 'es' }
 	]
 };
