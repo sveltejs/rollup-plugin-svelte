@@ -181,7 +181,7 @@ export default function svelte(options = {}) {
 			if (!filter(id)) return null;
 			if (!~extensions.indexOf(path.extname(id))) return null;
 
-			return (options.preprocess ? preprocess(code, options.preprocess) : Promise.resolve(code)).then(code => {
+			return (options.preprocess ? preprocess(code, Object.assign({}, options.preprocess, { id })) : Promise.resolve(code)).then(code => {
 				const compiled = compile(
 					code.toString(),
 					Object.assign({}, {
