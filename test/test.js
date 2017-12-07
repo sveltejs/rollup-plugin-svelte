@@ -137,9 +137,11 @@ describe('rollup-plugin-svelte', () => {
 	it('preprocesses components', () => {
 		const { transform } = plugin({
 			preprocess: {
-				markup: ({ content }) => {
+				markup: ({ content, filename }) => {
 					return {
-						code: content.replace('__REPLACEME__', 'replaced')
+						code: content
+							.replace('__REPLACEME__', 'replaced')
+							.replace('__FILENAME__', filename)
 					};
 				}
 			}
@@ -147,8 +149,10 @@ describe('rollup-plugin-svelte', () => {
 
 		return transform(`
 			<h1>Hello __REPLACEME__!</h1>
+			<h2>file: __FILENAME__</h2>
 		`, 'test.html').then(({ code }) => {
-			assert.equal(code.indexOf('__REPLACEME__'), -1);
+			assert.equal(code.indexOf('__REPLACEME__'), -1, 'content not modified');
+			assert.notEqual(code.indexOf('file: test.html'), -1, 'filename not replaced');
 		});
 	});
 });
