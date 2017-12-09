@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 3.3.0
+
+* Pass ID as `filename` to `preprocess` ([#24](https://github.com/rollup/rollup-plugin-svelte/pull/24))
+
 ## 3.2.0
 
 * Support `preprocess` option ([#21](https://github.com/rollup/rollup-plugin-svelte/issues/21))
