@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 4.0.0
+
+* Make `svelte` to `peerDependencies` ([#25](https://github.com/rollup/rollup-plugin-svelte/issues/25))
+
 ## 3.3.0
 
 * Pass ID as `filename` to `preprocess` ([#24](https://github.com/rollup/rollup-plugin-svelte/pull/24))

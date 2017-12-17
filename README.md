@@ -6,8 +6,10 @@ Compile Svelte components.
 ## Installation
 
 ```bash
-npm install --save-dev rollup-plugin-svelte
+npm install --save-dev svelte rollup-plugin-svelte
 ```
+
+Note that we need to install Svelte as well as the plugin, as it's a 'peer dependency'.
 
 
 ## Usage
