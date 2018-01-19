@@ -20,9 +20,11 @@ import * as fs from 'fs';
 import svelte from 'rollup-plugin-svelte';
 
 export default {
-  entry: 'src/main.js',
-  dest: 'public/bundle.js',
-  format: 'iife',
+  input: 'src/main.js',
+  output: {
+    file: 'public/bundle.js',
+    format: 'iife'
+  },
   plugins: [
     svelte({
       // By default, all .html and .svelte files are compiled
