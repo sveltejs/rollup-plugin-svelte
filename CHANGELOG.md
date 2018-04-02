@@ -1,8 +1,12 @@
 # rollup-plugin-svelte changelog
 
+## 4.1.0
+
+* Support Svelte 1.60 and above ([#29](https://github.com/rollup/rollup-plugin-svelte/pull/29))
+
 ## 4.0.0
 
-* Make `svelte` to `peerDependencies` ([#25](https://github.com/rollup/rollup-plugin-svelte/issues/25))
+* Move `svelte` to `peerDependencies` ([#25](https://github.com/rollup/rollup-plugin-svelte/issues/25))
 
 ## 3.3.0
 
