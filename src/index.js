@@ -198,15 +198,16 @@ export default function svelte(options = {}) {
 				);
 
 				if (css) {
-					cssLookup.set(id, {
-						code: compiled.css,
-						map: compiled.cssMap
-					});
+					// handle pre- and post-1.60 signature
+					const code = typeof compiled.css === 'string' ? compiled.css : compiled.css && compiled.css.code;
+					const map = compiled.css && compiled.css.map || compiled.cssMap;
+
+					cssLookup.set(id, { code, map });
 				}
 
 				return {
-					code: compiled.code,
-					map: compiled.map
+					code: compiled.js ? compiled.js.code : compiled.code,
+					map: compiled.js ? compiled.js.map : compiled.map
 				};
 			});
 		},
