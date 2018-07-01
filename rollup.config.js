@@ -10,7 +10,7 @@ export default {
 	external: ['path', 'rollup-pluginutils', 'svelte', 'require-relative'],
 	plugins: [
 		buble({
-			target: { node: 4 }
+			target: { node: 8 }
 		})
 	]
 };
