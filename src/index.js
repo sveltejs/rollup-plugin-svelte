@@ -203,25 +203,16 @@ export default function svelte(options = {}) {
 					})
 				);
 
-				let bundle = {
-					code: compiled.js ? compiled.js.code : compiled.code,
-					map: compiled.js ? compiled.js.map : compiled.map
-				};
-
 				if (css || options.emitCss) {
-					// handle pre- and post-1.60 signature
-					let code = typeof compiled.css === 'string' ? compiled.css : compiled.css && compiled.css.code;
-					let map = compiled.css && compiled.css.map || compiled.cssMap;
-
 					let fname = id.replace('.html', '.scss');
-					cssLookup.set(fname, { code, map });
+					cssLookup.set(fname, compiled.css);
 					if (options.emitCss) {
-						bundle.code += `\nimport '${fname}';\n`;
+						compiled.js.code += `\nimport '${fname}';\n`;
 					}
 
 				}
 
-				return bundle;
+				return compiled.js;
 			});
 		},
 		ongenerate() {
