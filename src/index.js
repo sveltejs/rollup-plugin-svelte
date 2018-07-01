@@ -69,9 +69,9 @@ export default function svelte(options = {}) {
 	fixedOptions.shared = require.resolve(options.shared || 'svelte/shared.js');
 
 	// handle CSS extraction
-	if ('extract_css' in options) {
-		if (typeof options.extract_css !== 'boolean') {
-			throw new Error('options.extract_css must be a boolean');
+	if ('emitCss' in options) {
+		if (typeof options.emitCss !== 'boolean') {
+			throw new Error('options.emitCss must be a boolean');
 		}
 	}
 	let cssBuffer = new Map();
@@ -130,7 +130,7 @@ export default function svelte(options = {}) {
 					code.toString(),
 					Object.assign({}, {
 						onwarn: warning => {
-							if (!options.extract_css && warning.code === 'css-unused-selector') return;
+							if (!options.emitCss && warning.code === 'css-unused-selector') return;
 							this.warn(warning);
 						},
 						onerror: error => this.error(error)
@@ -145,7 +145,7 @@ export default function svelte(options = {}) {
 					map: compiled.js ? compiled.js.map : compiled.map
 				};
 
-				if (options.extract_css) {
+				if (options.emitCss) {
 					// handle pre- and post-1.60 signature
 					const css_code = typeof compiled.css === 'string' ? compiled.css : compiled.css && compiled.css.code;
 					const css_map = compiled.css && compiled.css.map || compiled.cssMap;
