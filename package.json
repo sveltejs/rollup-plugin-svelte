@@ -13,7 +13,7 @@
   "scripts": {
     "test": "mocha",
     "pretest": "npm run build",
-    "prepare": "npm run lint && npm run build",
+    "prepublishOnly": "npm run lint && npm run build",
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "lint": "eslint src"
@@ -37,11 +37,10 @@
     "rollup-plugin-buble": "^0.19.2",
     "rollup-watch": "^4.3.1",
     "sander": "^0.6.0",
-    "source-map": "^0.7.3",
+    "source-map": "^0.6.1",
     "svelte": "^2.9.0"
   },
   "dependencies": {
-    "eslit": "^5.0.0",
     "require-relative": "^0.8.7",
     "rollup-pluginutils": "^2.3.0",
     "sourcemap-codec": "^1.4.1"
