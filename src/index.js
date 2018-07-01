@@ -3,6 +3,7 @@ import path from 'path';
 import relative from 'require-relative';
 import { compile, preprocess } from 'svelte';
 import { createFilter } from 'rollup-pluginutils';
+import { encode, decode } from 'sourcemap-codec';
 
 function sanitize(input) {
 	return path
@@ -52,6 +53,59 @@ function exists(file) {
 	}
 }
 
+function mkdirp(dir) {
+	const parent = path.dirname(dir);
+	if (parent === dir) return;
+
+	mkdirp(parent);
+
+	try {
+		fs.mkdirSync(dir);
+	} catch (err) {
+		if (err.code !== 'EEXIST') throw err;
+	}
+}
+
+class CssWriter {
+	constructor (code, map) {
+		this.code = code;
+		this.map = {
+			version: 3,
+			file: null,
+			sources: map.sources,
+			sourcesContent: map.sourcesContent,
+			names: [],
+			mappings: map.mappings
+		};
+	}
+
+	write(dest, map) {
+		dest = path.resolve(dest);
+		mkdirp(path.dirname(dest));
+
+		const basename = path.basename(dest);
+
+		if (map !== false) {
+			fs.writeFileSync(dest, `${this.code}\n/*# sourceMappingURL=${basename}.map */`);
+			fs.writeFileSync(`${dest}.map`, JSON.stringify({
+				version: 3,
+				file: basename,
+				sources: this.map.sources.map(source => path.relative(path.dirname(dest), source)),
+				sourcesContent: this.map.sourcesContent,
+				names: [],
+				mappings: this.map.mappings
+			}, null, '  '));
+		} else {
+			fs.writeFileSync(dest, this.code);
+		}
+	}
+
+	toString() {
+		console.log('[DEPRECATION] As of rollup-plugin-svelte@3, the argument to the `css` function is an object, not a string — use `css.write(file)`. Consult the documentation for more information: https://github.com/rollup/rollup-plugin-svelte'); // eslint-disable-line no-console
+		return this.code;
+	}
+}
+
 export default function svelte(options = {}) {
 	const filter = createFilter(options.include, options.exclude);
 
@@ -69,12 +123,21 @@ export default function svelte(options = {}) {
 	fixedOptions.shared = require.resolve(options.shared || 'svelte/shared.js');
 
 	// handle CSS extraction
-	if ('emitCss' in options) {
-		if (typeof options.emitCss !== 'boolean') {
-			throw new Error('options.emitCss must be a boolean');
+	if ('css' in options) {
+		if (typeof options.css !== 'function' && typeof options.css !== 'boolean') {
+			throw new Error('options.css must be a boolean or a function');
 		}
 	}
-	let cssBuffer = new Map();
+
+	let css = options.css && typeof options.css === 'function'
+		? options.css
+		: null;
+
+	const cssLookup = new Map();
+
+	if (css || options.emitCss) {
+		fixedOptions.css = false;
+	}
 
 	if (options.onwarn) {
 		fixedOptions.onwarn = options.onwarn;
@@ -84,12 +147,12 @@ export default function svelte(options = {}) {
 		name: 'svelte',
 
 		load(id) {
-			if (!cssBuffer.has(id)) return null;
-			return cssBuffer.get(id);
+			if (!cssLookup.has(id)) return null;
+			return cssLookup.get(id);
 		},
 
 		resolveId(importee, importer) {
-			if (cssBuffer.has(importee)) { return importee; }
+			if (cssLookup.has(importee)) { return importee; }
 			if (!importer || importee[0] === '.' || importee[0] === '\0' || path.isAbsolute(importee))
 				return null;
 
@@ -130,7 +193,7 @@ export default function svelte(options = {}) {
 					code.toString(),
 					Object.assign({}, {
 						onwarn: warning => {
-							if (!options.emitCss && warning.code === 'css-unused-selector') return;
+							if ((options.css || !options.emitCss) && warning.code === 'css-unused-selector') return;
 							this.warn(warning);
 						},
 						onerror: error => this.error(error)
@@ -145,18 +208,63 @@ export default function svelte(options = {}) {
 					map: compiled.js ? compiled.js.map : compiled.map
 				};
 
-				if (options.emitCss) {
+				if (css || options.emitCss) {
 					// handle pre- and post-1.60 signature
-					const css_code = typeof compiled.css === 'string' ? compiled.css : compiled.css && compiled.css.code;
-					const css_map = compiled.css && compiled.css.map || compiled.cssMap;
+					let code = typeof compiled.css === 'string' ? compiled.css : compiled.css && compiled.css.code;
+					let map = compiled.css && compiled.css.map || compiled.cssMap;
 
 					let fname = id.replace('.html', '.scss');
-					cssBuffer.set(fname, { code: css_code, map: css_map });
-					bundle.code += `\nimport '${fname}';\n`;
+					cssLookup.set(fname, { code, map });
+					if (options.emitCss) {
+						bundle.code += `\nimport '${fname}';\n`;
+					}
+
 				}
 
 				return bundle;
 			});
+		},
+		ongenerate() {
+			if (css) {
+				// write out CSS file. TODO would be nice if there was a
+				// a more idiomatic way to do this in Rollup
+				let result = '';
+
+				const mappings = [];
+				const sources = [];
+				const sourcesContent = [];
+
+				for (let chunk of cssLookup.values()) {
+					if (!chunk.code) continue;
+					result += chunk.code + '\n';
+
+					if (chunk.map) {
+						const i = sources.length;
+						sources.push(chunk.map.sources[0]);
+						sourcesContent.push(chunk.map.sourcesContent[0]);
+
+						const decoded = decode(chunk.map.mappings);
+
+						if (i > 0) {
+							decoded.forEach(line => {
+								line.forEach(segment => {
+									segment[1] = i;
+								});
+							});
+						}
+
+						mappings.push(...decoded);
+					}
+				}
+
+				const writer = new CssWriter(result, {
+					sources,
+					sourcesContent,
+					mappings: encode(mappings)
+				});
+
+				css(writer);
+			}
 		}
 	};
 }
