@@ -46,6 +46,9 @@ export default {
         }
       },
 
+      // Emit CSS as "files" for other plugins to process
+      emitCss: true,
+
       // Extract CSS into a separate file (recommended).
       // See note below
       css: function (css) {
@@ -85,6 +88,8 @@ Conversely, if you're *publishing* a component to npm, you should ship the uncom
 If your Svelte components contain `<style>` tags, by default the compiler will add JavaScript that injects those styles into the page when the component is rendered. That's not ideal, because it adds weight to your JavaScript, prevents styles from being fetched in parallel with your code, and can even cause CSP violations.
 
 A better option is to extract the CSS into a separate file. Using the `css` option as shown above would cause a `public/main.css` file to be generated each time the bundle is built (or rebuilt, if you're using rollup-watch), with the normal scoping rules applied.
+
+If you have other plugins processing your CSS (e.g. rollup-plugin-scss), and want your styles passed through to them to be bundled together, you can use `emitCss: true`.
 
 Alternatively, if you're handling styles in some other way and just want to prevent the CSS being added to your JavaScript bundle, use `css: false`.
 
