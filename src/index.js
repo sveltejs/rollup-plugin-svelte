@@ -204,7 +204,7 @@ export default function svelte(options = {}) {
 					})
 				);
 
-				if (css || options.emitCss) {
+				if ((css || options.emitCss)) && compiled.css.code) {
 					let fname = id.replace('.html', '.css');
 					cssLookup.set(fname, compiled.css);
 					if (options.emitCss) {
