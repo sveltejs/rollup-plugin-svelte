@@ -204,7 +204,7 @@ export default function svelte(options = {}) {
 				);
 
 				if (css || options.emitCss) {
-					let fname = id.replace('.html', '.scss');
+					let fname = id.replace('.html', '.css');
 					cssLookup.set(fname, compiled.css);
 					if (options.emitCss) {
 						compiled.js.code += `\nimport '${fname}';\n`;
