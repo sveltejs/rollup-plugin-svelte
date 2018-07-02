@@ -155,4 +155,33 @@ describe('rollup-plugin-svelte', () => {
 			assert.notEqual(code.indexOf('file: test.html'), -1, 'filename not replaced');
 		});
 	});
+
+	it('emits a CSS file', () => {
+		const { load, transform } = plugin({
+			emitCss: true
+		});
+
+		return transform(`<h1>Hello!</h1>
+
+		<style>
+			h1 {
+				color: red;
+			}
+		</style>`, `path/to/Input.html`).then(transformed => {
+			assert.ok(transformed.code.indexOf(`import 'path/to/Input.css';`) !== -1);
+
+			const css = load('path/to/Input.css');
+
+			const smc = new SourceMapConsumer(css.map);
+
+			const loc = smc.originalPositionFor({
+				line: 1,
+				column: 0
+			});
+
+			assert.equal(loc.source, 'path/to/Input.html');
+			assert.equal(loc.line, 4);
+			assert.equal(loc.column, 3);
+		});
+	});
 });

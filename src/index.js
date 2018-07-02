@@ -132,9 +132,10 @@ export default function svelte(options = {}) {
 	let css = options.css && typeof options.css === 'function'
 		? options.css
 		: null;
+
 	const cssLookup = new Map();
 
-	if (css) {
+	if (css || options.emitCss) {
 		fixedOptions.css = false;
 	}
 
@@ -145,7 +146,13 @@ export default function svelte(options = {}) {
 	return {
 		name: 'svelte',
 
+		load(id) {
+			if (!cssLookup.has(id)) return null;
+			return cssLookup.get(id);
+		},
+
 		resolveId(importee, importer) {
+			if (cssLookup.has(importee)) { return importee; }
 			if (!importer || importee[0] === '.' || importee[0] === '\0' || path.isAbsolute(importee))
 				return null;
 
@@ -171,6 +178,7 @@ export default function svelte(options = {}) {
 				}
 			} else {
 				if (pkg['svelte.root']) {
+					// TODO remove this. it's weird and unnecessary
 					const sub = path.resolve(dir, pkg['svelte.root'], parts.join('/'));
 					if (exists(sub)) return sub;
 				}
@@ -186,8 +194,7 @@ export default function svelte(options = {}) {
 					code.toString(),
 					Object.assign({}, {
 						onwarn: warning => {
-							// TODO replace this with warning.code, post sveltejs/svelte#824
-							if (options.css === false && warning.message === 'Unused CSS selector') return;
+							if ((options.css || !options.emitCss) && warning.code === 'css-unused-selector') return;
 							this.warn(warning);
 						},
 						onerror: error => this.error(error)
@@ -197,21 +204,18 @@ export default function svelte(options = {}) {
 					})
 				);
 
-				if (css) {
-					// handle pre- and post-1.60 signature
-					const code = typeof compiled.css === 'string' ? compiled.css : compiled.css && compiled.css.code;
-					const map = compiled.css && compiled.css.map || compiled.cssMap;
+				if (css || options.emitCss) {
+					let fname = id.replace('.html', '.css');
+					cssLookup.set(fname, compiled.css);
+					if (options.emitCss) {
+						compiled.js.code += `\nimport '${fname}';\n`;
+					}
 
-					cssLookup.set(id, { code, map });
 				}
 
-				return {
-					code: compiled.js ? compiled.js.code : compiled.code,
-					map: compiled.js ? compiled.js.map : compiled.map
-				};
+				return compiled.js;
 			});
 		},
-
 		ongenerate() {
 			if (css) {
 				// write out CSS file. TODO would be nice if there was a
@@ -224,7 +228,6 @@ export default function svelte(options = {}) {
 
 				for (let chunk of cssLookup.values()) {
 					if (!chunk.code) continue;
-
 					result += chunk.code + '\n';
 
 					if (chunk.map) {

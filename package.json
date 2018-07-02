@@ -13,7 +13,7 @@
   "scripts": {
     "test": "mocha",
     "pretest": "npm run build",
-    "prepublish": "npm run lint && npm run build",
+    "prepublishOnly": "npm run lint && npm run build",
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "lint": "eslint src"

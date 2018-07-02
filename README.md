@@ -62,25 +62,22 @@ export default {
 ```
 
 
-## `pkg.svelte` and `pkg["svelte.root"]`
+## `pkg.svelte`
 
-If you're importing a component from your node_modules folder, and that component's package.json has `"svelte"` and/or `"svelte.root"` properties...
+If you're importing a component from your node_modules folder, and that component's package.json has a `"svelte"` property...
 
 ```js
 {
   "name": "some-component",
 
   // this means 'some-component' resolves to 'some-component/src/SomeComponent.html'
-  "svelte": "src/MyComponent.html",
-
-  // this means 'my-component/Foo.html' resolves to 'some-component/src/Foo.html'
-  "svelte.root": "src"
+  "svelte": "src/MyComponent.html"
 }
 ```
 
 ...then this plugin will ensure that your app imports the *uncompiled* component source code. That will result in a smaller, faster app (because code is deduplicated, and shared functions get optimized quicker), and makes it less likely that you'll run into bugs caused by your app using a different version of Svelte to the component.
 
-Conversely, if you're *publishing* a component to npm, you should ship the uncompiled source (together with the compiled distributable, for people who aren't using Svelte elsewhere in their app) and include these properties in your package.json.
+Conversely, if you're *publishing* a component to npm, you should ship the uncompiled source (together with the compiled distributable, for people who aren't using Svelte elsewhere in their app) and include the `"svelte"` property in your package.json.
 
 
 ## Extracting CSS
