@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 4.2.0
+
+* Add `emitCss` option ([#32](https://github.com/rollup/rollup-plugin-svelte/pull/32))
+
 ## 4.1.0
 
 * Support Svelte 1.60 and above ([#29](https://github.com/rollup/rollup-plugin-svelte/pull/29))
