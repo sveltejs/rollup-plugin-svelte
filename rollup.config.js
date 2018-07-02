@@ -1,4 +1,3 @@
-import buble from 'rollup-plugin-buble';
 import pkg from './package.json';
 
 export default {
@@ -7,10 +6,5 @@ export default {
 		{ file: pkg.main, format: 'cjs' },
 		{ file: pkg.module, format: 'es' }
 	],
-	external: ['path', 'rollup-pluginutils', 'svelte', 'require-relative'],
-	plugins: [
-		buble({
-			target: { node: 8 }
-		})
-	]
+	external: ['path', 'rollup-pluginutils', 'svelte', 'require-relative']
 };
