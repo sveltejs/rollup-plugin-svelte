@@ -178,6 +178,7 @@ export default function svelte(options = {}) {
 				}
 			} else {
 				if (pkg['svelte.root']) {
+					// TODO remove this. it's weird and unnecessary
 					const sub = path.resolve(dir, pkg['svelte.root'], parts.join('/'));
 					if (exists(sub)) return sub;
 				}

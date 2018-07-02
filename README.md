@@ -62,19 +62,16 @@ export default {
 ```
 
 
-## `pkg.svelte` and `pkg["svelte.root"]`
+## `pkg.svelte`
 
-If you're importing a component from your node_modules folder, and that component's package.json has `"svelte"` and/or `"svelte.root"` properties...
+If you're importing a component from your node_modules folder, and that component's package.json has a `"svelte"` property...
 
 ```js
 {
   "name": "some-component",
 
   // this means 'some-component' resolves to 'some-component/src/SomeComponent.html'
-  "svelte": "src/MyComponent.html",
-
-  // this means 'my-component/Foo.html' resolves to 'some-component/src/Foo.html'
-  "svelte.root": "src"
+  "svelte": "src/MyComponent.html"
 }
 ```
 
