@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 4.2.1
+
+* Fix `emitCss` with style-less components ([#34](https://github.com/rollup/rollup-plugin-svelte/pull/34))
+
 ## 4.2.0
 
 * Add `emitCss` option ([#32](https://github.com/rollup/rollup-plugin-svelte/pull/32))
