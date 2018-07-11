@@ -120,7 +120,15 @@ export default function svelte(options = {}) {
 	});
 
 	fixedOptions.format = 'es';
-	fixedOptions.shared = require.resolve(options.shared || 'svelte/shared.js');
+	if (typeof options.shared === 'string') {
+		fixedOptions.shared = require.resolve(options.shared);
+	} else if (typeof options.shared === 'boolean') {
+		fixedOptions.shared = options.shared ? require.resolve('svelte/shared.js') : false;
+	} else if (options.shared == null) {
+		fixedOptions.shared = false;
+	} else {
+		throw new Error('options.shared must be a boolean or a string');
+	}
 
 	// handle CSS extraction
 	if ('css' in options) {
