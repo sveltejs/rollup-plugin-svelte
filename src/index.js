@@ -206,11 +206,17 @@ export default function svelte(options = {}) {
 
 				if ((css || options.emitCss) && compiled.css.code) {
 					let fname = id.replace('.html', '.css');
-					cssLookup.set(fname, compiled.css);
+
+					let { code } = compiled.css;
+
 					if (options.emitCss) {
+						const source_map_comment = `/*# sourceMappingURL=${compiled.css.map.toUrl()} */`;
+						code += `\n${source_map_comment}`;
+
 						compiled.js.code += `\nimport '${fname}';\n`;
 					}
 
+					cssLookup.set(fname, code);
 				}
 
 				return compiled.js;
