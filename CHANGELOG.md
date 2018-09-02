@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 4.3.0
+
+* Append inline sourcemaps to virtual CSS files generated with `emitCss: true` ([#36](https://github.com/rollup/rollup-plugin-svelte/pull/36))
+
 ## 4.2.1
 
 * Fix `emitCss` with style-less components ([#34](https://github.com/rollup/rollup-plugin-svelte/pull/34))
