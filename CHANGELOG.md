@@ -1,5 +1,10 @@
 # rollup-plugin-svelte changelog
 
+## 4.3.1
+
+* Handle arbitrary file extensions ([#38](https://github.com/rollup/rollup-plugin-svelte/pull/38))
+* Generate Windows-friendly import paths ([#38](https://github.com/rollup/rollup-plugin-svelte/pull/38))
+
 ## 4.3.0
 
 * Append inline sourcemaps to virtual CSS files generated with `emitCss: true` ([#36](https://github.com/rollup/rollup-plugin-svelte/pull/36))
