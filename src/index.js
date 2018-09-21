@@ -188,7 +188,7 @@ export default function svelte(options = {}) {
 		transform(code, id) {
 			if (!filter(id)) return null;
 
-			const extension = path.extname(id)
+			const extension = path.extname(id);
 
 			if (!~extensions.indexOf(extension)) return null;
 
