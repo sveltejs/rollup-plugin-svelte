@@ -187,7 +187,10 @@ export default function svelte(options = {}) {
 
 		transform(code, id) {
 			if (!filter(id)) return null;
-			if (!~extensions.indexOf(path.extname(id))) return null;
+
+			const extension = path.extname(id)
+
+			if (!~extensions.indexOf(extension)) return null;
 
 			return (options.preprocess ? preprocess(code, Object.assign({}, options.preprocess, { filename : id })) : Promise.resolve(code)).then(code => {
 				const compiled = compile(
@@ -205,13 +208,13 @@ export default function svelte(options = {}) {
 				);
 
 				if ((css || options.emitCss) && compiled.css.code) {
-					let fname = id.replace('.html', '.css');
+					let fname = id.replace(extension, '.css');
 
 					if (options.emitCss) {
 						const source_map_comment = `/*# sourceMappingURL=${compiled.css.map.toUrl()} */`;
 						compiled.css.code += `\n${source_map_comment}`;
 
-						compiled.js.code += `\nimport '${fname}';\n`;
+						compiled.js.code += `\nimport ${JSON.stringify(fname)};\n`;
 					}
 
 					cssLookup.set(fname, compiled.css);
