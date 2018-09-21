@@ -211,7 +211,7 @@ export default function svelte(options = {}) {
 						const source_map_comment = `/*# sourceMappingURL=${compiled.css.map.toUrl()} */`;
 						compiled.css.code += `\n${source_map_comment}`;
 
-						compiled.js.code += `\nimport '${fname}';\n`;
+						compiled.js.code += `\nimport ${JSON.stringify(fname)};\n`;
 					}
 
 					cssLookup.set(fname, compiled.css);
