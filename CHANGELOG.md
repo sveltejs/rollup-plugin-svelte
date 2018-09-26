@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 4.3.2
+
+* Remove deprecated `onerror` handler
+
 ## 4.3.1
 
 * Handle arbitrary file extensions ([#38](https://github.com/rollup/rollup-plugin-svelte/pull/38))

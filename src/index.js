@@ -199,8 +199,7 @@ export default function svelte(options = {}) {
 						onwarn: warning => {
 							if ((options.css || !options.emitCss) && warning.code === 'css-unused-selector') return;
 							this.warn(warning);
-						},
-						onerror: error => this.error(error)
+						}
 					}, fixedOptions, {
 						name: capitalize(sanitize(id)),
 						filename: id
