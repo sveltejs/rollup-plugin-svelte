@@ -144,13 +144,15 @@ describe('rollup-plugin-svelte', () => {
 							.replace('__FILENAME__', filename),
 						dependencies: ['foo'],
 					};
-				}
+				},
+				script: () => null,
 			}
 		});
 
 		return transform(`
 			<h1>Hello __REPLACEME__!</h1>
 			<h2>file: __FILENAME__</h2>
+			<script>export default {}</script>
 		`, 'test.html').then(({ code, dependencies }) => {
 			assert.equal(code.indexOf('__REPLACEME__'), -1, 'content not modified');
 			assert.notEqual(code.indexOf('file: test.html'), -1, 'filename not replaced');
