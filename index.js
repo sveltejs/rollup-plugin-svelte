@@ -205,7 +205,7 @@ module.exports = function svelte(options = {}) {
 				for (const key in options.preprocess) {
 					preprocessOptions[key] = (...args) => {
 						return Promise.resolve(options.preprocess[key](...args)).then(resp => {
-							if (resp.dependencies) {
+							if (resp && resp.dependencies) {
 								dependencies.push(...resp.dependencies);
 							}
 							return resp;
