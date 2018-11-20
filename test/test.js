@@ -40,10 +40,10 @@ describe('rollup-plugin-svelte', () => {
 		);
 	});
 
-	it('creates a {code, map} object, excluding the AST etc', () => {
+	it('creates a {code, map, dependencies} object, excluding the AST etc', () => {
 		const { transform } = plugin();
 		return transform('', 'test.html').then(compiled => {
-			assert.deepEqual(Object.keys(compiled), ['code', 'map']);
+			assert.deepEqual(Object.keys(compiled), ['code', 'map', 'dependencies']);
 		});
 	});
 
@@ -141,7 +141,8 @@ describe('rollup-plugin-svelte', () => {
 					return {
 						code: content
 							.replace('__REPLACEME__', 'replaced')
-							.replace('__FILENAME__', filename)
+							.replace('__FILENAME__', filename),
+						dependencies: ['foo'],
 					};
 				}
 			}
@@ -150,9 +151,10 @@ describe('rollup-plugin-svelte', () => {
 		return transform(`
 			<h1>Hello __REPLACEME__!</h1>
 			<h2>file: __FILENAME__</h2>
-		`, 'test.html').then(({ code }) => {
+		`, 'test.html').then(({ code, dependencies }) => {
 			assert.equal(code.indexOf('__REPLACEME__'), -1, 'content not modified');
 			assert.notEqual(code.indexOf('file: test.html'), -1, 'filename not replaced');
+			assert.deepEqual(dependencies, ['foo']);
 		});
 	});
 
