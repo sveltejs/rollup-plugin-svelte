@@ -195,12 +195,14 @@ export default function svelte(options = {}) {
 			return (options.preprocess ? preprocess(code, Object.assign({}, options.preprocess, { filename : id })) : Promise.resolve(code)).then(code => {
 				const compiled = compile(
 					code.toString(),
-					Object.assign({}, {
+					Object.assign({}, fixedOptions, {
 						onwarn: warning => {
 							if ((options.css || !options.emitCss) && warning.code === 'css-unused-selector') return;
-							this.warn(warning);
+							fixedOptions.onwarn
+								? fixedOptions.onwarn(warning, this.warn)
+								: this.warn(warning);
 						}
-					}, fixedOptions, {
+					}, {
 						name: capitalize(sanitize(id)),
 						filename: id
 					})
