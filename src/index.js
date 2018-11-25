@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import relative from 'require-relative';
-import { compile, preprocess } from 'svelte';
+import { compile, preprocess } from 'svelte/compiler';
 import { createFilter } from 'rollup-pluginutils';
 import { encode, decode } from 'sourcemap-codec';
 
@@ -119,8 +119,8 @@ export default function svelte(options = {}) {
 		fixedOptions[key] = options[key];
 	});
 
-	fixedOptions.format = 'es';
-	fixedOptions.shared = require.resolve(options.shared || 'svelte/shared.js');
+	fixedOptions.format = 'esm';
+	fixedOptions.shared = require.resolve(options.shared || 'svelte/internal.js');
 
 	// handle CSS extraction
 	if ('css' in options) {
