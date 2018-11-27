@@ -1,9 +1,20 @@
-import fs from 'fs';
-import path from 'path';
-import relative from 'require-relative';
-import { compile, preprocess } from 'svelte/compiler';
-import { createFilter } from 'rollup-pluginutils';
-import { encode, decode } from 'sourcemap-codec';
+const fs = require('fs');
+const path = require('path');
+const relative = require('require-relative');
+
+console.log(require.resolve('svelte'));
+
+const { version } = require('svelte/package.json');
+const { createFilter } = require('rollup-pluginutils');
+const { encode, decode } = require('sourcemap-codec');
+
+console.log("HERE!!!");
+
+const major_version = +version[0];
+
+const { compile, preprocess } = major_version >= 3
+	? require('svelte/compiler.js')
+	: require('svelte');
 
 function sanitize(input) {
 	return path
@@ -106,7 +117,7 @@ class CssWriter {
 	}
 }
 
-export default function svelte(options = {}) {
+module.exports = function svelte(options = {}) {
 	const filter = createFilter(options.include, options.exclude);
 
 	const extensions = options.extensions || ['.html', '.svelte'];
@@ -119,8 +130,8 @@ export default function svelte(options = {}) {
 		fixedOptions[key] = options[key];
 	});
 
-	fixedOptions.format = 'esm';
-	fixedOptions.shared = require.resolve(options.shared || 'svelte/internal.js');
+	fixedOptions.format = major_version >= 3 ? 'esm' : 'es';
+	fixedOptions.shared = require.resolve(options.shared || (major_version >= 3 ? 'svelte/internal.js' : 'svelte/shared.js'));
 
 	// handle CSS extraction
 	if ('css' in options) {
@@ -265,4 +276,4 @@ export default function svelte(options = {}) {
 			}
 		}
 	};
-}
+};

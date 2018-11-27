@@ -2,21 +2,15 @@
   "name": "rollup-plugin-svelte",
   "version": "4.3.2",
   "description": "Compile Svelte components with Rollup",
-  "main": "dist/rollup-plugin-svelte.cjs.js",
-  "module": "dist/rollup-plugin-svelte.es.js",
-  "jsnext:main": "dist/rollup-plugin-svelte.es.js",
+  "main": "index.js",
   "files": [
-    "dist",
+    "index.js",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "test": "mocha",
-    "pretest": "npm run build",
-    "prepublishOnly": "npm run lint && npm run build",
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "lint": "eslint src"
+    "prepublishOnly": "npm run lint && npm test"
   },
   "repository": "rollup/rollup-plugin-svelte",
   "keywords": [
@@ -33,11 +27,10 @@
     "eslint": "^5.0.1",
     "locate-character": "^2.0.5",
     "mocha": "^5.2.0",
-    "rollup": "^0.62.0",
-    "rollup-watch": "^4.3.1",
+    "rollup": "^0.67.3",
     "sander": "^0.6.0",
     "source-map": "^0.6.1",
-    "svelte": "^2.9.1"
+    "svelte": "^3.0.0-alpha1"
   },
   "dependencies": {
     "require-relative": "^0.8.7",
