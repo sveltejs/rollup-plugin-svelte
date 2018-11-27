@@ -1,14 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const relative = require('require-relative');
-
-console.log(require.resolve('svelte'));
-
 const { version } = require('svelte/package.json');
 const { createFilter } = require('rollup-pluginutils');
 const { encode, decode } = require('sourcemap-codec');
-
-console.log("HERE!!!");
 
 const major_version = +version[0];
 

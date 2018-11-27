@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "test": "mocha",
+    "lint": "eslint index.js",
     "prepublishOnly": "npm run lint && npm test"
   },
   "repository": "rollup/rollup-plugin-svelte",
