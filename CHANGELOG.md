@@ -1,5 +1,10 @@
 # rollup-plugin-svelte changelog
 
+## 4.4.0
+
+* Support Svelte 3 alpha
+* Internal reorganisation
+
 ## 4.3.2
 
 * Remove deprecated `onerror` handler
