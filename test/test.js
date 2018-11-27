@@ -5,7 +5,7 @@ const rollup = require('rollup');
 const { SourceMapConsumer } = require('source-map');
 const { getLocator } = require('locate-character');
 
-const plugin = require('../dist/rollup-plugin-svelte.cjs.js');
+const plugin = require('..');
 
 describe('rollup-plugin-svelte', () => {
 	it('resolves using pkg.svelte', () => {
