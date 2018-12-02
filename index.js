@@ -208,7 +208,8 @@ module.exports = function svelte(options = {}) {
 						}
 					}, fixedOptions, {
 						name: capitalize(sanitize(id)),
-						filename: id
+						filename: id,
+						sourceMap: code.getMap ? code.getMap() : undefined
 					})
 				);
 
@@ -244,15 +245,15 @@ module.exports = function svelte(options = {}) {
 
 					if (chunk.map) {
 						const i = sources.length;
-						sources.push(chunk.map.sources[0]);
-						sourcesContent.push(chunk.map.sourcesContent[0]);
+						sources.push(...chunk.map.sources);
+						sourcesContent.push(...chunk.map.sourcesContent);
 
 						const decoded = decode(chunk.map.mappings);
 
 						if (i > 0) {
 							decoded.forEach(line => {
 								line.forEach(segment => {
-									segment[1] = i;
+									segment[1] += i;
 								});
 							});
 						}
