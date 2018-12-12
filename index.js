@@ -73,7 +73,7 @@ function mkdirp(dir) {
 }
 
 class CssWriter {
-	constructor (code, map) {
+	constructor (code, map, warn) {
 		this.code = code;
 		this.map = {
 			version: 3,
@@ -83,6 +83,7 @@ class CssWriter {
 			names: [],
 			mappings: map.mappings
 		};
+		this.warn = warn;
 	}
 
 	write(dest, map) {
@@ -107,7 +108,7 @@ class CssWriter {
 	}
 
 	toString() {
-		console.log('[DEPRECATION] As of rollup-plugin-svelte@3, the argument to the `css` function is an object, not a string — use `css.write(file)`. Consult the documentation for more information: https://github.com/rollup/rollup-plugin-svelte'); // eslint-disable-line no-console
+		this.warn('[DEPRECATION] As of rollup-plugin-svelte@3, the argument to the `css` function is an object, not a string — use `css.write(file)`. Consult the documentation for more information: https://github.com/rollup/rollup-plugin-svelte');
 		return this.code;
 	}
 }
@@ -228,7 +229,7 @@ module.exports = function svelte(options = {}) {
 				return compiled.js;
 			});
 		},
-		ongenerate() {
+		generateBundle() {
 			if (css) {
 				// write out CSS file. TODO would be nice if there was a
 				// a more idiomatic way to do this in Rollup
@@ -265,7 +266,7 @@ module.exports = function svelte(options = {}) {
 					sources,
 					sourcesContent,
 					mappings: encode(mappings)
-				});
+				}, this.warn);
 
 				css(writer);
 			}

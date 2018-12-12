@@ -28,7 +28,7 @@
     "eslint": "^5.0.1",
     "locate-character": "^2.0.5",
     "mocha": "^5.2.0",
-    "rollup": "^0.67.3",
+    "rollup": "github:rollup/rollup#1.0",
     "sander": "^0.6.0",
     "source-map": "^0.6.1",
     "svelte": "^3.0.0-alpha1"
