@@ -25,18 +25,18 @@
   },
   "homepage": "https://github.com/rollup/rollup-plugin-svelte#README",
   "devDependencies": {
-    "eslint": "^5.0.1",
+    "eslint": "^5.10.0",
     "locate-character": "^2.0.5",
     "mocha": "^5.2.0",
-    "rollup": "github:rollup/rollup#1.0",
+    "rollup": "^0.67.4",
     "sander": "^0.6.0",
     "source-map": "^0.6.1",
-    "svelte": "^3.0.0-alpha1"
+    "svelte": "^3.0.0-alpha2"
   },
   "dependencies": {
     "require-relative": "^0.8.7",
-    "rollup-pluginutils": "^2.3.0",
-    "sourcemap-codec": "^1.4.1"
+    "rollup-pluginutils": "^2.3.3",
+    "sourcemap-codec": "^1.4.4"
   },
   "peerDependencies": {
     "svelte": "*"
