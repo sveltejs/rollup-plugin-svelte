@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 4.5.0
+
+* Pass `dependencies` through from preprocessors ([#40](https://github.com/rollup/rollup-plugin-svelte/issues/40))
+
 ## 4.4.0
 
 * Support Svelte 3 alpha
