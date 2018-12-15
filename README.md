@@ -65,6 +65,11 @@ export default {
 ```
 
 
+## Preprocessing and dependencies
+
+If you are using the `preprocess` feature, then your callback responses may — in addition to the `code` and `map` values described in the Svelte compile docs — also optionally include a `dependencies` array. This should be the paths of additional files that the preprocessor result in some way depends upon. In Rollup 0.61+ in watch mode, any changes to these additional files will also trigger re-builds.
+
+
 ## `pkg.svelte`
 
 If you're importing a component from your node_modules folder, and that component's package.json has a `"svelte"` property...

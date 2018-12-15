@@ -198,9 +198,28 @@ module.exports = function svelte(options = {}) {
 
 			if (!~extensions.indexOf(extension)) return null;
 
-			return (options.preprocess ? preprocess(code, Object.assign({}, options.preprocess, { filename : id })) : Promise.resolve(code)).then(code => {
+			const dependencies = [];
+			let preprocessPromise;
+			if (options.preprocess) {
+				const preprocessOptions = {};
+				for (const key in options.preprocess) {
+					preprocessOptions[key] = (...args) => {
+						return Promise.resolve(options.preprocess[key](...args)).then(resp => {
+							if (resp && resp.dependencies) {
+								dependencies.push(...resp.dependencies);
+							}
+							return resp;
+						});
+					};
+				}
+				preprocessPromise = preprocess(code, Object.assign(preprocessOptions, { filename: id })).then(code => code.toString());
+			} else {
+				preprocessPromise = Promise.resolve(code);
+			}
+
+			return preprocessPromise.then(code => {
 				const compiled = compile(
-					code.toString(),
+					code,
 					Object.assign({}, {
 						onwarn: warning => {
 							if ((options.css || !options.emitCss) && warning.code === 'css-unused-selector') return;
@@ -224,6 +243,8 @@ module.exports = function svelte(options = {}) {
 
 					cssLookup.set(fname, compiled.css);
 				}
+
+				compiled.js.dependencies = dependencies;
 
 				return compiled.js;
 			});
