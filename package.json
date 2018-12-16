@@ -39,6 +39,7 @@
     "sourcemap-codec": "^1.4.4"
   },
   "peerDependencies": {
-    "svelte": "*"
+    "svelte": "*",
+    "rollup": ">=0.60.0"
   }
 }
