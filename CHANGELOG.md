@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 5.0.0
+*2018-12-16*
+* Replace deprecated `ongenerate` hook, use Rollup's internal warning mechanism; requires rollup@0.60+ ([#45](https://github.com/rollup/rollup-plugin-svelte/issues/45))
+
 ## 4.5.0
 
 * Pass `dependencies` through from preprocessors ([#40](https://github.com/rollup/rollup-plugin-svelte/issues/40))
