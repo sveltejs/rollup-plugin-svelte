@@ -245,7 +245,11 @@ module.exports = function svelte(options = {}) {
 					cssLookup.set(fname, compiled.css);
 				}
 
-				compiled.js.dependencies = dependencies;
+				if (this.addWatchFile) {
+					dependencies.forEach(dependency => this.addWatchFile(dependency));
+				} else {
+					compiled.js.dependencies = dependencies;
+				}
 
 				return compiled.js;
 			});
