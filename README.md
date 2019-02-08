@@ -27,12 +27,12 @@ export default {
   },
   plugins: [
     svelte({
-      // By default, all .html and .svelte files are compiled
-      extensions: [ '.my-custom-extension' ],
+      // By default, all .svelte and .html files are compiled
+      extensions: ['.my-custom-extension'],
 
       // You can restrict which files are compiled
       // using `include` and `exclude`
-      include: 'src/components/**/*.html',
+      include: 'src/components/**/*.svelte',
 
       // By default, the client-side compiler is used. You
       // can also use the server-side rendering compiler
@@ -78,8 +78,8 @@ If you're importing a component from your node_modules folder, and that componen
 {
   "name": "some-component",
 
-  // this means 'some-component' resolves to 'some-component/src/SomeComponent.html'
-  "svelte": "src/MyComponent.html"
+  // this means 'some-component' resolves to 'some-component/src/SomeComponent.svelte'
+  "svelte": "src/MyComponent.svelte"
 }
 ```
 
