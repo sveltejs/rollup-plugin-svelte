@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-svelte",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "description": "Compile Svelte components with Rollup",
   "main": "index.js",
   "files": [
