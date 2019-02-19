@@ -29,9 +29,12 @@ const pluginOptions = {
 	include: true,
 	exclude: true,
 	extensions: true,
-	shared: true,
 	emitCss: true,
-	preprocess: true
+	preprocess: true,
+
+	// legacy — we might want to remove/change these in a future version
+	onwarn: true,
+	shared: true
 };
 
 function tryRequire(id) {
@@ -153,10 +156,6 @@ module.exports = function svelte(options = {}) {
 		fixed_options.css = false;
 	}
 
-	if (options.onwarn) {
-		fixed_options.onwarn = options.onwarn;
-	}
-
 	return {
 		name: 'svelte',
 
@@ -246,7 +245,12 @@ module.exports = function svelte(options = {}) {
 
 				warnings.forEach(warning => {
 					if ((options.css || !options.emitCss) && warning.code === 'css-unused-selector') return;
-					this.warn(warning);
+
+					if (options.onwarn) {
+						options.onwarn(warning, warning => this.warn(warning));
+					} else {
+						this.warn(warning);
+					}
 				});
 
 				if ((css || options.emitCss) && compiled.css.code) {

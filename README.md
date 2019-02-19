@@ -58,6 +58,17 @@ export default {
         // creates `main.css` and `main.css.map` — pass `false`
         // as the second argument if you don't want the sourcemap
         css.write('public/main.css');
+      },
+
+      // Warnings are normally passed straight to Rollup. You can
+      // optionally handle them here, for example to squelch
+      // warnings with a particular code
+      onwarn: (warning, handler) => {
+        // e.g. don't warn on <marquee> elements, cos they're cool
+        if (warning.code === 'a11y-distracting-elements') return;
+
+        // let Rollup handle all other warnings normally
+        handler(warning);
       }
     })
   ]

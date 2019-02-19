@@ -215,4 +215,31 @@ describe('rollup-plugin-svelte', () => {
 			assert.equal(loc.column, 3);
 		});
 	});
+
+	it('intercepts warnings', async () => {
+		const warnings = [];
+		const handled = [];
+
+		const { transform } = plugin({
+			onwarn(warning, handler) {
+				warnings.push(warning);
+
+				if (warning.code === 'a11y-hidden') {
+					handler(warning);
+				}
+			}
+		});
+
+		await transform.call({
+			warn: warning => {
+				handled.push(warning);
+			}
+		}, `
+			<h1 aria-hidden>Hello world!</h1>
+			<marquee>wheee!!!</marquee>
+		`, 'test.html');
+
+		assert.deepEqual(warnings.map(w => w.code), ['a11y-hidden', 'a11y-distracting-elements']);
+		assert.deepEqual(handled.map(w => w.code), ['a11y-hidden']);
+	});
 });
