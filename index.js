@@ -29,7 +29,8 @@ const pluginOptions = {
 	include: true,
 	exclude: true,
 	extensions: true,
-	shared: true
+	shared: true,
+	emitCss: true
 };
 
 function tryRequire(id) {
@@ -118,16 +119,21 @@ module.exports = function svelte(options = {}) {
 
 	const extensions = options.extensions || ['.html', '.svelte'];
 
-	const fixedOptions = {};
+	const fixed_options = {};
 
 	Object.keys(options).forEach(key => {
 		// add all options except include, exclude, extensions, and shared
 		if (pluginOptions[key]) return;
-		fixedOptions[key] = options[key];
+		fixed_options[key] = options[key];
 	});
 
-	fixedOptions.format = major_version >= 3 ? 'esm' : 'es';
-	fixedOptions.shared = require.resolve(options.shared || (major_version >= 3 ? 'svelte/internal.js' : 'svelte/shared.js'));
+	if (major_version >= 3) {
+		fixed_options.format = 'esm';
+		fixed_options.sveltePath = options.sveltePath || 'svelte';
+	} else {
+		fixed_options.format = 'es';
+		fixed_options.shared = require.resolve(options.shared || 'svelte/shared.js');
+	}
 
 	// handle CSS extraction
 	if ('css' in options) {
@@ -143,11 +149,11 @@ module.exports = function svelte(options = {}) {
 	const cssLookup = new Map();
 
 	if (css || options.emitCss) {
-		fixedOptions.css = false;
+		fixed_options.css = false;
 	}
 
 	if (options.onwarn) {
-		fixedOptions.onwarn = options.onwarn;
+		fixed_options.onwarn = options.onwarn;
 	}
 
 	return {
@@ -219,18 +225,28 @@ module.exports = function svelte(options = {}) {
 			}
 
 			return preprocessPromise.then(code => {
+				let warnings = [];
+
+				const base_options = major_version < 3
+					? {
+						onwarn: warning => warnings.push(warning)
+					}
+					: {};
+
 				const compiled = compile(
 					code,
-					Object.assign({}, {
-						onwarn: warning => {
-							if ((options.css || !options.emitCss) && warning.code === 'css-unused-selector') return;
-							this.warn(warning);
-						}
-					}, fixedOptions, {
+					Object.assign(base_options, fixed_options, {
 						name: capitalize(sanitize(id)),
 						filename: id
 					})
 				);
+
+				if (major_version >= 3) warnings = compiled.warnings || compiled.stats.warnings;
+
+				warnings.forEach(warning => {
+					if ((options.css || !options.emitCss) && warning.code === 'css-unused-selector') return;
+					this.warn(warning);
+				});
 
 				if ((css || options.emitCss) && compiled.css.code) {
 					let fname = id.replace(extension, '.css');
