@@ -30,7 +30,8 @@ const pluginOptions = {
 	exclude: true,
 	extensions: true,
 	shared: true,
-	emitCss: true
+	emitCss: true,
+	preprocess: true
 };
 
 function tryRequire(id) {

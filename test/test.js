@@ -55,7 +55,6 @@ describe('rollup-plugin-svelte', () => {
 			input: 'test/sourcemap-test/src/main.js',
 			plugins: [
 				plugin({
-					cascade: false,
 					css: css => {
 						css.write('test/sourcemap-test/dist/bundle.css');
 
@@ -116,8 +115,7 @@ describe('rollup-plugin-svelte', () => {
 
 	it('squelches CSS warnings if css: false', () => {
 		const { transform } = plugin({
-			css: false,
-			cascade: false
+			css: false
 		});
 
 		transform.call({
