@@ -39,7 +39,7 @@ export default {
       generate: 'ssr',
 
       // Optionally, preprocess components with svelte.preprocess:
-      // https://github.com/sveltejs/svelte#preprocessor-options
+      // https://svelte.dev/docs#svelte_preprocess
       preprocess: {
         style: ({ content }) => {
           return transformStyles(content);
