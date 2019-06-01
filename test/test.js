@@ -158,6 +158,36 @@ describe('rollup-plugin-svelte', () => {
 		});
 	});
 
+	it('allows multiple processors', () => {
+		const { transform } = plugin({
+			preprocess: [{
+				markup: ({ content, filename }) => {
+					return {
+						code: content.replace('__REPLACEME__', 'replaced'),
+						dependencies: ['foo'],
+					};
+				},
+			}, {
+				markup: ({ content, filename }) => {
+					return {
+						code: content.replace('__FILENAME__', filename),
+						dependencies: ['bar'],
+					};
+				},
+			}]
+		});
+
+		return transform(`
+			<h1>Hello __REPLACEME__!</h1>
+			<h2>file: __FILENAME__</h2>
+			<style>h1 { color: red; }</style>
+		`, 'test.html').then(({ code, dependencies }) => {
+			assert.equal(code.indexOf('__REPLACEME__'), -1, 'content not modified');
+			assert.notEqual(code.indexOf('file: test.html'), -1, 'filename not replaced');
+			assert.deepEqual(dependencies, ['foo', 'bar']);
+		});
+	})
+
 	it('emits a CSS file', () => {
 		const { load, transform } = plugin({
 			emitCss: true

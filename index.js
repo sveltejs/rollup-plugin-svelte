@@ -208,18 +208,26 @@ module.exports = function svelte(options = {}) {
 			const dependencies = [];
 			let preprocessPromise;
 			if (options.preprocess) {
-				const preprocessOptions = {};
-				for (const key in options.preprocess) {
-					preprocessOptions[key] = (...args) => {
-						return Promise.resolve(options.preprocess[key](...args)).then(resp => {
-							if (resp && resp.dependencies) {
-								dependencies.push(...resp.dependencies);
-							}
-							return resp;
-						});
-					};
-				}
-				preprocessPromise = preprocess(code, Object.assign(preprocessOptions, { filename: id })).then(code => code.toString());
+
+				const preprocessors = (Array.isArray(options.preprocess) ? options.preprocess : [options.preprocess])
+					.map(options => {
+						const preprocessOptions = { };
+
+						for (const key in options) {
+							preprocessOptions[key] = (...args) => {
+								return Promise.resolve(options[key](...args)).then(resp => {
+									if (resp && resp.dependencies) {
+										dependencies.push(...resp.dependencies);
+									}
+									return resp;
+								});
+							};
+						}
+
+						return preprocessOptions;
+					});
+
+				preprocessPromise = preprocess(code, preprocessors, { filename: id }).then(code => code.toString());
 			} else {
 				preprocessPromise = Promise.resolve(code);
 			}
