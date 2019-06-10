@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 5.1.0
+
+* Support array of preprocessors in Svelte 3
+
 ## 5.0.3
 
 * Handle `onwarn` correctly in new Svelte 3 beta
