@@ -98,6 +98,15 @@ If you're importing a component from your node_modules folder, and that componen
 
 Conversely, if you're *publishing* a component to npm, you should ship the uncompiled source (together with the compiled distributable, for people who aren't using Svelte elsewhere in their app) and include the `"svelte"` property in your package.json.
 
+If you are publishing a package containing multiple components, you can create an `index.js` file that re-exports all the components, like this:
+
+```js
+export { default as Component1 } from './Component1.svelte';
+export { default as Component2 } from './Component2.svelte';
+```
+
+and so on. Then, in `package.json`, set the `svelte` property to point to this `index.js` file.
+
 
 ## Extracting CSS
 
