@@ -40,6 +40,18 @@ describe('rollup-plugin-svelte', () => {
 		);
 	});
 
+	it('supports component name assignment', () => {
+		const { transform } = plugin();
+		return transform('', 'index.svelte').then(({ code }) => {
+			assert.notEqual(code.indexOf('class Index extends SvelteComponent'), -1);
+
+			return transform('', 'card/index.svelte');
+		}).then(({ code }) => {
+			assert.equal(code.indexOf('class Index extends SvelteComponent'), -1);
+			assert.notEqual(code.indexOf('class Card extends SvelteComponent'), -1);
+		});
+	});
+
 	it('creates a {code, map, dependencies} object, excluding the AST etc', () => {
 		const { transform } = plugin();
 		return transform('', 'test.html').then(compiled => {

@@ -252,8 +252,9 @@ module.exports = function svelte(options = {}) {
 				const compiled = compile(
 					code,
 					Object.assign(base_options, fixed_options, {
-						name: capitalize(sanitize(id)),
 						filename: id
+					}, major_version >= 3 ? null : {
+						name: capitalize(sanitize(id))
 					})
 				);
 
