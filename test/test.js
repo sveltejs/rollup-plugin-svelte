@@ -228,7 +228,7 @@ describe('rollup-plugin-svelte', () => {
 		});
 	});
 
-	it('intercepts warnings', async () => {
+	it('intercepts warnings', () => {
 		const warnings = [];
 		const handled = [];
 
@@ -242,16 +242,16 @@ describe('rollup-plugin-svelte', () => {
 			}
 		});
 
-		await transform.call({
+		return transform.call({
 			warn: warning => {
 				handled.push(warning);
 			}
 		}, `
 			<h1 aria-hidden>Hello world!</h1>
 			<marquee>wheee!!!</marquee>
-		`, 'test.html');
-
-		assert.deepEqual(warnings.map(w => w.code), ['a11y-hidden', 'a11y-distracting-elements']);
-		assert.deepEqual(handled.map(w => w.code), ['a11y-hidden']);
+		`, 'test.html').then(() => {
+			assert.deepEqual(warnings.map(w => w.code), ['a11y-hidden', 'a11y-distracting-elements']);
+			assert.deepEqual(handled.map(w => w.code), ['a11y-hidden']);
+		});
 	});
 });
