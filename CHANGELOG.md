@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 5.1.1
+
+* Use Svelte 3's built-in logic for automatically determining the component name from its file path ([#74](https://github.com/rollup/rollup-plugin-svelte/issues/74))
+
 ## 5.1.0
 
 * Support array of preprocessors in Svelte 3
