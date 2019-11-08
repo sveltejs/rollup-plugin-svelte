@@ -280,6 +280,8 @@ module.exports = function svelte(options = {}) {
 						compiled.js.code += `\nimport ${JSON.stringify(fname)};\n`;
 					}
 
+					compiled.css.importerId = id;
+
 					cssLookup.set(fname, compiled.css);
 				}
 
@@ -292,7 +294,14 @@ module.exports = function svelte(options = {}) {
 				return compiled.js;
 			});
 		},
-		generateBundle() {
+		generateBundle(outputOptions, bundle) {
+			const usedInChunk = ({ importerId }) => ({ modules }) => {
+				const importer = modules[importerId];
+				return importer && !importer.removedExports.includes('default');
+			};
+
+			const hasBeenTreeshaked = chunk => !Object.values(bundle).some(usedInChunk(chunk));
+
 			if (css) {
 				// write out CSS file. TODO would be nice if there was a
 				// a more idiomatic way to do this in Rollup
@@ -304,6 +313,7 @@ module.exports = function svelte(options = {}) {
 
 				for (let chunk of cssLookup.values()) {
 					if (!chunk.code) continue;
+					if (hasBeenTreeshaked(chunk)) continue;
 					result += chunk.code + '\n';
 
 					if (chunk.map) {
