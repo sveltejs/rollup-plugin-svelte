@@ -31,6 +31,7 @@ const pluginOptions = {
 	extensions: true,
 	emitCss: true,
 	preprocess: true,
+	strictOrder: true,
 
 	// legacy — we might want to remove/change these in a future version
 	onwarn: true,
@@ -224,11 +225,15 @@ module.exports = function svelte(options = {}) {
 					}
 					preprocessPromise = preprocess(
 						code,
-						Object.assign(preprocessOptions, { filename: id })
+						Object.assign(preprocessOptions, {
+							filename: id,
+							strictOrder: options.strictOrder
+						})
 					).then(code => code.toString());
 				} else {
 					preprocessPromise = preprocess(code, options.preprocess, {
-						filename: id
+						filename: id,
+						strictOrder: options.strictOrder
 					}).then(processed => {
 						if (processed.dependencies) {
 							dependencies.push(...processed.dependencies);
