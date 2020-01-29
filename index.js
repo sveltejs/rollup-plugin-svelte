@@ -292,7 +292,7 @@ module.exports = function svelte(options = {}) {
 				return compiled.js;
 			});
 		},
-		generateBundle() {
+		generateBundle({ sourcemapExcludeSources }) {
 			if (css) {
 				// write out CSS file. TODO would be nice if there was a
 				// a more idiomatic way to do this in Rollup
@@ -309,7 +309,7 @@ module.exports = function svelte(options = {}) {
 					if (chunk.map) {
 						const i = sources.length;
 						sources.push(chunk.map.sources[0]);
-						sourcesContent.push(chunk.map.sourcesContent[0]);
+						sourcesContent.push(sourcemapExcludeSources ? null : chunk.map.sourcesContent[0]);
 
 						const decoded = decode(chunk.map.mappings);
 
