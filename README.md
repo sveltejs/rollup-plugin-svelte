@@ -37,6 +37,10 @@ export default {
       // By default, the client-side compiler is used. You
       // can also use the server-side rendering compiler
       generate: 'ssr',
+      
+      // ensure that extra attributes are added to head
+      // elements for hydration (used with ssr: true)
+      hydratable: true,
 
       // Optionally, preprocess components with svelte.preprocess:
       // https://svelte.dev/docs#svelte_preprocess
