@@ -50,6 +50,7 @@ function tryResolve(pkg, importer) {
 		return relative.resolve(pkg, importer);
 	} catch (err) {
 		if (err.code === 'MODULE_NOT_FOUND') return null;
+		if (pkg === 'rollup/package.json') return null
 		throw err;
 	}
 }
