@@ -1,5 +1,10 @@
 # rollup-plugin-svelte changelog
 
+## 5.2.0
+
+* Deterministic CSS bundle order ([#84](https://github.com/sveltejs/rollup-plugin-svelte/issues/84))
+* Add typings ([#90](https://github.com/sveltejs/rollup-plugin-svelte/pull/90))
+
 ## 5.1.1
 
 * Use Svelte 3's built-in logic for automatically determining the component name from its file path ([#74](https://github.com/rollup/rollup-plugin-svelte/issues/74))
