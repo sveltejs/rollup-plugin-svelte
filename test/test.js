@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const sander = require('sander');
 const assert = require('assert');
@@ -254,5 +255,41 @@ describe('rollup-plugin-svelte', () => {
 
 		assert.deepEqual(warnings.map(w => w.code), ['a11y-hidden', 'a11y-distracting-elements']);
 		assert.deepEqual(handled.map(w => w.code), ['a11y-hidden']);
+	});
+
+	it('bundles CSS deterministically', async () => {
+		sander.rimrafSync('test/deterministic-css/dist');
+		sander.mkdirSync('test/deterministic-css/dist');
+
+		let css;
+
+		const bundle = await rollup.rollup({
+			input: 'test/deterministic-css/src/main.js',
+			plugins: [
+				{
+					resolveId: async (id) => {
+						if (/A\.svelte/.test(id)) {
+							await new Promise(f => setTimeout(f, 50));
+						}
+					}
+				},
+				plugin({
+					css: value => {
+						css = value;
+						css.write('test/deterministic-css/dist/bundle.css');
+					}
+				})
+			]
+		});
+
+		await bundle.write({
+			format: 'iife',
+			file: 'test/deterministic-css/dist/bundle.js'
+		});
+
+		assert.equal(
+			fs.readFileSync('test/deterministic-css/dist/bundle.css', 'utf-8'),
+			fs.readFileSync('test/deterministic-css/expected/bundle.css', 'utf-8')
+		);
 	});
 });

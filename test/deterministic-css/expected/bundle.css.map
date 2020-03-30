@@ -1,0 +1,16 @@
+{
+  "version": 3,
+  "file": "bundle.css",
+  "sources": [
+    "../src/A.html",
+    "../src/B.html",
+    "../src/C.html"
+  ],
+  "sourcesContent": [
+    "<p class=\"a\">red</p>\n\n<style>\n\t.a {\n\t\tcolor: red;\n\t}\n</style>",
+    "<p class=\"b\">green</p>\n\n<style>\n\t.b {\n\t\tcolor: green;\n\t}\n</style>",
+    "<p class=\"c\">blue</p>\n\n<style>\n\t.c {\n\t\tcolor: blue;\n\t}\n</style>"
+  ],
+  "names": [],
+  "mappings": "AAGC,EAAE,cAAC,CAAC,AACH,KAAK,CAAE,GAAG,AACX,CAAC;ACFD,EAAE,cAAC,CAAC,AACH,KAAK,CAAE,KAAK,AACb,CAAC;ACFD,EAAE,eAAC,CAAC,AACH,KAAK,CAAE,IAAI,AACZ,CAAC"
+}
