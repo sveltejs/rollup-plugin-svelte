@@ -1,5 +1,21 @@
 # rollup-plugin-svelte changelog
 
+## 5.1.1
+
+* Use Svelte 3's built-in logic for automatically determining the component name from its file path ([#74](https://github.com/rollup/rollup-plugin-svelte/issues/74))
+
+## 5.1.0
+
+* Support array of preprocessors in Svelte 3
+
+## 5.0.3
+
+* Handle `onwarn` correctly in new Svelte 3 beta
+
+## 5.0.2
+
+* Support latest Svelte 3 beta
+
 ## 5.0.1
 
 * Use `this.addWatchFile` if present ([#46](https://github.com/rollup/rollup-plugin-svelte/pull/46))

@@ -40,6 +40,18 @@ describe('rollup-plugin-svelte', () => {
 		);
 	});
 
+	it('supports component name assignment', () => {
+		const { transform } = plugin();
+		return transform('', 'index.svelte').then(({ code }) => {
+			assert.notEqual(code.indexOf('class Index extends SvelteComponent'), -1);
+
+			return transform('', 'card/index.svelte');
+		}).then(({ code }) => {
+			assert.equal(code.indexOf('class Index extends SvelteComponent'), -1);
+			assert.notEqual(code.indexOf('class Card extends SvelteComponent'), -1);
+		});
+	});
+
 	it('creates a {code, map, dependencies} object, excluding the AST etc', () => {
 		const { transform } = plugin();
 		return transform('', 'test.html').then(compiled => {
@@ -216,7 +228,7 @@ describe('rollup-plugin-svelte', () => {
 		});
 	});
 
-	it('intercepts warnings', async () => {
+	it('intercepts warnings', () => {
 		const warnings = [];
 		const handled = [];
 
@@ -230,16 +242,16 @@ describe('rollup-plugin-svelte', () => {
 			}
 		});
 
-		await transform.call({
+		return transform.call({
 			warn: warning => {
 				handled.push(warning);
 			}
 		}, `
 			<h1 aria-hidden>Hello world!</h1>
 			<marquee>wheee!!!</marquee>
-		`, 'test.html');
-
-		assert.deepEqual(warnings.map(w => w.code), ['a11y-hidden', 'a11y-distracting-elements']);
-		assert.deepEqual(handled.map(w => w.code), ['a11y-hidden']);
+		`, 'test.html').then(() => {
+			assert.deepEqual(warnings.map(w => w.code), ['a11y-hidden', 'a11y-distracting-elements']);
+			assert.deepEqual(handled.map(w => w.code), ['a11y-hidden']);
+		});
 	});
 });

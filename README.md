@@ -37,9 +37,13 @@ export default {
       // By default, the client-side compiler is used. You
       // can also use the server-side rendering compiler
       generate: 'ssr',
+      
+      // ensure that extra attributes are added to head
+      // elements for hydration (used with ssr: true)
+      hydratable: true,
 
       // Optionally, preprocess components with svelte.preprocess:
-      // https://github.com/sveltejs/svelte#preprocessor-options
+      // https://svelte.dev/docs#svelte_preprocess
       preprocess: {
         style: ({ content }) => {
           return transformStyles(content);
@@ -97,6 +101,15 @@ If you're importing a component from your node_modules folder, and that componen
 ...then this plugin will ensure that your app imports the *uncompiled* component source code. That will result in a smaller, faster app (because code is deduplicated, and shared functions get optimized quicker), and makes it less likely that you'll run into bugs caused by your app using a different version of Svelte to the component.
 
 Conversely, if you're *publishing* a component to npm, you should ship the uncompiled source (together with the compiled distributable, for people who aren't using Svelte elsewhere in their app) and include the `"svelte"` property in your package.json.
+
+If you are publishing a package containing multiple components, you can create an `index.js` file that re-exports all the components, like this:
+
+```js
+export { default as Component1 } from './Component1.svelte';
+export { default as Component2 } from './Component2.svelte';
+```
+
+and so on. Then, in `package.json`, set the `svelte` property to point to this `index.js` file.
 
 
 ## Extracting CSS
