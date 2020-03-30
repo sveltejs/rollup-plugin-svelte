@@ -302,7 +302,9 @@ module.exports = function svelte(options = {}) {
 				const sources = [];
 				const sourcesContent = [];
 
-				for (let chunk of cssLookup.values()) {
+				const chunks = Array.from(cssLookup.keys()).sort().map(key => cssLookup.get(key));
+
+				for (let chunk of chunks) {
 					if (!chunk.code) continue;
 					result += chunk.code + '\n';
 
