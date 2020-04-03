@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 5.2.1
+
+* Revert accidental change to Rollup peer dependency
+
 ## 5.2.0
 
 * Deterministic CSS bundle order ([#84](https://github.com/sveltejs/rollup-plugin-svelte/issues/84))
