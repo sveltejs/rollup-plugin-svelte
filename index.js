@@ -271,7 +271,7 @@ module.exports = function svelte(options = {}) {
 				});
 
 				if ((css || options.emitCss) && compiled.css.code) {
-					let fname = id.replace(extension, '.css');
+					let fname = id.replace(new RegExp(`\\${extension}$`), '.css');
 
 					if (options.emitCss) {
 						const source_map_comment = `/*# sourceMappingURL=${compiled.css.map.toUrl()} */`;
