@@ -73,12 +73,14 @@ describe('rollup-plugin-svelte', () => {
 						css.write('test/sourcemap-test/dist/bundle.css');
 					}
 				})
-			]
+			],
+			external: ['svelte/internal']
 		});
 
 		await bundle.write({
 			format: 'iife',
-			file: 'test/sourcemap-test/dist/bundle.js'
+			file: 'test/sourcemap-test/dist/bundle.js',
+			globals: { 'svelte/internal': 'svelte' }
 		});
 
 		const smc = await new SourceMapConsumer(css.map);
@@ -279,17 +281,60 @@ describe('rollup-plugin-svelte', () => {
 						css.write('test/deterministic-css/dist/bundle.css');
 					}
 				})
-			]
+			],
+			external: ['svelte/internal']
 		});
 
 		await bundle.write({
 			format: 'iife',
-			file: 'test/deterministic-css/dist/bundle.js'
+			file: 'test/deterministic-css/dist/bundle.js',
+			globals: { 'svelte/internal': 'svelte' }
 		});
 
 		assert.equal(
 			fs.readFileSync('test/deterministic-css/dist/bundle.css', 'utf-8'),
 			fs.readFileSync('test/deterministic-css/expected/bundle.css', 'utf-8')
+		);
+	});
+
+	it('handles filenames that happen to contain .svelte', async () => {
+		sander.rimrafSync('test/filename-test/dist');
+		sander.mkdirSync('test/filename-test/dist');
+
+		try {
+			const bundle = await rollup.rollup({
+				input: 'test/filename-test/src/foo.svelte.dev/main.js',
+				plugins: [
+					{
+						resolveId: async (id) => {
+							if (/A\.svelte/.test(id)) {
+								await new Promise(f => setTimeout(f, 50));
+							}
+						}
+					},
+					plugin({
+						css: value => {
+							css = value;
+							css.write('test/filename-test/dist/bundle.css');
+						}
+					})
+				],
+				external: ['svelte/internal']
+			});
+
+			await bundle.write({
+				format: 'iife',
+				file: 'test/filename-test/dist/bundle.js',
+				globals: { 'svelte/internal': 'svelte' }
+			});
+		} catch (err) {
+			console.log(err);
+			throw err;
+		}
+
+		assert.equal(
+			fs.readFileSync('test/filename-test/dist/bundle.css', 'utf-8'),
+			fs.readFileSync('test/filename-test/expected/bundle.css', 'utf-8')
 		);
 	});
 });
