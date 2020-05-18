@@ -45,11 +45,27 @@ function tryRequire(id) {
 	}
 }
 
+const errorRegExp = /Package subpath '.\/package.json' is not defined by "exports" in (.*)/;
+function tryParseErrorMessage(error) {
+	try {
+		const [, file] = errorRegExp.exec(error.message);
+		return file;
+	} catch (err) {
+		// if the matching fails, rethrow the original error for inspection
+		throw error;
+	}
+}
+
 function tryResolve(pkg, importer) {
 	try {
 		return relative.resolve(pkg, importer);
 	} catch (err) {
 		if (err.code === 'MODULE_NOT_FOUND') return null;
+		if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED')
+			// in the edge cases where the package.json file is not listed in the
+			// package's "exports" field, parse the target file name from the error
+			// message
+			return tryParseErrorMessage(err);
 		throw err;
 	}
 }
