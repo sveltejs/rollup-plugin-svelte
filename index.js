@@ -50,6 +50,10 @@ function tryResolve(pkg, importer) {
 		return relative.resolve(pkg, importer);
 	} catch (err) {
 		if (err.code === 'MODULE_NOT_FOUND') return null;
+		if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
+			console.warn(`WARNING: Could not read svelte config from ${pkg}. Reason: ${err.message}`);
+			return null;
+		}
 		throw err;
 	}
 }

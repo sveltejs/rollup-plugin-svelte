@@ -33,6 +33,22 @@ describe('rollup-plugin-svelte', () => {
 		);
 	});
 
+	it('ignores esm module not exporting package.json', () => {
+		const { resolveId } = plugin();
+		assert.equal(
+			resolveId('esm-module-without-svelte-config', path.resolve('test/foo/main.js')),
+			null
+		);
+	});
+
+	it('resolves esm module exporting package.json', () => {
+		const { resolveId } = plugin();
+		assert.equal(
+			resolveId('esm-widget', path.resolve('test/foo/main.js')),
+			path.resolve('test/node_modules/esm-widget/src/Widget.html')
+		);
+	});
+
 	it('ignores virtual modules', () => {
 		const { resolveId } = plugin();
 		assert.equal(
