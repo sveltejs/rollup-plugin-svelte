@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 5.2.3
+
+* Actually publish typings ([#110](https://github.com/sveltejs/rollup-plugin-svelte/issues/110))
+
 ## 5.2.2
 
 * Handle files with `.svelte` in the middle of their filename ([#107](https://github.com/sveltejs/rollup-plugin-svelte/pull/107))
