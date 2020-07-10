@@ -48,8 +48,7 @@ interface Options {
    * By default, the client-side compiler is used. You
    * can also use the server-side rendering compiler
    */
-  // this isn't used yet in plugin
-  // generate?: 'ssr';
+  generate?: string | false;
 
   /**
    * Optionally, preprocess components with svelte.preprocess:
