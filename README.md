@@ -53,6 +53,10 @@ export default {
       // Emit CSS as "files" for other plugins to process
       emitCss: true,
 
+      // You can optionally set 'customElement' to 'true' to compile
+      // your components to custom elements (aka web elements)
+      customElement: false,
+
       // Extract CSS into a separate file (recommended).
       // See note below
       css: function (css) {
