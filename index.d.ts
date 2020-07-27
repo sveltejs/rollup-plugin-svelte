@@ -7,7 +7,7 @@ interface Css {
   map: any;
 }
 
-class CssWriter {
+declare class CssWriter {
   code: string;
   map: {
     version: number;
