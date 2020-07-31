@@ -43,7 +43,6 @@ describe('rollup-plugin-svelte', () => {
 
 	it('resolves esm module that exports package.json', () => {
 		const { resolveId } = plugin();
-		console.log(resolveId('esm-component', path.resolve('test/foo/main.js')));
 		assert.equal(
 			resolveId('esm-component', path.resolve('test/foo/main.js')),
 			path.resolve('test/node_modules/esm-component/src/Component.svelte')
