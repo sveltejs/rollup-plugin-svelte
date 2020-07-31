@@ -52,9 +52,7 @@ function tryResolve(pkg, importer) {
 	} catch (err) {
 		if (err.code === 'MODULE_NOT_FOUND') return null;
 		if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
-			if (!pkg_export_errors.has(pkg)) {
-				pkg_export_errors.add(pkg.replace(/\/package.json$/, ''));
-			}
+			pkg_export_errors.add(pkg.replace(/\/package.json$/, ''));
 			return null;
 		}
 		throw err;
