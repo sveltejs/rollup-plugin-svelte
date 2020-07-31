@@ -346,7 +346,7 @@ module.exports = function svelte(options = {}) {
 			}
 			if (pkg_export_errors.size < 1) return;
 
-			console.warn('\nrollup-plugin-svelte: The following packages did not export their `package.json` file so we could not check the `svelte` field. If you had difficulties importing svelte components from a package, please contact the author and ask them to export their package.json file.\n');
+			console.warn('\nrollup-plugin-svelte: The following packages did not export their `package.json` file so we could not check the `svelte` field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n');
 			console.warn(Array.from(pkg_export_errors).map(s => `- ${s}`).join('\n') + '\n');
 		}
 	};
