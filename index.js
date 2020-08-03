@@ -65,7 +65,7 @@ function exists(file) {
 }
 
 class CssWriter {
-	constructor (code, map, warn, bundle) {
+	constructor (code, filename = this.filename, map, warn, bundle) {
 		this.code = code;
 		this.map = {
 			version: 3,
@@ -311,6 +311,8 @@ module.exports = function svelte(options = {}) {
 						mappings.push(...decoded);
 					}
 				}
+
+				const filename = Object.keys(bundle)[0].split('.').shift() + '.css';
 
 				const writer = new CssWriter(result, {
 					sources,
