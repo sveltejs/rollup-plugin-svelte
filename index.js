@@ -67,6 +67,7 @@ function exists(file) {
 class CssWriter {
 	constructor (code, filename = this.filename, map, warn, bundle) {
 		this.code = code;
+		this.filename = filename;
 		this.map = {
 			version: 3,
 			file: null,
