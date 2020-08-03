@@ -6,6 +6,7 @@ const { createFilter } = require('rollup-pluginutils');
 const { encode, decode } = require('sourcemap-codec');
 
 const major_version = +version[0];
+const pkg_export_errors = new Set();
 
 const { compile, preprocess } = major_version >= 3
 	? require('svelte/compiler.js')
@@ -50,6 +51,10 @@ function tryResolve(pkg, importer) {
 		return relative.resolve(pkg, importer);
 	} catch (err) {
 		if (err.code === 'MODULE_NOT_FOUND') return null;
+		if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
+			pkg_export_errors.add(pkg.replace(/\/package.json$/, ''));
+			return null;
+		}
 		throw err;
 	}
 }
@@ -64,22 +69,10 @@ function exists(file) {
 	}
 }
 
-function mkdirp(dir) {
-	const parent = path.dirname(dir);
-	if (parent === dir) return;
-
-	mkdirp(parent);
-
-	try {
-		fs.mkdirSync(dir);
-	} catch (err) {
-		if (err.code !== 'EEXIST') throw err;
-	}
-}
-
 class CssWriter {
-	constructor (code, map, warn) {
+	constructor (code, filename, map, warn, bundle) {
 		this.code = code;
+		this.filename = filename;
 		this.map = {
 			version: 3,
 			file: null,
@@ -89,26 +82,24 @@ class CssWriter {
 			mappings: map.mappings
 		};
 		this.warn = warn;
+		this.bundle = bundle;
 	}
 
-	write(dest, map) {
-		dest = path.resolve(dest);
-		mkdirp(path.dirname(dest));
-
+	write(dest = this.filename, map) {
 		const basename = path.basename(dest);
 
 		if (map !== false) {
-			fs.writeFileSync(dest, `${this.code}\n/*# sourceMappingURL=${basename}.map */`);
-			fs.writeFileSync(`${dest}.map`, JSON.stringify({
+			this.bundle.emitFile({type: 'asset', fileName: dest, source: `${this.code}\n/*# sourceMappingURL=${basename}.map */`});
+			this.bundle.emitFile({type: 'asset', fileName: `${dest}.map`, source: JSON.stringify({
 				version: 3,
 				file: basename,
 				sources: this.map.sources.map(source => path.relative(path.dirname(dest), source)),
 				sourcesContent: this.map.sourcesContent,
 				names: [],
 				mappings: this.map.mappings
-			}, null, '  '));
+			}, null, '  ')});
 		} else {
-			fs.writeFileSync(dest, this.code);
+			this.bundle.emitFile({type: 'asset', fileName: dest, source: this.code});
 		}
 	}
 
@@ -271,7 +262,7 @@ module.exports = function svelte(options = {}) {
 				});
 
 				if ((css || options.emitCss) && compiled.css.code) {
-					let fname = id.replace(extension, '.css');
+					let fname = id.replace(new RegExp(`\\${extension}$`), '.css');
 
 					if (options.emitCss) {
 						const source_map_comment = `/*# sourceMappingURL=${compiled.css.map.toUrl()} */`;
@@ -294,7 +285,7 @@ module.exports = function svelte(options = {}) {
 				return compiled.js;
 			});
 		},
-		generateBundle(outputOptions, bundle) {
+		generateBundle(options, bundle) {
 			const usedInChunk = ({ importerId }) => ({ modules }) => {
 				const importer = modules[importerId];
 				return importer && !importer.removedExports.includes('default');
@@ -311,7 +302,9 @@ module.exports = function svelte(options = {}) {
 				const sources = [];
 				const sourcesContent = [];
 
-				for (let chunk of cssLookup.values()) {
+				const chunks = Array.from(cssLookup.keys()).sort().map(key => cssLookup.get(key));
+
+				for (let chunk of chunks) {
 					if (!chunk.code) continue;
 					if (hasBeenTreeshaked(chunk)) continue;
 					result += chunk.code + '\n';
@@ -335,14 +328,22 @@ module.exports = function svelte(options = {}) {
 					}
 				}
 
-				const writer = new CssWriter(result, {
+				const filename = Object.keys(bundle)[0].split('.').shift() + '.css';
+
+				const writer = new CssWriter(result, filename, {
 					sources,
 					sourcesContent,
 					mappings: encode(mappings)
-				}, this.warn);
+				}, this.warn, this);
 
 				css(writer);
+
+				
 			}
+			if (pkg_export_errors.size < 1) return;
+
+			console.warn('\nrollup-plugin-svelte: The following packages did not export their `package.json` file so we could not check the `svelte` field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n');
+			console.warn(Array.from(pkg_export_errors).map(s => `- ${s}`).join('\n') + '\n');
 		}
 	};
 };

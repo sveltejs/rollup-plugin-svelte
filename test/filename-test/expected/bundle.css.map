@@ -1,0 +1,12 @@
+{
+  "version": 3,
+  "file": "bundle.css",
+  "sources": [
+    "../src/foo.svelte.dev/index.svelte"
+  ],
+  "sourcesContent": [
+    "<h1>Hello world!</h1>\n\n<style>\n\th1 {\n\t\tcolor: red;\n\t}\n</style>"
+  ],
+  "names": [],
+  "mappings": "AAGC,EAAE,cAAC,CAAC,AACH,KAAK,CAAE,GAAG,AACX,CAAC"
+}
