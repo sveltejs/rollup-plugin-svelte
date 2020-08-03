@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "lint": "eslint index.js",
-    "test": "node test/test.js",
+    "test": "node test/index.js",
     "prepublishOnly": "npm run lint && npm test"
   },
   "repository": "sveltejs/rollup-plugin-svelte",
