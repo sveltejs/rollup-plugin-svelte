@@ -65,7 +65,7 @@ function exists(file) {
 }
 
 class CssWriter {
-	constructor (code, filename = this.filename, map, warn, bundle) {
+	constructor (code, filename, map, warn, bundle) {
 		this.code = code;
 		this.filename = filename;
 		this.map = {
@@ -80,7 +80,7 @@ class CssWriter {
 		this.bundle = bundle;
 	}
 
-	write(dest, map) {
+	write(dest = this.filename, map) {
 		const basename = path.basename(dest);
 
 		if (map !== false) {
