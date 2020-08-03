@@ -328,7 +328,7 @@ module.exports = function svelte(options = {}) {
 
 				css(writer);
 
-				
+
 			}
 			if (pkg_export_errors.size < 1) return;
 
