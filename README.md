@@ -60,6 +60,7 @@ export default {
         console.log(css.map); // a sourcemap
 
         // creates `main.css` and `main.css.map`
+        // using a falsy name will default to the bundle name
         // — pass `false` as the second argument if you don't want the sourcemap
         css.write('main.css');
       },
