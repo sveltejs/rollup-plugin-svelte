@@ -116,7 +116,7 @@ describe('rollup-plugin-svelte', () => {
 				name: originalFooLoc.name
 			},
 			{
-				source: path.resolve('test/sourcemap-test/src/Foo.html'),
+				source: 'Foo.html',
 				line: 5,
 				column: 1,
 				name: null
@@ -137,7 +137,7 @@ describe('rollup-plugin-svelte', () => {
 				name: originalBarLoc.name
 			},
 			{
-				source: path.resolve('test/sourcemap-test/src/Bar.html'),
+				source: 'Bar.html',
 				line: 4,
 				column: 1,
 				name: null
@@ -214,7 +214,7 @@ describe('rollup-plugin-svelte', () => {
 			column: 0
 		});
 
-		assert.equal(loc.source, 'path/to/Input.html');
+		assert.equal(loc.source, 'Input.html');
 		assert.equal(loc.line, 4);
 		assert.equal(loc.column, 3);
 	});
@@ -243,7 +243,7 @@ describe('rollup-plugin-svelte', () => {
 			column: 0
 		});
 
-		assert.equal(loc.source, `path/t'o/Input.html`);
+		assert.equal(loc.source, 'Input.html');
 		assert.equal(loc.line, 4);
 		assert.equal(loc.column, 3);
 	});
