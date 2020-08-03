@@ -16,7 +16,6 @@ Note that we need to install Svelte as well as the plugin, as it's a 'peer depen
 
 ```js
 // rollup.config.js
-import * as fs from 'fs';
 import svelte from 'rollup-plugin-svelte';
 
 export default {
