@@ -6,6 +6,7 @@ const { createFilter } = require('rollup-pluginutils');
 const { encode, decode } = require('sourcemap-codec');
 
 const major_version = +version[0];
+const pkg_export_errors = new Set();
 
 const { compile, preprocess } = major_version >= 3
 	? require('svelte/compiler.js')
@@ -50,6 +51,10 @@ function tryResolve(pkg, importer) {
 		return relative.resolve(pkg, importer);
 	} catch (err) {
 		if (err.code === 'MODULE_NOT_FOUND') return null;
+		if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
+			pkg_export_errors.add(pkg.replace(/\/package.json$/, ''));
+			return null;
+		}
 		throw err;
 	}
 }
@@ -334,7 +339,13 @@ module.exports = function svelte(options = {}) {
 				}, this.warn);
 
 				css(writer);
+
+				
 			}
+			if (pkg_export_errors.size < 1) return;
+
+			console.warn('\nrollup-plugin-svelte: The following packages did not export their `package.json` file so we could not check the `svelte` field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n');
+			console.warn(Array.from(pkg_export_errors).map(s => `- ${s}`).join('\n') + '\n');
 		}
 	};
 };
