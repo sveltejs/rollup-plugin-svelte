@@ -48,7 +48,7 @@ interface Options {
    * By default, the client-side compiler is used. You
    * can also use the server-side rendering compiler
    */
-  generate?: string | false;
+  generate?: 'dom' | 'ssr' | false;
 
   /**
    * Optionally, preprocess components with svelte.preprocess:
