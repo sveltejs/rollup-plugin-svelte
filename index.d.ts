@@ -1,6 +1,5 @@
 import { Plugin, RollupWarning } from 'rollup';
-
-interface PreprocessOptions extends Record<string, (...args: any[]) => void> {}
+import { PreprocessorGroup } from 'svelte/types/compiler/preprocess';
 
 interface Css {
   code: any;
@@ -55,7 +54,7 @@ interface Options {
    * Optionally, preprocess components with svelte.preprocess:
    * https://svelte.dev/docs#svelte_preprocess
    */
-  preprocess?: PreprocessOptions;
+  preprocess?: PreprocessorGroup | PreprocessorGroup[];
   // {
   //   style: ({ content }) => {
   //     return transformStyles(content);
