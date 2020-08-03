@@ -1,4 +1,4 @@
-import { Plugin, RollupWarning, PluginContext } from 'rollup';
+import { Plugin, RollupWarning } from 'rollup';
 import { PreprocessorGroup } from 'svelte/types/compiler/preprocess';
 
 interface Css {
@@ -18,7 +18,7 @@ declare class CssWriter {
     mappings: string;
   };
   warn: RollupWarning;
-  bundle: PluginContext;
+  emit(fileName: string, source: string): void;
   write(dest: string, map: boolean): void;
   toString(): string;
 }
