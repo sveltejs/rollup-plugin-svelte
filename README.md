@@ -27,19 +27,23 @@ export default {
   },
   plugins: [
     svelte({
-      // By default, all .html and .svelte files are compiled
-      extensions: [ '.my-custom-extension' ],
+      // By default, all .svelte and .html files are compiled
+      extensions: ['.my-custom-extension'],
 
       // You can restrict which files are compiled
       // using `include` and `exclude`
-      include: 'src/components/**/*.html',
+      include: 'src/components/**/*.svelte',
 
       // By default, the client-side compiler is used. You
       // can also use the server-side rendering compiler
       generate: 'ssr',
+      
+      // ensure that extra attributes are added to head
+      // elements for hydration (used with ssr: true)
+      hydratable: true,
 
       // Optionally, preprocess components with svelte.preprocess:
-      // https://github.com/sveltejs/svelte#preprocessor-options
+      // https://svelte.dev/docs#svelte_preprocess
       preprocess: {
         style: ({ content }) => {
           return transformStyles(content);
@@ -58,11 +62,27 @@ export default {
         // creates `main.css` and `main.css.map` — pass `false`
         // as the second argument if you don't want the sourcemap
         css.write('public/main.css');
+      },
+
+      // Warnings are normally passed straight to Rollup. You can
+      // optionally handle them here, for example to squelch
+      // warnings with a particular code
+      onwarn: (warning, handler) => {
+        // e.g. don't warn on <marquee> elements, cos they're cool
+        if (warning.code === 'a11y-distracting-elements') return;
+
+        // let Rollup handle all other warnings normally
+        handler(warning);
       }
     })
   ]
 }
 ```
+
+
+## Preprocessing and dependencies
+
+If you are using the `preprocess` feature, then your callback responses may — in addition to the `code` and `map` values described in the Svelte compile docs — also optionally include a `dependencies` array. This should be the paths of additional files that the preprocessor result in some way depends upon. In Rollup 0.61+ in watch mode, any changes to these additional files will also trigger re-builds.
 
 
 ## `pkg.svelte`
@@ -73,14 +93,23 @@ If you're importing a component from your node_modules folder, and that componen
 {
   "name": "some-component",
 
-  // this means 'some-component' resolves to 'some-component/src/SomeComponent.html'
-  "svelte": "src/MyComponent.html"
+  // this means 'some-component' resolves to 'some-component/src/SomeComponent.svelte'
+  "svelte": "src/MyComponent.svelte"
 }
 ```
 
 ...then this plugin will ensure that your app imports the *uncompiled* component source code. That will result in a smaller, faster app (because code is deduplicated, and shared functions get optimized quicker), and makes it less likely that you'll run into bugs caused by your app using a different version of Svelte to the component.
 
 Conversely, if you're *publishing* a component to npm, you should ship the uncompiled source (together with the compiled distributable, for people who aren't using Svelte elsewhere in their app) and include the `"svelte"` property in your package.json.
+
+If you are publishing a package containing multiple components, you can create an `index.js` file that re-exports all the components, like this:
+
+```js
+export { default as Component1 } from './Component1.svelte';
+export { default as Component2 } from './Component2.svelte';
+```
+
+and so on. Then, in `package.json`, set the `svelte` property to point to this `index.js` file.
 
 
 ## Extracting CSS

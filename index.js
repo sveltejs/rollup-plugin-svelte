@@ -29,6 +29,11 @@ const pluginOptions = {
 	include: true,
 	exclude: true,
 	extensions: true,
+	emitCss: true,
+	preprocess: true,
+
+	// legacy — we might want to remove/change these in a future version
+	onwarn: true,
 	shared: true
 };
 
@@ -73,7 +78,7 @@ function mkdirp(dir) {
 }
 
 class CssWriter {
-	constructor (code, map) {
+	constructor (code, map, warn) {
 		this.code = code;
 		this.map = {
 			version: 3,
@@ -83,6 +88,7 @@ class CssWriter {
 			names: [],
 			mappings: map.mappings
 		};
+		this.warn = warn;
 	}
 
 	write(dest, map) {
@@ -107,7 +113,7 @@ class CssWriter {
 	}
 
 	toString() {
-		console.log('[DEPRECATION] As of rollup-plugin-svelte@3, the argument to the `css` function is an object, not a string — use `css.write(file)`. Consult the documentation for more information: https://github.com/rollup/rollup-plugin-svelte'); // eslint-disable-line no-console
+		this.warn('[DEPRECATION] As of rollup-plugin-svelte@3, the argument to the `css` function is an object, not a string — use `css.write(file)`. Consult the documentation for more information: https://github.com/rollup/rollup-plugin-svelte');
 		return this.code;
 	}
 }
@@ -117,16 +123,21 @@ module.exports = function svelte(options = {}) {
 
 	const extensions = options.extensions || ['.html', '.svelte'];
 
-	const fixedOptions = {};
+	const fixed_options = {};
 
 	Object.keys(options).forEach(key => {
 		// add all options except include, exclude, extensions, and shared
 		if (pluginOptions[key]) return;
-		fixedOptions[key] = options[key];
+		fixed_options[key] = options[key];
 	});
 
-	fixedOptions.format = major_version >= 3 ? 'esm' : 'es';
-	fixedOptions.shared = require.resolve(options.shared || (major_version >= 3 ? 'svelte/internal.js' : 'svelte/shared.js'));
+	if (major_version >= 3) {
+		fixed_options.format = 'esm';
+		fixed_options.sveltePath = options.sveltePath || 'svelte';
+	} else {
+		fixed_options.format = 'es';
+		fixed_options.shared = require.resolve(options.shared || 'svelte/shared.js');
+	}
 
 	// handle CSS extraction
 	if ('css' in options) {
@@ -142,11 +153,7 @@ module.exports = function svelte(options = {}) {
 	const cssLookup = new Map();
 
 	if (css || options.emitCss) {
-		fixedOptions.css = false;
-	}
-
-	if (options.onwarn) {
-		fixedOptions.onwarn = options.onwarn;
+		fixed_options.css = false;
 	}
 
 	return {
@@ -198,23 +205,74 @@ module.exports = function svelte(options = {}) {
 
 			if (!~extensions.indexOf(extension)) return null;
 
-			return (options.preprocess ? preprocess(code, Object.assign({}, options.preprocess, { filename : id })) : Promise.resolve(code)).then(code => {
-				const compiled = compile(
-					code.toString(),
-					Object.assign({}, {
-						onwarn: warning => {
-							if ((options.css || !options.emitCss) && warning.code === 'css-unused-selector') return;
-							this.warn(warning);
+			const dependencies = [];
+			let preprocessPromise;
+			if (options.preprocess) {
+				if (major_version < 3) {
+					const preprocessOptions = {};
+					for (const key in options.preprocess) {
+						preprocessOptions[key] = (...args) => {
+							return Promise.resolve(options.preprocess[key](...args)).then(
+								resp => {
+									if (resp && resp.dependencies) {
+										dependencies.push(...resp.dependencies);
+									}
+									return resp;
+								}
+							);
+						};
+					}
+					preprocessPromise = preprocess(
+						code,
+						Object.assign(preprocessOptions, { filename: id })
+					).then(code => code.toString());
+				} else {
+					preprocessPromise = preprocess(code, options.preprocess, {
+						filename: id
+					}).then(processed => {
+						if (processed.dependencies) {
+							dependencies.push(...processed.dependencies);
 						}
-					}, fixedOptions, {
+						return processed.toString();
+					});
+				}
+			} else {
+				preprocessPromise = Promise.resolve(code);
+			}
+
+			return preprocessPromise.then(code => {
+				let warnings = [];
+
+				const base_options = major_version < 3
+					? {
+						onwarn: warning => warnings.push(warning)
+					}
+					: {};
+
+				const compiled = compile(
+					code,
+					Object.assign(base_options, fixed_options, {
+						filename: id
+					}, major_version >= 3 ? null : {
 						name: capitalize(sanitize(id)),
-						filename: id,
 						sourceMap: code.getMap ? code.getMap() : undefined
 					})
 				);
 
+				if (major_version >= 3) warnings = compiled.warnings || compiled.stats.warnings;
+
+				warnings.forEach(warning => {
+					if ((options.css || !options.emitCss) && warning.code === 'css-unused-selector') return;
+
+					if (options.onwarn) {
+						options.onwarn(warning, warning => this.warn(warning));
+					} else {
+						this.warn(warning);
+					}
+				});
+
 				if ((css || options.emitCss) && compiled.css.code) {
-					let fname = id.replace(extension, '.css');
+					let fname = id.replace(new RegExp(`\\${extension}$`), '.css');
 
 					if (options.emitCss) {
 						const source_map_comment = `/*# sourceMappingURL=${compiled.css.map.toUrl()} */`;
@@ -226,10 +284,16 @@ module.exports = function svelte(options = {}) {
 					cssLookup.set(fname, compiled.css);
 				}
 
+				if (this.addWatchFile) {
+					dependencies.forEach(dependency => this.addWatchFile(dependency));
+				} else {
+					compiled.js.dependencies = dependencies;
+				}
+
 				return compiled.js;
 			});
 		},
-		ongenerate() {
+		generateBundle() {
 			if (css) {
 				// write out CSS file. TODO would be nice if there was a
 				// a more idiomatic way to do this in Rollup
@@ -239,7 +303,9 @@ module.exports = function svelte(options = {}) {
 				const sources = [];
 				const sourcesContent = [];
 
-				for (let chunk of cssLookup.values()) {
+				const chunks = Array.from(cssLookup.keys()).sort().map(key => cssLookup.get(key));
+
+				for (let chunk of chunks) {
 					if (!chunk.code) continue;
 					result += chunk.code + '\n';
 
@@ -266,7 +332,7 @@ module.exports = function svelte(options = {}) {
 					sources,
 					sourcesContent,
 					mappings: encode(mappings)
-				});
+				}, this.warn);
 
 				css(writer);
 			}
