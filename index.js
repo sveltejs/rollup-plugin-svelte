@@ -70,9 +70,11 @@ function exists(file) {
 }
 
 class CssWriter {
-	constructor (code, filename, map, warn, bundle) {
+	constructor(code, filename, map, warn, toAsset) {
 		this.code = code;
 		this.filename = filename;
+		this.emit = toAsset;
+		this.warn = warn;
 		this.map = {
 			version: 3,
 			file: null,
@@ -81,25 +83,23 @@ class CssWriter {
 			names: [],
 			mappings: map.mappings
 		};
-		this.warn = warn;
-		this.bundle = bundle;
 	}
 
 	write(dest = this.filename, map) {
 		const basename = path.basename(dest);
 
 		if (map !== false) {
-			this.bundle.emitFile({type: 'asset', fileName: dest, source: `${this.code}\n/*# sourceMappingURL=${basename}.map */`});
-			this.bundle.emitFile({type: 'asset', fileName: `${dest}.map`, source: JSON.stringify({
+			this.emit(dest, `${this.code}\n/*# sourceMappingURL=${basename}.map */`);
+			this.emit(`${dest}.map`, JSON.stringify({
 				version: 3,
 				file: basename,
 				sources: this.map.sources.map(source => path.relative(path.dirname(dest), source)),
 				sourcesContent: this.map.sourcesContent,
 				names: [],
 				mappings: this.map.mappings
-			}, null, '  ')});
+			}, null, 2));
 		} else {
-			this.bundle.emitFile({type: 'asset', fileName: dest, source: this.code});
+			this.emit(dest, this.code);
 		}
 	}
 
@@ -324,12 +324,13 @@ module.exports = function svelte(options = {}) {
 					sources,
 					sourcesContent,
 					mappings: encode(mappings)
-				}, this.warn, this);
+				}, this.warn, (fileName, source) => {
+					this.emitFile({ type: 'asset', fileName, source });
+				});
 
 				css(writer);
-
-				
 			}
+
 			if (pkg_export_errors.size < 1) return;
 
 			console.warn('\nrollup-plugin-svelte: The following packages did not export their `package.json` file so we could not check the `svelte` field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n');

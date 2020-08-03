@@ -8,6 +8,7 @@ interface Css {
 
 declare class CssWriter {
   code: string;
+  filename: string;
   map: {
     version: number;
     file?: boolean;
@@ -17,6 +18,7 @@ declare class CssWriter {
     mappings: string;
   };
   warn: RollupWarning;
+  emit(fileName: string, source: string): void;
   write(dest: string, map: boolean): void;
   toString(): string;
 }
