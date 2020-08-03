@@ -72,6 +72,13 @@ interface Options {
    */
   css?: (css: CssWriter) => any;
 
+
+  /**
+   * Compile Svelte components to custom elements (aka web components).
+   * @default false
+   */
+  customElement?: boolean;
+
   /**
    * let Rollup handle all other warnings normally
    */
