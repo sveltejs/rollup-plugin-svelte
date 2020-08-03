@@ -1,5 +1,22 @@
 # rollup-plugin-svelte changelog
 
+## 5.2.3
+
+* Actually publish typings ([#110](https://github.com/sveltejs/rollup-plugin-svelte/issues/110))
+
+## 5.2.2
+
+* Handle files with `.svelte` in the middle of their filename ([#107](https://github.com/sveltejs/rollup-plugin-svelte/pull/107))
+
+## 5.2.1
+
+* Revert accidental change to Rollup peer dependency
+
+## 5.2.0
+
+* Deterministic CSS bundle order ([#84](https://github.com/sveltejs/rollup-plugin-svelte/issues/84))
+* Add typings ([#90](https://github.com/sveltejs/rollup-plugin-svelte/pull/90))
+
 ## 5.1.1
 
 * Use Svelte 3's built-in logic for automatically determining the component name from its file path ([#74](https://github.com/rollup/rollup-plugin-svelte/issues/74))
