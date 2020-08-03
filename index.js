@@ -315,7 +315,7 @@ module.exports = function svelte(options = {}) {
 
 				const filename = Object.keys(bundle)[0].split('.').shift() + '.css';
 
-				const writer = new CssWriter(result, {
+				const writer = new CssWriter(result, filename, {
 					sources,
 					sourcesContent,
 					mappings: encode(mappings)
