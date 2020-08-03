@@ -27,17 +27,15 @@ test('resolves using pkg.svelte.root', () => {
 
 test('ignores built-in modules', () => {
 	const { resolveId } = plugin();
-	assert.is(
-		resolveId('path', path.resolve('test/foo/main.js')),
-		null
+	assert.ok(
+		resolveId('path', path.resolve('test/foo/main.js')) == null
 	);
 });
 
 test('ignores esm modules that do not export package.json', () => {
 	const { resolveId } = plugin();
-	assert.is(
-		resolveId('esm-no-pkg-export', path.resolve('test/foo/main.js')),
-		null
+	assert.ok(
+		resolveId('esm-no-pkg-export', path.resolve('test/foo/main.js')) == null
 	);
 });
 
@@ -51,9 +49,8 @@ test('resolves esm module that exports package.json', () => {
 
 test('ignores virtual modules', () => {
 	const { resolveId } = plugin();
-	assert.is(
-		resolveId('path', path.resolve('\0some-plugin-generated-module')),
-		null
+	assert.ok(
+		resolveId('path', path.resolve('\0some-plugin-generated-module')) == null
 	);
 });
 
