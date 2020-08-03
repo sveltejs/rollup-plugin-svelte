@@ -294,7 +294,7 @@ describe('rollup-plugin-svelte', () => {
 				plugin({
 					css: value => {
 						css = value;
-						css.write('test/deterministic-css/dist/bundle.css');
+						css.write('bundle.css');
 					}
 				})
 			],
@@ -331,7 +331,7 @@ describe('rollup-plugin-svelte', () => {
 					plugin({
 						css: value => {
 							css = value;
-							css.write('test/filename-test/dist/bundle.css');
+							css.write('bundle.css');
 						}
 					})
 				],

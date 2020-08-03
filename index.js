@@ -69,22 +69,10 @@ function exists(file) {
 	}
 }
 
-function mkdirp(dir) {
-	const parent = path.dirname(dir);
-	if (parent === dir) return;
-
-	mkdirp(parent);
-
-	try {
-		fs.mkdirSync(dir);
-	} catch (err) {
-		if (err.code !== 'EEXIST') throw err;
-	}
-}
-
 class CssWriter {
-	constructor (code, map, warn) {
+	constructor (code, filename, map, warn, bundle) {
 		this.code = code;
+		this.filename = filename;
 		this.map = {
 			version: 3,
 			file: null,
@@ -94,26 +82,24 @@ class CssWriter {
 			mappings: map.mappings
 		};
 		this.warn = warn;
+		this.bundle = bundle;
 	}
 
-	write(dest, map) {
-		dest = path.resolve(dest);
-		mkdirp(path.dirname(dest));
-
+	write(dest = this.filename, map) {
 		const basename = path.basename(dest);
 
 		if (map !== false) {
-			fs.writeFileSync(dest, `${this.code}\n/*# sourceMappingURL=${basename}.map */`);
-			fs.writeFileSync(`${dest}.map`, JSON.stringify({
+			this.bundle.emitFile({type: 'asset', fileName: dest, source: `${this.code}\n/*# sourceMappingURL=${basename}.map */`});
+			this.bundle.emitFile({type: 'asset', fileName: `${dest}.map`, source: JSON.stringify({
 				version: 3,
 				file: basename,
 				sources: this.map.sources.map(source => path.relative(path.dirname(dest), source)),
 				sourcesContent: this.map.sourcesContent,
 				names: [],
 				mappings: this.map.mappings
-			}, null, '  '));
+			}, null, '  ')});
 		} else {
-			fs.writeFileSync(dest, this.code);
+			this.bundle.emitFile({type: 'asset', fileName: dest, source: this.code});
 		}
 	}
 
@@ -297,7 +283,7 @@ module.exports = function svelte(options = {}) {
 				return compiled.js;
 			});
 		},
-		generateBundle() {
+		generateBundle(options, bundle) {
 			if (css) {
 				// write out CSS file. TODO would be nice if there was a
 				// a more idiomatic way to do this in Rollup
@@ -332,11 +318,13 @@ module.exports = function svelte(options = {}) {
 					}
 				}
 
-				const writer = new CssWriter(result, {
+				const filename = Object.keys(bundle)[0].split('.').shift() + '.css';
+
+				const writer = new CssWriter(result, filename, {
 					sources,
 					sourcesContent,
 					mappings: encode(mappings)
-				}, this.warn);
+				}, this.warn, this);
 
 				css(writer);
 
