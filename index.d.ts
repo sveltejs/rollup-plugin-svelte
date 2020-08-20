@@ -23,6 +23,12 @@ declare class CssWriter {
   toString(): string;
 }
 
+interface Svelte {
+  compile: any;
+  preprocess: any;
+  major_version: number;
+}
+
 interface Options {
   /**
    * By default, all .svelte and .html files are compiled
@@ -79,6 +85,11 @@ interface Options {
    * @default false
    */
   customElement?: boolean;
+
+  /**
+   * Pass in a specific version of Svelte.
+   */
+  svelte?: Svelte;
 
   /**
    * let Rollup handle all other warnings normally

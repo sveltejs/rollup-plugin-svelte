@@ -1,16 +1,22 @@
 const fs = require('fs');
 const path = require('path');
 const relative = require('require-relative');
-const { version } = require('svelte/package.json');
 const { createFilter } = require('rollup-pluginutils');
 const { encode, decode } = require('sourcemap-codec');
 
-const major_version = +version[0];
 const pkg_export_errors = new Set();
 
-const { compile, preprocess } = major_version >= 3
-	? require('svelte/compiler.js')
-	: require('svelte');
+function loadDefaultSvelte() {
+	const { version } = require('svelte/package.json');
+
+	const major_version = +version[0];
+
+	const { compile, preprocess } = major_version >= 3
+		? require('svelte/compiler.js')
+		: require('svelte');
+
+	return { compile, preprocess, major_version };
+}
 
 function sanitize(input) {
 	return path
@@ -110,6 +116,7 @@ class CssWriter {
 }
 
 module.exports = function svelte(options = {}) {
+	const { compile, preprocess, major_version } = options.svelte || loadDefaultSvelte();
 	const filter = createFilter(options.include, options.exclude);
 
 	const extensions = options.extensions || ['.html', '.svelte'];
