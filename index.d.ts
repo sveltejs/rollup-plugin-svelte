@@ -40,7 +40,7 @@ interface Options extends CompileOptions {
   /**
    * @type {IncludeAndExclude}
    */
-	include?: string;
+  include?: string;
 
   /**
    * @type {IncludeAndExclude}
