@@ -23,6 +23,8 @@ declare class CssWriter {
   toString(): string;
 }
 
+type CssEmitter = (css: CssWriter) => any;
+
 interface Options {
   /**
    * By default, all .svelte and .html files are compiled
@@ -71,7 +73,7 @@ interface Options {
   /**
    * Extract CSS into a separate file (recommended).
    */
-  css?: (css: CssWriter) => any;
+  css?: false | CssEmitter;
 
 
   /**
