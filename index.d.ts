@@ -48,12 +48,6 @@ interface Options extends CompileOptions {
   exclude?: string;
 
   /**
-   * By default, the client-side compiler is used. You
-   * can also use the server-side rendering compiler
-   */
-  generate?: 'dom' | 'ssr' | false;
-
-  /**
    * Optionally, preprocess components with svelte.preprocess:
    * https://svelte.dev/docs#svelte_preprocess
    */
