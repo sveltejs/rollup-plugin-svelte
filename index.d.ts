@@ -24,6 +24,8 @@ declare class CssWriter {
   toString(): string;
 }
 
+type CssEmitter = (css: CssWriter) => any;
+
 interface Options extends CompileOptions {
   /**
    * By default, all .svelte and .html files are compiled
@@ -67,7 +69,7 @@ interface Options extends CompileOptions {
   /**
    * Extract CSS into a separate file (recommended).
    */
-  css?: (css: CssWriter) => any;
+  css?: false | CssEmitter;
 
   /**
    * let Rollup handle all other warnings normally

@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 6.0.1
+
+* Fix types to allow `css: false` ([#125](https://github.com/sveltejs/rollup-plugin-svelte/pull/125))
+
 ## 6.0.0
 
 * Breaking changes:
