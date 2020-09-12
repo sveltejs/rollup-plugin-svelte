@@ -227,6 +227,8 @@ module.exports = function svelte(options = {}) {
 
 			if (!~extensions.indexOf(extension)) return null;
 
+
+			const filename = path.relative(process.cwd(), id);
 			const dependencies = [];
 			let preprocessPromise;
 			if (options.preprocess) {
@@ -246,11 +248,11 @@ module.exports = function svelte(options = {}) {
 					}
 					preprocessPromise = preprocess(
 						code,
-						Object.assign(preprocessOptions, { filename: id })
+						Object.assign(preprocessOptions, { filename })
 					).then(code => code.toString());
 				} else {
 					preprocessPromise = preprocess(code, options.preprocess, {
-						filename: id
+						filename
 					}).then(processed => {
 						if (processed.dependencies) {
 							dependencies.push(...processed.dependencies);
@@ -274,7 +276,7 @@ module.exports = function svelte(options = {}) {
 				const compiled = compile(
 					code,
 					Object.assign(base_options, fixed_options, {
-						filename: id
+						filename
 					}, major_version >= 3 ? null : {
 						name: capitalize(sanitize(id))
 					})
