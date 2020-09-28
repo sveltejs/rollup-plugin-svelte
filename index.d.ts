@@ -91,4 +91,4 @@ interface Options {
   ) => void;
 }
 
-export default function svelte(options: Options): Plugin;
+export default function svelte(options?: Options): Plugin;
