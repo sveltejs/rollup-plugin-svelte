@@ -85,7 +85,7 @@ class CssWriter {
 		};
 	}
 
-	write(dest = this.filename, map) {
+	write(dest = this.filename, map = true) {
 		const basename = path.basename(dest);
 
 		if (map !== false) {
