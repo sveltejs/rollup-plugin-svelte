@@ -265,7 +265,7 @@ module.exports = function svelte(options = {}) {
 				if (major_version >= 3) warnings = compiled.warnings || compiled.stats.warnings;
 
 				warnings.forEach(warning => {
-					if ((options.css || !options.emitCss) && warning.code === 'css-unused-selector') return;
+					if ((!options.css && !options.emitCss) && warning.code === 'css-unused-selector') return;
 
 					if (options.onwarn) {
 						options.onwarn(warning, warning => this.warn(warning));
