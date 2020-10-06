@@ -19,7 +19,7 @@ declare class CssWriter {
   };
   warn: RollupWarning;
   emit(fileName: string, source: string): void;
-  write(dest: string, map: boolean): void;
+  write(dest: string, map?: boolean): void;
   toString(): string;
 }
 

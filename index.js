@@ -85,10 +85,10 @@ class CssWriter {
 		};
 	}
 
-	write(dest = this.filename, map) {
+	write(dest = this.filename, map = true) {
 		const basename = path.basename(dest);
 
-		if (map !== false) {
+		if (map) {
 			this.emit(dest, `${this.code}\n/*# sourceMappingURL=${basename}.map */`);
 			this.emit(`${dest}.map`, JSON.stringify({
 				version: 3,
