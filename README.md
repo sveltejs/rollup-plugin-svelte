@@ -56,7 +56,7 @@ export default {
       // your components to custom elements (aka web elements)
       customElement: false,
 
-      // Extract CSS into a separate file (recommended).
+      // Extract CSS into a single bundled file (recommended).
       // See note below
       css: function (css) {
         console.log(css.code); // the concatenated CSS

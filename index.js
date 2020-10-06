@@ -141,6 +141,9 @@ module.exports = function svelte(options = {}) {
 		? options.css
 		: null;
 
+	// A map from css filename to css contents
+	// If css: true we output all contents
+	// If emitCss: true we virtually resolve these imports
 	const cssLookup = new Map();
 
 	if (css || options.emitCss) {
@@ -150,11 +153,17 @@ module.exports = function svelte(options = {}) {
 	return {
 		name: 'svelte',
 
+		/**
+		 * Returns CSS contents for an id
+		 */
 		load(id) {
 			if (!cssLookup.has(id)) return null;
 			return cssLookup.get(id);
 		},
 
+		/**
+		 * Returns id for import
+		 */
 		resolveId(importee, importer) {
 			if (cssLookup.has(importee)) { return importee; }
 			if (!importer || importee[0] === '.' || importee[0] === '\0' || path.isAbsolute(importee))
@@ -189,6 +198,10 @@ module.exports = function svelte(options = {}) {
 			}
 		},
 
+		/**
+		 * Transforms a .svelte file into a .js file
+		 * Adds a static import for virtual css file when emitCss: true
+		 */
 		transform(code, id) {
 			if (!filter(id)) return null;
 
@@ -283,10 +296,12 @@ module.exports = function svelte(options = {}) {
 				return compiled.js;
 			});
 		},
+		/**
+		 * If css: true then outputs a single file with all CSS bundled together
+		 */
 		generateBundle(options, bundle) {
 			if (css) {
-				// write out CSS file. TODO would be nice if there was a
-				// a more idiomatic way to do this in Rollup
+				// TODO would be nice if there was a more idiomatic way to do this in Rollup
 				let result = '';
 
 				const mappings = [];
