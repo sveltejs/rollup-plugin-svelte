@@ -1,5 +1,10 @@
 # rollup-plugin-svelte changelog
 
+## Unreleased
+
+* Added default value to CssWriter.write map option ([#135](https://github.com/sveltejs/rollup-plugin-svelte/pull/135))
+* Do not warn about missing unused css selectors if both css and emitCss are false ([#127](https://github.com/sveltejs/rollup-plugin-svelte/pull/127))
+
 ## 6.0.1
 
 * Fix types to allow `css: false` ([#125](https://github.com/sveltejs/rollup-plugin-svelte/pull/125))
