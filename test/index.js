@@ -83,7 +83,7 @@ test('does not generate a CSS sourcemap by default', async () => {
 			plugin({
 				css: value => {
 					css = value;
-					css.write('test/sourcemap-test/dist/bundle.css');
+					css.write('bundle.css');
 				}
 			})
 		],
@@ -221,7 +221,7 @@ test('produces readable sourcemap output when `dev` is truthy', async () => {
 				dev: true,
 				css: value => {
 					css = value;
-					css.write('test/sourcemap-test/dist/bundle.css');
+					css.write('bundle.css');
 				}
 			})
 		],
@@ -233,11 +233,11 @@ test('produces readable sourcemap output when `dev` is truthy', async () => {
 		sourcemap: true,
 		file: 'test/sourcemap-test/dist/bundle.js',
 		globals: { 'svelte/internal': 'svelte' },
-		assetFileNames: '[name][extname]',
+		assetFileNames: '[name].[ext]'
 	});
 
-	const content = fs.readFileSync('test/deterministic-css/dist/bundle.css.map', 'utf-8');
-	assert.is(content.includes('\n'), false);
+	const content = fs.readFileSync('test/sourcemap-test/dist/bundle.css.map', 'utf-8');
+	assert.is(content.includes('\n'), true);
 });
 
 test('squelches CSS warnings if css: false', () => {
@@ -411,8 +411,8 @@ test('bundles CSS deterministically', async () => {
 });
 
 test('respects `assetFileNames` Rollup format', async () => {
-	sander.rimrafSync('test/deterministic-css/dist/assets');
-	sander.mkdirSync('test/deterministic-css/dist/assets');
+	sander.rimrafSync('test/deterministic-css/dist');
+	sander.mkdirSync('test/deterministic-css/dist');
 
 	let css;
 
