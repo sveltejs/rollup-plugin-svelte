@@ -335,8 +335,8 @@ module.exports = function svelte(options = {}) {
 
 					if (config.sourcemap && chunk.map) {
 						const len = sources.length;
-						sources.push(chunk.map.sources[0]);
-						sourcesContent.push(chunk.map.sourcesContent[0]);
+						config.sourcemapExcludeSources || sources.push(chunk.map.sources[0]);
+						config.sourcemapExcludeSources || sourcesContent.push(chunk.map.sourcesContent[0]);
 
 						const decoded = decode(chunk.map.mappings);
 
