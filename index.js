@@ -70,11 +70,9 @@ function exists(file) {
 }
 
 class CssWriter {
-	constructor(code, filename, map, warn, toAsset) {
+	constructor(context, code, filename, map) {
 		this.code = code;
 		this.filename = filename;
-		this.emit = toAsset;
-		this.warn = warn;
 		this.map = {
 			version: 3,
 			file: null,
@@ -83,6 +81,11 @@ class CssWriter {
 			names: [],
 			mappings: map.mappings
 		};
+
+		this.warn = context.warn;
+		this.emit = (name, source) => context.emitFile({
+			type: 'asset', name, source
+		});
 	}
 
 	write(dest = this.filename, map = true) {
@@ -335,7 +338,7 @@ module.exports = function svelte(options = {}) {
 
 				const filename = Object.keys(bundle)[0].split('.').shift() + '.css';
 
-				const writer = new CssWriter(result, filename, {
+				const writer = new CssWriter(this, result, filename, {
 					sources,
 					sourcesContent,
 					mappings: encode(mappings)
