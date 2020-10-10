@@ -1,25 +1,16 @@
-import { Plugin, RollupWarning } from 'rollup';
-import { PreprocessorGroup } from 'svelte/types/compiler/preprocess';
+import type { Plugin, RollupWarning, SourceMap as Mapping } from 'rollup';
+import type { PreprocessorGroup } from 'svelte/types/compiler/preprocess';
 
-interface Css {
-  code: any;
-  map: any;
-}
+type SourceMap = Omit<Mapping, 'toString' | 'toUrl'>;
 
 declare class CssWriter {
   code: string;
   filename: string;
-  map: {
-    version: number;
-    file?: boolean;
-    sources: string[];
-    sourcesContent: string[];
-    names: any[];
-    mappings: string;
-  };
+  map: false | SourceMap;
   warn: RollupWarning;
   write(file: string, map?: boolean): void;
   emit(name: string, source: string): string;
+  sourcemap(file: string, sourcemap: SourceMap): void;
   toString(): string;
 }
 
