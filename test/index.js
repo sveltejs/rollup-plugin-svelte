@@ -92,8 +92,10 @@ test('generates a CSS sourcemap', async () => {
 
 	await bundle.write({
 		format: 'iife',
+		sourcemap: true,
 		file: 'test/sourcemap-test/dist/bundle.js',
-		globals: { 'svelte/internal': 'svelte' }
+		globals: { 'svelte/internal': 'svelte' },
+		assetFileNames: '[name][extname]',
 	});
 
 	const smc = await new SourceMapConsumer(css.map);
@@ -301,7 +303,9 @@ test('bundles CSS deterministically', async () => {
 	await bundle.write({
 		format: 'iife',
 		file: 'test/deterministic-css/dist/bundle.js',
-		globals: { 'svelte/internal': 'svelte' }
+		globals: { 'svelte/internal': 'svelte' },
+		assetFileNames: '[name].[ext]',
+		sourcemap: true,
 	});
 
 	assert.fixture(
@@ -338,7 +342,9 @@ test('handles filenames that happen to contain .svelte', async () => {
 		await bundle.write({
 			format: 'iife',
 			file: 'test/filename-test/dist/bundle.js',
-			globals: { 'svelte/internal': 'svelte' }
+			globals: { 'svelte/internal': 'svelte' },
+			assetFileNames: '[name].[ext]',
+			sourcemap: true,
 		});
 	} catch (err) {
 		console.log(err);
