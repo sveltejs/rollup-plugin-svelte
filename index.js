@@ -70,7 +70,7 @@ function exists(file) {
 }
 
 class CssWriter {
-	constructor(context, bundle, code, filename, map) {
+	constructor(context, bundle, isDev, code, filename, map) {
 		this.code = code;
 		this.filename = filename;
 
@@ -106,7 +106,7 @@ class CssWriter {
 				...mapping,
 				file: filename,
 				sources: mapping.sources.map(toRelative),
-			}, null, 2);
+			}, null, isDev ? 2 : 0);
 
 			// use `fileName` to prevent additional Rollup hashing
 			context.emitFile({ type: 'asset', fileName: mapfile, source });
@@ -354,7 +354,7 @@ module.exports = function svelte(options = {}) {
 
 				const filename = Object.keys(bundle)[0].split('.').shift() + '.css';
 
-				const writer = new CssWriter(this, bundle, result, filename, config.sourcemap && {
+				const writer = new CssWriter(this, bundle, !!options.dev, result, filename, config.sourcemap && {
 					sources,
 					sourcesContent,
 					mappings: encode(mappings)

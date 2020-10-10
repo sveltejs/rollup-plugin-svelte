@@ -56,6 +56,12 @@ interface Options {
   // },
 
   /**
+   * Add extra code for development and debugging purposes.
+   * @default false
+   */
+  dev?: boolean;
+
+  /**
    * Emit CSS as "files" for other plugins to process
    * @default false
    */
