@@ -43,5 +43,8 @@
   "peerDependencies": {
     "svelte": ">=3.5.0",
     "rollup": ">=2.0.0"
+  },
+  "engines": {
+    "node": ">=10"
   }
 }
