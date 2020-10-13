@@ -82,6 +82,13 @@ interface Options {
    */
   customElement?: boolean;
 
+
+  /**
+   * Upgrade existing DOM rather than creating new elements
+   * @default false
+   */
+  hydratable?: boolean;
+
   /**
    * let Rollup handle all other warnings normally
    */
