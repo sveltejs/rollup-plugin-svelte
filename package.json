@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-svelte",
-  "version": "5.2.3",
+  "version": "6.0.2",
   "description": "Compile Svelte components with Rollup",
   "main": "index.js",
   "types": "index.d.ts",
@@ -11,8 +11,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "mocha",
     "lint": "eslint index.js",
+    "test": "node test/index.js",
     "prepublishOnly": "npm run lint && npm test"
   },
   "repository": "sveltejs/rollup-plugin-svelte",
@@ -29,11 +29,11 @@
   "devDependencies": {
     "eslint": "^6.8.0",
     "locate-character": "^2.0.5",
-    "mocha": "^7.1.1",
-    "rollup": "^0.67.4",
+    "rollup": "^2.30.0",
     "sander": "^0.6.0",
     "source-map": "^0.7.3",
-    "svelte": "^3.0.0-beta.5"
+    "svelte": "^3.24.0",
+    "uvu": "^0.3.1"
   },
   "dependencies": {
     "require-relative": "^0.8.7",
@@ -41,7 +41,10 @@
     "sourcemap-codec": "^1.4.8"
   },
   "peerDependencies": {
-    "svelte": "*",
-    "rollup": ">=0.60.0"
+    "svelte": ">=3.5.0",
+    "rollup": ">=2.0.0"
+  },
+  "engines": {
+    "node": ">=10"
   }
 }

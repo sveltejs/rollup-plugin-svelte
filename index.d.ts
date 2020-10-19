@@ -1,28 +1,23 @@
-import { Plugin, RollupWarning } from 'rollup';
+import { Plugin, RollupWarning, SourceMap as Mapping } from 'rollup';
+import { PreprocessorGroup } from 'svelte/types/compiler/preprocess';
+import { CompileOptions } from 'svelte/types/compiler/interfaces';
 
-interface PreprocessOptions extends Record<string, (...args: any[]) => void> {}
-
-interface Css {
-  code: any;
-  map: any;
-}
+type SourceMap = Omit<Mapping, 'toString' | 'toUrl'>;
 
 declare class CssWriter {
   code: string;
-  map: {
-    version: number;
-    file?: boolean;
-    sources: string[];
-    sourcesContent: string[];
-    names: any[];
-    mappings: string;
-  };
+  filename: string;
+  map: false | SourceMap;
   warn: RollupWarning;
-  write(dest: string, map: boolean): void;
+  write(file: string, map?: boolean): void;
+  emit(name: string, source: string): string;
+  sourcemap(file: string, sourcemap: SourceMap): void;
   toString(): string;
 }
 
-interface Options {
+type CssEmitter = (css: CssWriter) => any;
+
+interface Options extends CompileOptions {
   /**
    * By default, all .svelte and .html files are compiled
    * @default ['.html', '.svelte']
@@ -39,28 +34,28 @@ interface Options {
    * @type {IncludeAndExclude}
    */
   include?: string;
+
   /**
    * @type {IncludeAndExclude}
    */
   exclude?: string;
 
   /**
-   * By default, the client-side compiler is used. You
-   * can also use the server-side rendering compiler
-   */
-  // this isn't used yet in plugin
-  // generate?: 'ssr';
-
-  /**
    * Optionally, preprocess components with svelte.preprocess:
    * https://svelte.dev/docs#svelte_preprocess
    */
-  preprocess?: PreprocessOptions;
+  preprocess?: PreprocessorGroup | PreprocessorGroup[];
   // {
   //   style: ({ content }) => {
   //     return transformStyles(content);
   //   }
   // },
+
+  /**
+   * Add extra code for development and debugging purposes.
+   * @default false
+   */
+  dev?: boolean;
 
   /**
    * Emit CSS as "files" for other plugins to process
@@ -71,7 +66,7 @@ interface Options {
   /**
    * Extract CSS into a separate file (recommended).
    */
-  css?: (css: CssWriter) => any;
+  css?: false | CssEmitter;
 
   /**
    * let Rollup handle all other warnings normally
@@ -82,4 +77,4 @@ interface Options {
   ) => void;
 }
 
-export default function svelte(options: Options): Plugin;
+export default function svelte(options?: Options): Plugin;
