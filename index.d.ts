@@ -19,7 +19,7 @@ declare class CssWriter {
   };
   warn: RollupWarning;
   emit(fileName: string, source: string): void;
-  write(dest: string, map: boolean): void;
+  write(dest: string, map?: boolean): void;
   toString(): string;
 }
 
@@ -28,6 +28,8 @@ interface Svelte {
   preprocess: any;
   version: number | string;
 }
+
+type CssEmitter = (css: CssWriter) => any;
 
 interface Options {
   /**
@@ -77,7 +79,7 @@ interface Options {
   /**
    * Extract CSS into a separate file (recommended).
    */
-  css?: (css: CssWriter) => any;
+  css?: false | CssEmitter;
 
 
   /**
@@ -100,4 +102,4 @@ interface Options {
   ) => void;
 }
 
-export default function svelte(options: Options): Plugin;
+export default function svelte(options?: Options): Plugin;

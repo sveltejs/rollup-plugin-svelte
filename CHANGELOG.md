@@ -1,10 +1,23 @@
 # rollup-plugin-svelte changelog
 
-## Unpublished
+## Unreleased
 
-* Types for `generate`, `customElement`, and `preprocess` options ([#111](https://github.com/sveltejs/rollup-plugin-svelte/pull/111), [#114](https://github.com/sveltejs/rollup-plugin-svelte/pull/114), and [#118](https://github.com/sveltejs/rollup-plugin-svelte/pull/118))
-* Utilize Rollup's `emitFile` API. `css.write` is now relative to destination directory ([#72](https://github.com/sveltejs/rollup-plugin-svelte/pull/72))
-* Warning for `package.json` not visible via `exports` ([#119](https://github.com/sveltejs/rollup-plugin-svelte/issues/119))
+* Added default value to CssWriter.write map option ([#135](https://github.com/sveltejs/rollup-plugin-svelte/pull/135))
+* Do not warn about missing unused css selectors if both css and emitCss are false ([#127](https://github.com/sveltejs/rollup-plugin-svelte/pull/127))
+
+## 6.0.1
+
+* Fix types to allow `css: false` ([#125](https://github.com/sveltejs/rollup-plugin-svelte/pull/125))
+
+## 6.0.0
+
+* Breaking changes:
+	* Rollup 1.19.2+ is now required
+	* The path passed to `css.write()` is now relative to the destination directory.
+* Other changes:
+	* Add types for `generate`, `customElement`, and `preprocess` options ([#111](https://github.com/sveltejs/rollup-plugin-svelte/pull/111), [#114](https://github.com/sveltejs/rollup-plugin-svelte/pull/114), and [#118](https://github.com/sveltejs/rollup-plugin-svelte/pull/118))
+	* Use Rollup's `emitFile` API ([#72](https://github.com/sveltejs/rollup-plugin-svelte/pull/72))
+	* Warn when `package.json` does not expose itself via `exports` ([#119](https://github.com/sveltejs/rollup-plugin-svelte/pull/119))
 
 ## 5.2.3
 

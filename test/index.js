@@ -9,6 +9,9 @@ const sander = require('sander');
 
 const plugin = require('..');
 
+// TODO(lukeed) do this within uvu?
+const normalize = file => fs.readFileSync(file, 'utf8').replace(/\r?\n/g, '\n');
+
 test('resolves using pkg.svelte', () => {
 	const { resolveId } = plugin();
 	assert.is(
@@ -305,8 +308,8 @@ test('bundles CSS deterministically', async () => {
 	});
 
 	assert.fixture(
-		fs.readFileSync('test/deterministic-css/dist/bundle.css', 'utf-8'),
-		fs.readFileSync('test/deterministic-css/expected/bundle.css', 'utf-8')
+		normalize('test/deterministic-css/dist/bundle.css'),
+		normalize('test/deterministic-css/expected/bundle.css')
 	);
 });
 
@@ -346,8 +349,8 @@ test('handles filenames that happen to contain .svelte', async () => {
 	}
 
 	assert.fixture(
-		fs.readFileSync('test/filename-test/dist/bundle.css', 'utf-8'),
-		fs.readFileSync('test/filename-test/expected/bundle.css', 'utf-8')
+		normalize('test/filename-test/dist/bundle.css'),
+		normalize('test/filename-test/expected/bundle.css')
 	);
 });
 

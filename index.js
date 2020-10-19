@@ -1,5 +1,5 @@
-const fs = require('fs');
 const path = require('path');
+const { existsSync } = require('fs');
 const relative = require('require-relative');
 const { createFilter } = require('rollup-pluginutils');
 const { encode, decode } = require('sourcemap-codec');
@@ -64,16 +64,6 @@ function tryResolve(pkg, importer) {
 	}
 }
 
-function exists(file) {
-	try {
-		fs.statSync(file);
-		return true;
-	} catch (err) {
-		if (err.code === 'ENOENT') return false;
-		throw err;
-	}
-}
-
 class CssWriter {
 	constructor(code, filename, map, warn, toAsset) {
 		this.code = code;
@@ -90,10 +80,10 @@ class CssWriter {
 		};
 	}
 
-	write(dest = this.filename, map) {
+	write(dest = this.filename, map = true) {
 		const basename = path.basename(dest);
 
-		if (map !== false) {
+		if (map) {
 			this.emit(dest, `${this.code}\n/*# sourceMappingURL=${basename}.map */`);
 			this.emit(`${dest}.map`, JSON.stringify({
 				version: 3,
@@ -148,6 +138,9 @@ module.exports = function (options = {}) {
 		? options.css
 		: null;
 
+	// A map from css filename to css contents
+	// If css: true we output all contents
+	// If emitCss: true we virtually resolve these imports
 	const cssLookup = new Map();
 
 	if (css || options.emitCss) {
@@ -157,11 +150,17 @@ module.exports = function (options = {}) {
 	return {
 		name: 'svelte',
 
+		/**
+		 * Returns CSS contents for an id
+		 */
 		load(id) {
 			if (!cssLookup.has(id)) return null;
 			return cssLookup.get(id);
 		},
 
+		/**
+		 * Returns id for import
+		 */
 		resolveId(importee, importer) {
 			if (cssLookup.has(importee)) { return importee; }
 			if (!importer || importee[0] === '.' || importee[0] === '\0' || path.isAbsolute(importee))
@@ -191,11 +190,15 @@ module.exports = function (options = {}) {
 				if (pkg['svelte.root']) {
 					// TODO remove this. it's weird and unnecessary
 					const sub = path.resolve(dir, pkg['svelte.root'], parts.join('/'));
-					if (exists(sub)) return sub;
+					if (existsSync(sub)) return sub;
 				}
 			}
 		},
 
+		/**
+		 * Transforms a .svelte file into a .js file
+		 * Adds a static import for virtual css file when emitCss: true
+		 */
 		transform(code, id) {
 			if (!filter(id)) return null;
 
@@ -259,7 +262,7 @@ module.exports = function (options = {}) {
 				if (version >= 3) warnings = compiled.warnings || compiled.stats.warnings;
 
 				warnings.forEach(warning => {
-					if ((options.css || !options.emitCss) && warning.code === 'css-unused-selector') return;
+					if ((!options.css && !options.emitCss) && warning.code === 'css-unused-selector') return;
 
 					if (options.onwarn) {
 						options.onwarn(warning, warning => this.warn(warning));
@@ -290,10 +293,12 @@ module.exports = function (options = {}) {
 				return compiled.js;
 			});
 		},
+		/**
+		 * If css: true then outputs a single file with all CSS bundled together
+		 */
 		generateBundle(options, bundle) {
 			if (css) {
-				// write out CSS file. TODO would be nice if there was a
-				// a more idiomatic way to do this in Rollup
+				// TODO would be nice if there was a more idiomatic way to do this in Rollup
 				let result = '';
 
 				const mappings = [];
