@@ -1,16 +1,11 @@
 const path = require('path');
 const { existsSync } = require('fs');
 const relative = require('require-relative');
-const { version } = require('svelte/package.json');
 const { createFilter } = require('rollup-pluginutils');
+const { compile, preprocess } = require('svelte/compiler');
 const { encode, decode } = require('sourcemap-codec');
 
-const major_version = +version[0];
 const pkg_export_errors = new Set();
-
-const { compile, preprocess } = major_version >= 3
-	? require('svelte/compiler.js')
-	: require('svelte');
 
 function sanitize(input) {
 	return path
@@ -23,7 +18,7 @@ function sanitize(input) {
 }
 
 function capitalize(str) {
-	return str[0].toUpperCase() + str.slice(1);
+	return str[0].toUpperCase() + str.substring(1);
 }
 
 const pluginOptions = {
@@ -132,13 +127,8 @@ module.exports = function svelte(options = {}) {
 		fixed_options[key] = options[key];
 	});
 
-	if (major_version >= 3) {
-		fixed_options.format = 'esm';
-		fixed_options.sveltePath = options.sveltePath || 'svelte';
-	} else {
-		fixed_options.format = 'es';
-		fixed_options.shared = require.resolve(options.shared || 'svelte/shared.js');
-	}
+	fixed_options.format = 'esm';
+	fixed_options.sveltePath = options.sveltePath || 'svelte';
 
 	// handle CSS extraction
 	if ('css' in options) {
@@ -223,53 +213,26 @@ module.exports = function svelte(options = {}) {
 			const dependencies = [];
 			let preprocessPromise;
 			if (options.preprocess) {
-				if (major_version < 3) {
-					const preprocessOptions = {};
-					for (const key in options.preprocess) {
-						preprocessOptions[key] = (...args) => {
-							return Promise.resolve(options.preprocess[key](...args)).then(
-								resp => {
-									if (resp && resp.dependencies) {
-										dependencies.push(...resp.dependencies);
-									}
-									return resp;
-								}
-							);
-						};
+				preprocessPromise = preprocess(code, options.preprocess, { filename }).then(processed => {
+					if (processed.dependencies) {
+						dependencies.push(...processed.dependencies);
 					}
-					preprocessPromise = preprocess(
-						code,
-						Object.assign(preprocessOptions, { filename })
-					).then(code => code.toString());
-				} else {
-					preprocessPromise = preprocess(code, options.preprocess, { filename }).then(processed => {
-						if (processed.dependencies) {
-							dependencies.push(...processed.dependencies);
-						}
-						return processed.toString();
-					});
-				}
+					return processed.toString();
+				});
 			} else {
 				preprocessPromise = Promise.resolve(code);
 			}
 
 			return preprocessPromise.then(code => {
 				let warnings = [];
-
-				const base_options = major_version < 3
-					? {
-						onwarn: warning => warnings.push(warning)
-					}
-					: {};
+				const base_options = {};
 
 				const compiled = compile(
 					code,
-					Object.assign(base_options, fixed_options, { filename }, major_version >= 3 ? null : {
-						name: capitalize(sanitize(id))
-					})
+					Object.assign(base_options, fixed_options, { filename })
 				);
 
-				if (major_version >= 3) warnings = compiled.warnings || compiled.stats.warnings;
+				warnings = compiled.warnings || compiled.stats.warnings;
 
 				warnings.forEach(warning => {
 					if ((!options.css && !options.emitCss) && warning.code === 'css-unused-selector') return;
