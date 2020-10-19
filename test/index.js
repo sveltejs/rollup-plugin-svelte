@@ -101,7 +101,7 @@ test('does not generate a CSS sourcemap by default', async () => {
 		assetFileNames: '[name][extname]',
 	});
 
-	assert.is(css.code.includes('sourceMappingURL'), false);
+	assert.not.match(css.code, 'sourceMappingURL');
 	assert.is(css.map, false);
 });
 
@@ -495,8 +495,8 @@ test('ensures sourcemap and original files point to each other\'s hashed filenam
 	const data1 = fs.readFileSync(path.join(assets, file), 'utf-8');
 	const data2 = fs.readFileSync(path.join(assets, sourcemap), 'utf-8');
 
-	assert.match(data1, sourcemap, 'file has `sourcemap` reference');
-	assert.match(data2, file, 'sourcemap has `file` reference');
+	assert.match(data1, `sourceMappingURL=${sourcemap}`, 'file has `sourcemap` reference');
+	assert.match(data2, `"file":"${file}"`, 'sourcemap has `file` reference');
 });
 
 test('handles filenames that happen to contain .svelte', async () => {

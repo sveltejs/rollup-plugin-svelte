@@ -90,13 +90,15 @@ class CssWriter {
 
 		this.sourcemap = (file, mapping) => {
 			const ref = this.emit(file, this.code);
-			const filename = context.getFileName(ref);
+			const filename = context.getFileName(ref); // may be "assets/[name][ext]"
 
-			const mapfile = `${filename}.map`;
+			const mapfile = `${filename}.map`; // may be "assets/[name][ext]"
 			const toRelative = src => path.relative(path.dirname(file), src);
 
 			if (bundle[filename]) {
-				bundle[filename].source += `\n/*# sourceMappingURL=${mapfile} */`;
+				// use `basename` because files are siblings
+				// aka, avoid `sourceMappingURL=assets/bundle.css.map` from `assets/bundle.css`
+				bundle[filename].source += `\n/*# sourceMappingURL=${path.basename(mapfile)} */`;
 			} else {
 				// This should not ever happen, but just in case...
 				return this.warn(`Missing "${filename}" ("${file}") in bundle; skipping sourcemap!`);
@@ -104,7 +106,7 @@ class CssWriter {
 
 			const source = JSON.stringify({
 				...mapping,
-				file: filename,
+				file: path.basename(filename), //=> sibling file
 				sources: mapping.sources.map(toRelative),
 			}, null, isDev ? 2 : 0);
 
