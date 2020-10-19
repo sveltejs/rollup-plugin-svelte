@@ -36,7 +36,7 @@ export default {
       // By default, the client-side compiler is used. You
       // can also use the server-side rendering compiler
       generate: 'ssr',
-      
+
       // ensure that extra attributes are added to head
       // elements for hydration (used with ssr: true)
       hydratable: true,
@@ -81,13 +81,8 @@ export default {
 
       // Pass in a specific version of Svelte, e.g. if you use
       // npm aliases to install multiple versions you can import
-      // a specific version:
-      // import svelte1 from 'svelte1' // aliased version of svelte@1.x
-      svelte: {
-        compile: svelte1.compile,
-        preprocess: svelte1.preprocess,
-        major_version: 1
-      }
+      // a specific version. Assume "svelte1" is `svelte@1.x` alias.
+      svelte: require('svelte1')
     })
   ]
 }
