@@ -7,20 +7,6 @@ const { encode, decode } = require('sourcemap-codec');
 
 const pkg_export_errors = new Set();
 
-function sanitize(input) {
-	return path
-		.basename(input)
-		.replace(path.extname(input), '')
-		.replace(/[^a-zA-Z_$0-9]+/g, '_')
-		.replace(/^_/, '')
-		.replace(/_$/, '')
-		.replace(/^(\d)/, '_$1');
-}
-
-function capitalize(str) {
-	return str[0].toUpperCase() + str.substring(1);
-}
-
 const pluginOptions = {
 	include: true,
 	exclude: true,
