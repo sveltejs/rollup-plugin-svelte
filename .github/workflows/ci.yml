@@ -34,6 +34,7 @@ jobs:
       run: npm ci
 
     - name: Linter
+      if: matrix.os != 'windows-latest'
       run: npm run lint
 
     - name: Test
