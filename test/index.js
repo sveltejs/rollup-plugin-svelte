@@ -71,7 +71,38 @@ test('creates a {code, map, dependencies} object, excluding the AST etc', async 
 	assert.equal(Object.keys(compiled), ['code', 'map', 'dependencies']);
 });
 
-test('generates a CSS sourcemap', async () => {
+test('does not generate a CSS sourcemap by default', async () => {
+	sander.rimrafSync('test/sourcemap-test/dist');
+	sander.mkdirSync('test/sourcemap-test/dist');
+
+	let css;
+
+	const bundle = await rollup({
+		input: 'test/sourcemap-test/src/main.js',
+		plugins: [
+			plugin({
+				css: value => {
+					css = value;
+					css.write('bundle.css');
+				}
+			})
+		],
+		external: ['svelte/internal']
+	});
+
+	await bundle.write({
+		format: 'iife',
+		sourcemap: false,
+		file: 'test/sourcemap-test/dist/bundle.js',
+		globals: { 'svelte/internal': 'svelte' },
+		assetFileNames: '[name][extname]',
+	});
+
+	assert.is(css.code.includes('sourceMappingURL'), false);
+	assert.is(css.map, false);
+});
+
+test('can generate a CSS sourcemap – a la Rollup config', async () => {
 	sander.rimrafSync('test/sourcemap-test/dist');
 	sander.mkdirSync('test/sourcemap-test/dist');
 
@@ -92,8 +123,10 @@ test('generates a CSS sourcemap', async () => {
 
 	await bundle.write({
 		format: 'iife',
+		sourcemap: true,
 		file: 'test/sourcemap-test/dist/bundle.js',
-		globals: { 'svelte/internal': 'svelte' }
+		globals: { 'svelte/internal': 'svelte' },
+		assetFileNames: '[name][extname]',
 	});
 
 	const smc = await new SourceMapConsumer(css.map);
@@ -140,6 +173,71 @@ test('generates a CSS sourcemap', async () => {
 			name: null
 		}
 	);
+});
+
+test('respects `sourcemapExcludeSources` Rollup option', async () => {
+	sander.rimrafSync('test/sourcemap-test/dist');
+	sander.mkdirSync('test/sourcemap-test/dist');
+
+	let css;
+
+	const bundle = await rollup({
+		input: 'test/sourcemap-test/src/main.js',
+		plugins: [
+			plugin({
+				css: value => {
+					css = value;
+					css.write('test/sourcemap-test/dist/bundle.css');
+				}
+			})
+		],
+		external: ['svelte/internal']
+	});
+
+	await bundle.write({
+		format: 'iife',
+		sourcemap: true,
+		sourcemapExcludeSources: true,
+		file: 'test/sourcemap-test/dist/bundle.js',
+		globals: { 'svelte/internal': 'svelte' },
+		assetFileNames: '[name][extname]',
+	});
+
+	assert.ok(css.map);
+	assert.is(css.map.sources.length, 0);
+	assert.is(css.map.sourcesContent.length, 0);
+});
+
+test('produces readable sourcemap output when `dev` is truthy', async () => {
+	sander.rimrafSync('test/sourcemap-test/dist');
+	sander.mkdirSync('test/sourcemap-test/dist');
+
+	let css;
+
+	const bundle = await rollup({
+		input: 'test/sourcemap-test/src/main.js',
+		plugins: [
+			plugin({
+				dev: true,
+				css: value => {
+					css = value;
+					css.write('bundle.css');
+				}
+			})
+		],
+		external: ['svelte/internal']
+	});
+
+	await bundle.write({
+		format: 'iife',
+		sourcemap: true,
+		file: 'test/sourcemap-test/dist/bundle.js',
+		globals: { 'svelte/internal': 'svelte' },
+		assetFileNames: '[name].[ext]'
+	});
+
+	const content = fs.readFileSync('test/sourcemap-test/dist/bundle.css.map', 'utf-8');
+	assert.is(content.includes('\n'), true);
 });
 
 test('squelches CSS warnings if css: false', () => {
@@ -301,13 +399,101 @@ test('bundles CSS deterministically', async () => {
 	await bundle.write({
 		format: 'iife',
 		file: 'test/deterministic-css/dist/bundle.js',
-		globals: { 'svelte/internal': 'svelte' }
+		globals: { 'svelte/internal': 'svelte' },
+		assetFileNames: '[name].[ext]',
+		sourcemap: true,
 	});
 
 	assert.fixture(
 		fs.readFileSync('test/deterministic-css/dist/bundle.css', 'utf-8'),
 		fs.readFileSync('test/deterministic-css/expected/bundle.css', 'utf-8')
 	);
+});
+
+test('respects `assetFileNames` Rollup format', async () => {
+	sander.rimrafSync('test/deterministic-css/dist');
+	sander.mkdirSync('test/deterministic-css/dist');
+
+	let css;
+
+	const bundle = await rollup({
+		input: 'test/deterministic-css/src/main.js',
+		plugins: [
+			{
+				resolveId: async (id) => {
+					if (/A\.svelte/.test(id)) {
+						await new Promise(f => setTimeout(f, 50));
+					}
+				}
+			},
+			plugin({
+				css: value => {
+					css = value;
+					css.write('bundle.css');
+				}
+			})
+		],
+		external: ['svelte/internal']
+	});
+
+	await bundle.write({
+		format: 'iife',
+		file: 'test/deterministic-css/dist/bundle.js',
+		globals: { 'svelte/internal': 'svelte' },
+	});
+
+	const files = await sander.readdir('test/deterministic-css/dist/assets');
+	assert.is(files.length, 1, 'produced 1 file output');
+	assert.match(files[0], /^bundle-(\w+)\.css$/);
+});
+
+test('ensures sourcemap and original files point to each other\'s hashed filenames', async () => {
+	sander.rimrafSync('test/deterministic-css/dist/assets');
+	sander.mkdirSync('test/deterministic-css/dist/assets');
+
+	let css;
+
+	const bundle = await rollup({
+		input: 'test/deterministic-css/src/main.js',
+		plugins: [
+			{
+				resolveId: async (id) => {
+					if (/A\.svelte/.test(id)) {
+						await new Promise(f => setTimeout(f, 50));
+					}
+				}
+			},
+			plugin({
+				css: value => {
+					css = value;
+					css.write('bundle.css');
+				}
+			})
+		],
+		external: ['svelte/internal']
+	});
+
+	await bundle.write({
+		format: 'iife',
+		file: 'test/deterministic-css/dist/bundle.js',
+		globals: { 'svelte/internal': 'svelte' },
+		sourcemap: true,
+	});
+
+	const assets = path.resolve('test/deterministic-css/dist/assets');
+
+	const files = await sander.readdir(assets);
+	assert.is(files.length, 2, 'produced 2 file outputs');
+
+	const [file, sourcemap] = files;
+	assert.match(file, /^bundle-(\w+)\.css$/);
+	assert.match(sourcemap, /^bundle-(\w+)\.css\.map$/);
+
+	const data1 = fs.readFileSync(path.join(assets, file), 'utf-8');
+	const data2 = fs.readFileSync(path.join(assets, sourcemap), 'utf-8');
+
+	assert.match(data1, sourcemap, 'file has `sourcemap` reference');
+	assert.match(data2, file, 'sourcemap has `file` reference');
 });
 
 test('handles filenames that happen to contain .svelte', async () => {
@@ -338,7 +524,9 @@ test('handles filenames that happen to contain .svelte', async () => {
 		await bundle.write({
 			format: 'iife',
 			file: 'test/filename-test/dist/bundle.js',
-			globals: { 'svelte/internal': 'svelte' }
+			globals: { 'svelte/internal': 'svelte' },
+			assetFileNames: '[name].[ext]',
+			sourcemap: true,
 		});
 	} catch (err) {
 		console.log(err);

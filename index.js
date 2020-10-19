@@ -70,12 +70,11 @@ function exists(file) {
 }
 
 class CssWriter {
-	constructor(code, filename, map, warn, toAsset) {
+	constructor(context, bundle, isDev, code, filename, map) {
 		this.code = code;
 		this.filename = filename;
-		this.emit = toAsset;
-		this.warn = warn;
-		this.map = {
+
+		this.map = map && {
 			version: 3,
 			file: null,
 			sources: map.sources,
@@ -83,21 +82,40 @@ class CssWriter {
 			names: [],
 			mappings: map.mappings
 		};
+
+		this.warn = context.warn;
+		this.emit = (name, source) => context.emitFile({
+			type: 'asset', name, source
+		});
+
+		this.sourcemap = (file, mapping) => {
+			const ref = this.emit(file, this.code);
+			const filename = context.getFileName(ref);
+
+			const mapfile = `${filename}.map`;
+			const toRelative = src => path.relative(path.dirname(file), src);
+
+			if (bundle[filename]) {
+				bundle[filename].source += `\n/*# sourceMappingURL=${mapfile} */`;
+			} else {
+				// This should not ever happen, but just in case...
+				return this.warn(`Missing "${filename}" ("${file}") in bundle; skipping sourcemap!`);
+			}
+
+			const source = JSON.stringify({
+				...mapping,
+				file: filename,
+				sources: mapping.sources.map(toRelative),
+			}, null, isDev ? 2 : 0);
+
+			// use `fileName` to prevent additional Rollup hashing
+			context.emitFile({ type: 'asset', fileName: mapfile, source });
+		}
 	}
 
-	write(dest = this.filename, map = true) {
-		const basename = path.basename(dest);
-
-		if (map) {
-			this.emit(dest, `${this.code}\n/*# sourceMappingURL=${basename}.map */`);
-			this.emit(`${dest}.map`, JSON.stringify({
-				version: 3,
-				file: basename,
-				sources: this.map.sources.map(source => path.relative(path.dirname(dest), source)),
-				sourcesContent: this.map.sourcesContent,
-				names: [],
-				mappings: this.map.mappings
-			}, null, 2));
+	write(dest = this.filename, map = !!this.map) {
+		if (map && this.map) {
+			this.sourcemap(dest, this.map);
 		} else {
 			this.emit(dest, this.code);
 		}
@@ -299,14 +317,14 @@ module.exports = function svelte(options = {}) {
 		/**
 		 * If css: true then outputs a single file with all CSS bundled together
 		 */
-		generateBundle(options, bundle) {
+		generateBundle(config, bundle) {
 			if (css) {
 				// TODO would be nice if there was a more idiomatic way to do this in Rollup
 				let result = '';
 
 				const mappings = [];
-				const sources = [];
 				const sourcesContent = [];
+				const sources = [];
 
 				const chunks = Array.from(cssLookup.keys()).sort().map(key => cssLookup.get(key));
 
@@ -314,17 +332,18 @@ module.exports = function svelte(options = {}) {
 					if (!chunk.code) continue;
 					result += chunk.code + '\n';
 
-					if (chunk.map) {
-						const i = sources.length;
-						sources.push(chunk.map.sources[0]);
-						sourcesContent.push(chunk.map.sourcesContent[0]);
+
+					if (config.sourcemap && chunk.map) {
+						const len = sources.length;
+						config.sourcemapExcludeSources || sources.push(chunk.map.sources[0]);
+						config.sourcemapExcludeSources || sourcesContent.push(chunk.map.sourcesContent[0]);
 
 						const decoded = decode(chunk.map.mappings);
 
-						if (i > 0) {
+						if (len > 0) {
 							decoded.forEach(line => {
 								line.forEach(segment => {
-									segment[1] = i;
+									segment[1] = len;
 								});
 							});
 						}
@@ -335,12 +354,10 @@ module.exports = function svelte(options = {}) {
 
 				const filename = Object.keys(bundle)[0].split('.').shift() + '.css';
 
-				const writer = new CssWriter(result, filename, {
+				const writer = new CssWriter(this, bundle, !!options.dev, result, filename, config.sourcemap && {
 					sources,
 					sourcesContent,
 					mappings: encode(mappings)
-				}, this.warn, (fileName, source) => {
-					this.emitFile({ type: 'asset', fileName, source });
 				});
 
 				css(writer);

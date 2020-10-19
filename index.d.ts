@@ -1,26 +1,17 @@
-import { Plugin, RollupWarning } from 'rollup';
+import { Plugin, RollupWarning, SourceMap as Mapping } from 'rollup';
 import { PreprocessorGroup } from 'svelte/types/compiler/preprocess';
 import { CompileOptions } from 'svelte/types/compiler/interfaces';
 
-interface Css {
-  code: any;
-  map: any;
-}
+type SourceMap = Omit<Mapping, 'toString' | 'toUrl'>;
 
 declare class CssWriter {
   code: string;
   filename: string;
-  map: {
-    version: number;
-    file?: boolean;
-    sources: string[];
-    sourcesContent: string[];
-    names: any[];
-    mappings: string;
-  };
+  map: false | SourceMap;
   warn: RollupWarning;
-  emit(fileName: string, source: string): void;
-  write(dest: string, map?: boolean): void;
+  write(file: string, map?: boolean): void;
+  emit(name: string, source: string): string;
+  sourcemap(file: string, sourcemap: SourceMap): void;
   toString(): string;
 }
 
@@ -59,6 +50,12 @@ interface Options extends CompileOptions {
   //     return transformStyles(content);
   //   }
   // },
+
+  /**
+   * Add extra code for development and debugging purposes.
+   * @default false
+   */
+  dev?: boolean;
 
   /**
    * Emit CSS as "files" for other plugins to process
