@@ -18,7 +18,7 @@
     },
     "extends": "eslint:recommended",
     "parserOptions": {
-        "ecmaVersion": 6,
+        "ecmaVersion": 10,
         "sourceType": "module"
     }
 }
