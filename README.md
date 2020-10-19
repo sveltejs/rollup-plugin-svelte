@@ -1,4 +1,4 @@
-# rollup-plugin-svelte
+# rollup-plugin-svelte [![CI](https://github.com/sveltejs/rollup-plugin-svelte/workflows/CI/badge.svg)](https://github.com/sveltejs/rollup-plugin-svelte/actions)
 
 Compile Svelte components.
 
@@ -36,7 +36,7 @@ export default {
       // By default, the client-side compiler is used. You
       // can also use the server-side rendering compiler
       generate: 'ssr',
-      
+
       // ensure that extra attributes are added to head
       // elements for hydration (used with generate: 'ssr')
       hydratable: true,

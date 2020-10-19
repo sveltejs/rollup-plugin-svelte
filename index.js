@@ -110,7 +110,7 @@ class CssWriter {
 
 			// use `fileName` to prevent additional Rollup hashing
 			context.emitFile({ type: 'asset', fileName: mapfile, source });
-		}
+		};
 	}
 
 	write(dest = this.filename, map = !!this.map) {
