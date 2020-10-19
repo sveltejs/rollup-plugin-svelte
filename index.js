@@ -226,9 +226,10 @@ module.exports = function svelte(options = {}) {
 			if (!filter(id)) return null;
 
 			const extension = path.extname(id);
-
 			if (!~extensions.indexOf(extension)) return null;
-
+			
+			const filename = path.relative(process.cwd(), id);
+			
 			const dependencies = [];
 			let preprocessPromise;
 			if (options.preprocess) {
@@ -248,12 +249,10 @@ module.exports = function svelte(options = {}) {
 					}
 					preprocessPromise = preprocess(
 						code,
-						Object.assign(preprocessOptions, { filename: id })
+						Object.assign(preprocessOptions, { filename })
 					).then(code => code.toString());
 				} else {
-					preprocessPromise = preprocess(code, options.preprocess, {
-						filename: id
-					}).then(processed => {
+					preprocessPromise = preprocess(code, options.preprocess, { filename }).then(processed => {
 						if (processed.dependencies) {
 							dependencies.push(...processed.dependencies);
 						}
@@ -275,9 +274,7 @@ module.exports = function svelte(options = {}) {
 
 				const compiled = compile(
 					code,
-					Object.assign(base_options, fixed_options, {
-						filename: id
-					}, major_version >= 3 ? null : {
+					Object.assign(base_options, fixed_options, { filename }, major_version >= 3 ? null : {
 						name: capitalize(sanitize(id))
 					})
 				);
@@ -316,6 +313,7 @@ module.exports = function svelte(options = {}) {
 				return compiled.js;
 			});
 		},
+		
 		/**
 		 * If css: true then outputs a single file with all CSS bundled together
 		 */
