@@ -103,7 +103,7 @@ class CssWriter {
 module.exports = function svelte(options = {}) {
 	const filter = createFilter(options.include, options.exclude);
 
-	const extensions = options.extensions || ['.html', '.svelte'];
+	const extensions = options.extensions || ['.svelte'];
 
 	const fixed_options = {};
 
