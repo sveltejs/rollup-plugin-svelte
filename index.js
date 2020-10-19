@@ -97,7 +97,7 @@ class CssWriter {
 
 			if (bundle[filename]) {
 				// use `basename` because files are siblings
-				// aka, avoid `sourceMappingURL=assets/bundle.css` from `assets/bundle.css`
+				// aka, avoid `sourceMappingURL=assets/bundle.css.map` from `assets/bundle.css`
 				bundle[filename].source += `\n/*# sourceMappingURL=${path.basename(mapfile)} */`;
 			} else {
 				// This should not ever happen, but just in case...
