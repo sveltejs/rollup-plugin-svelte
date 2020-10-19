@@ -26,7 +26,7 @@ declare class CssWriter {
 interface Svelte {
   compile: any;
   preprocess: any;
-  major_version: number;
+  version: number | string;
 }
 
 interface Options {
