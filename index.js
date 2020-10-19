@@ -1,5 +1,5 @@
-const fs = require('fs');
 const path = require('path');
+const { existsSync } = require('fs');
 const relative = require('require-relative');
 const { version } = require('svelte/package.json');
 const { createFilter } = require('rollup-pluginutils');
@@ -55,16 +55,6 @@ function tryResolve(pkg, importer) {
 			pkg_export_errors.add(pkg.replace(/\/package.json$/, ''));
 			return null;
 		}
-		throw err;
-	}
-}
-
-function exists(file) {
-	try {
-		fs.statSync(file);
-		return true;
-	} catch (err) {
-		if (err.code === 'ENOENT') return false;
 		throw err;
 	}
 }
@@ -193,7 +183,7 @@ module.exports = function svelte(options = {}) {
 				if (pkg['svelte.root']) {
 					// TODO remove this. it's weird and unnecessary
 					const sub = path.resolve(dir, pkg['svelte.root'], parts.join('/'));
-					if (exists(sub)) return sub;
+					if (existsSync(sub)) return sub;
 				}
 			}
 		},
