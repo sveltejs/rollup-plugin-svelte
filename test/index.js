@@ -562,7 +562,7 @@ test('ignores ".html" extension by default', async () => {
 	} catch (err) {
 		assert.is(err.code, 'PARSE_ERROR');
 		assert.match(err.message, 'Note that you need plugins to import files that are not JavaScript');
-		assert.match(err.loc.file, 'test/node_modules/widget/src/Widget.html');
+		assert.match(err.loc.file, /widget[\\\/]+src[\\\/]+Widget.html$/);
 	}
 });
 
