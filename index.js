@@ -6,12 +6,11 @@ const { encode, decode } = require('sourcemap-codec');
 
 const pkg_export_errors = new Set();
 
-// future: breaks on v10.0
-const toMajor = str => Number(str[0]);
+const to_major = str => Number(str[0]);
 
 function autoload() {
 	const pkg = require('svelte/package.json');
-	const version = toMajor(pkg.version);
+	const version = to_major(pkg.version);
 
 	const { compile, preprocess } = require(version >= 3 ? 'svelte/compiler.js' : 'svelte');
 	return { compile, preprocess, version };
@@ -106,7 +105,7 @@ class CssWriter {
 
 module.exports = function (options = {}) {
 	let { compile, preprocess, version } = options.svelte || autoload();
-	if (typeof version === 'string') version = toMajor(version);
+	if (typeof version === 'string') version = to_major(version);
 
 	const filter = createFilter(options.include, options.exclude);
 	const extensions = options.extensions || ['.html', '.svelte'];
