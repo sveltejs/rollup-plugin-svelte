@@ -1,5 +1,4 @@
 const path = require('path');
-const { existsSync } = require('fs');
 const relative = require('require-relative');
 const { createFilter } = require('rollup-pluginutils');
 const { compile, preprocess } = require('svelte/compiler');
@@ -138,15 +137,9 @@ module.exports = function (options = {}) {
 				throw err;
 			}
 
-			if (parts.length === 0) {
-				// use pkg.svelte
-				if (pkg.svelte) {
-					return path.resolve(dir, pkg.svelte);
-				}
-			} else if (pkg['svelte.root']) {
-				// TODO remove this. it's weird and unnecessary
-				const sub = path.resolve(dir, pkg['svelte.root'], parts.join('/'));
-				if (existsSync(sub)) return sub;
+			// use pkg.svelte
+			if (parts.length === 0 && pkg.svelte) {
+				return path.resolve(dir, pkg.svelte);
 			}
 		},
 

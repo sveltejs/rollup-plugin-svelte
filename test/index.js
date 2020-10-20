@@ -20,14 +20,6 @@ test('resolves using pkg.svelte', () => {
 	);
 });
 
-test('resolves using pkg.svelte.root', () => {
-	const { resolveId } = plugin();
-	assert.is(
-		resolveId('widgets/Foo.html', path.resolve('test/foo/main.js')),
-		path.resolve('test/node_modules/widgets/src/Foo.html')
-	);
-});
-
 test('ignores built-in modules', () => {
 	const { resolveId } = plugin();
 	assert.ok(
