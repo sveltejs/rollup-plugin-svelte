@@ -9,9 +9,7 @@ const pkg_export_errors = new Set();
 
 const plugin_options = new Set([
 	'include', 'exclude', 'extensions',
-	'emitCss', 'preprocess',
-	// legacy — remove in future?
-	'onwarn', 'shared'
+	'emitCss', 'preprocess', 'onwarn',
 ]);
 
 function to_entry_css(bundle) {
