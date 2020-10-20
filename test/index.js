@@ -70,7 +70,7 @@ test('supports component name assignment', async () => {
 
 test('creates a {code, map, dependencies} object, excluding the AST etc', async () => {
 	const { transform } = plugin();
-	const compiled = await transform('', 'test.html')
+	const compiled = await transform('', 'test.html');
 	assert.equal(Object.keys(compiled), ['code', 'map', 'dependencies']);
 });
 
