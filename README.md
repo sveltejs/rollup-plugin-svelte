@@ -26,7 +26,7 @@ export default {
   },
   plugins: [
     svelte({
-      // By default, all .svelte and .html files are compiled
+      // By default, all ".svelte" files are compiled
       extensions: ['.my-custom-extension'],
 
       // You can restrict which files are compiled

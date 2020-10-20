@@ -80,8 +80,8 @@ class CssWriter {
 
 /** @returns {import('rollup').Plugin} */
 module.exports = function (options = {}) {
+	const extensions = options.extensions || ['.svelte'];
 	const filter = createFilter(options.include, options.exclude);
-	const extensions = options.extensions || ['.html', '.svelte'];
 
 	/** @type {import('svelte/types/compiler/interfaces').ModuleFormat} */
 	const format = 'esm', config = { format };

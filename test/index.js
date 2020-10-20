@@ -16,7 +16,7 @@ test('resolves using pkg.svelte', () => {
 	const { resolveId } = plugin();
 	assert.is(
 		resolveId('widget', path.resolve('test/foo/main.js')),
-		path.resolve('test/node_modules/widget/src/Widget.html')
+		path.resolve('test/node_modules/widget/src/Widget.svelte')
 	);
 });
 
@@ -62,7 +62,7 @@ test('supports component name assignment', async () => {
 
 test('creates a {code, map, dependencies} object, excluding the AST etc', async () => {
 	const { transform } = plugin();
-	const compiled = await transform('', 'test.html');
+	const compiled = await transform('', 'test.svelte');
 	assert.equal(Object.keys(compiled), ['code', 'map', 'dependencies']);
 });
 
@@ -141,7 +141,7 @@ test('can generate a CSS sourcemap – a la Rollup config', async () => {
 			name: originalFooLoc.name
 		},
 		{
-			source: 'Foo.html',
+			source: 'Foo.svelte',
 			line: 5,
 			column: 1,
 			name: null
@@ -162,7 +162,7 @@ test('can generate a CSS sourcemap – a la Rollup config', async () => {
 			name: originalBarLoc.name
 		},
 		{
-			source: 'Bar.html',
+			source: 'Bar.svelte',
 			line: 4,
 			column: 1,
 			name: null
@@ -201,7 +201,7 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 	assert.ok(css.map);
 	assert.is(css.map.sources.length, 2);
 	assert.is(css.map.sourcesContent, null);
-	assert.equal(css.map.sources, ['Bar.html', 'Foo.html']);
+	assert.equal(css.map.sources, ['Bar.svelte', 'Foo.svelte']);
 });
 
 test('produces readable sourcemap output when `dev` is truthy', async () => {
@@ -252,7 +252,7 @@ test('squelches CSS warnings if css: false', () => {
 				color: red;
 			}
 		</style>
-	`, 'test.html');
+	`, 'test.svelte');
 });
 
 test('preprocesses components', async () => {
@@ -274,10 +274,10 @@ test('preprocesses components', async () => {
 		<h1>Hello __REPLACEME__!</h1>
 		<h2>file: __FILENAME__</h2>
 		<style>h1 { color: red; }</style>
-	`, 'test.html');
+	`, 'test.svelte');
 
 	assert.is(code.indexOf('__REPLACEME__'), -1, 'content not modified');
-	assert.is.not(code.indexOf('file: test.html'), -1, 'filename not replaced');
+	assert.is.not(code.indexOf('file: test.svelte'), -1, 'filename not replaced');
 	assert.equal(dependencies, ['foo']);
 });
 
@@ -292,7 +292,7 @@ test('emits a CSS file', async () => {
 		h1 {
 			color: red;
 		}
-	</style>`, `path/to/Input.html`);
+	</style>`, `path/to/Input.svelte`);
 
 	assert.ok(transformed.code.indexOf(`import "path/to/Input.css";`) !== -1);
 
@@ -305,7 +305,7 @@ test('emits a CSS file', async () => {
 		column: 0
 	});
 
-	assert.is(loc.source, 'Input.html');
+	assert.is(loc.source, 'Input.svelte');
 	assert.is(loc.line, 4);
 	assert.is(loc.column, 2);
 });
@@ -321,7 +321,7 @@ test('properly escapes CSS paths', async () => {
 		h1 {
 			color: red;
 		}
-	</style>`, `path\\t'o\\Input.html`);
+	</style>`, `path\\t'o\\Input.svelte`);
 
 	assert.ok(transformed.code.indexOf(`import "path\\\\t'o\\\\Input.css";`) !== -1);
 
@@ -334,7 +334,7 @@ test('properly escapes CSS paths', async () => {
 		column: 0
 	});
 
-	assert.is(loc.source, 'Input.html');
+	assert.is(loc.source, 'Input.svelte');
 	assert.is(loc.line, 4);
 	assert.is(loc.column, 2);
 });
@@ -360,7 +360,7 @@ test('intercepts warnings', async () => {
 	}, `
 		<h1 aria-hidden>Hello world!</h1>
 		<marquee>wheee!!!</marquee>
-	`, 'test.html');
+	`, 'test.svelte');
 
 	assert.equal(warnings.map(w => w.code), ['a11y-hidden', 'a11y-distracting-elements']);
 	assert.equal(handled.map(w => w.code), ['a11y-hidden']);
@@ -533,6 +533,69 @@ test('handles filenames that happen to contain .svelte', async () => {
 		normalize('test/filename-test/dist/bundle.css'),
 		normalize('test/filename-test/expected/bundle.css')
 	);
+});
+
+test('ignores ".html" extension by default', async () => {
+	sander.rimrafSync('test/node_modules/widget/dist');
+	sander.mkdirSync('test/node_modules/widget/dist');
+
+	try {
+		const bundle = await rollup({
+			input: 'test/node_modules/widget/index.js',
+			external: ['svelte/internal'],
+			plugins: [
+				plugin({
+					css: false
+				})
+			]
+		});
+
+		await bundle.write({
+			format: 'iife',
+			file: 'test/node_modules/widget/dist/bundle.js',
+			globals: { 'svelte/internal': 'svelte' },
+			assetFileNames: '[name].[ext]',
+			sourcemap: true,
+		});
+
+		assert.unreachable('should have thrown PARSE_ERROR');
+	} catch (err) {
+		assert.is(err.code, 'PARSE_ERROR');
+		assert.match(err.message, 'Note that you need plugins to import files that are not JavaScript');
+		assert.match(err.loc.file, 'test/node_modules/widget/src/Widget.html');
+	}
+});
+
+test('allows ".html" extension if configured', async () => {
+	sander.rimrafSync('test/node_modules/widget/dist');
+	sander.mkdirSync('test/node_modules/widget/dist');
+
+	try {
+		const bundle = await rollup({
+			input: 'test/node_modules/widget/index.js',
+			external: ['svelte/internal'],
+			plugins: [
+				plugin({
+					extensions: ['.html'],
+					css: false
+				})
+			]
+		});
+
+		await bundle.write({
+			format: 'iife',
+			file: 'test/node_modules/widget/dist/bundle.js',
+			globals: { 'svelte/internal': 'svelte' },
+			assetFileNames: '[name].[ext]',
+			sourcemap: true,
+		});
+	} catch (err) {
+		console.log(err);
+		throw err;
+	}
+
+	assert.ok(fs.existsSync('test/node_modules/widget/dist/bundle.js'));
+	assert.ok(fs.existsSync('test/node_modules/widget/dist/bundle.js.map'));
 });
 
 test.run();
