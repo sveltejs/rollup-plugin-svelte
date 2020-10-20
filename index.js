@@ -220,7 +220,7 @@ module.exports = function (options = {}) {
 
 			let result = '';
 			const sources = [];
-			const sourcesContent = [];
+			const sourcesContent = config.sourcemapExcludeSources ? null : [];
 			const mappings = [];
 
 			[...css_cache.keys()].sort().forEach(file => {
@@ -231,8 +231,8 @@ module.exports = function (options = {}) {
 
 				if (config.sourcemap && chunk.map) {
 					const len = sources.length;
-					config.sourcemapExcludeSources || sources.push(chunk.map.sources[0]);
-					config.sourcemapExcludeSources || sourcesContent.push(chunk.map.sourcesContent[0]);
+					sources.push(chunk.map.sources[0]);
+					if (sourcesContent) sourcesContent.push(chunk.map.sourcesContent[0]);
 
 					const decoded = decode(chunk.map.mappings);
 
