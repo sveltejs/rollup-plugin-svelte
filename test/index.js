@@ -9,6 +9,9 @@ const sander = require('sander');
 
 const plugin = require('..');
 
+// TODO(lukeed) do this within uvu?
+const normalize = file => fs.readFileSync(file, 'utf8').replace(/\r?\n/g, '\n');
+
 test('resolves using pkg.svelte', () => {
 	const { resolveId } = plugin();
 	assert.is(
@@ -98,7 +101,7 @@ test('does not generate a CSS sourcemap by default', async () => {
 		assetFileNames: '[name][extname]',
 	});
 
-	assert.is(css.code.includes('sourceMappingURL'), false);
+	assert.not.match(css.code, 'sourceMappingURL');
 	assert.is(css.map, false);
 });
 
@@ -114,7 +117,7 @@ test('can generate a CSS sourcemap – a la Rollup config', async () => {
 			plugin({
 				css: value => {
 					css = value;
-					css.write('test/sourcemap-test/dist/bundle.css');
+					css.write('bundle.css');
 				}
 			})
 		],
@@ -187,7 +190,7 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 			plugin({
 				css: value => {
 					css = value;
-					css.write('test/sourcemap-test/dist/bundle.css');
+					css.write('bundle.css');
 				}
 			})
 		],
@@ -204,8 +207,9 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 	});
 
 	assert.ok(css.map);
-	assert.is(css.map.sources.length, 0);
-	assert.is(css.map.sourcesContent.length, 0);
+	assert.is(css.map.sources.length, 2);
+	assert.is(css.map.sourcesContent, null);
+	assert.equal(css.map.sources, ['Bar.html', 'Foo.html']);
 });
 
 test('produces readable sourcemap output when `dev` is truthy', async () => {
@@ -405,8 +409,8 @@ test('bundles CSS deterministically', async () => {
 	});
 
 	assert.fixture(
-		fs.readFileSync('test/deterministic-css/dist/bundle.css', 'utf-8'),
-		fs.readFileSync('test/deterministic-css/expected/bundle.css', 'utf-8')
+		normalize('test/deterministic-css/dist/bundle.css'),
+		normalize('test/deterministic-css/expected/bundle.css')
 	);
 });
 
@@ -492,8 +496,8 @@ test('ensures sourcemap and original files point to each other\'s hashed filenam
 	const data1 = fs.readFileSync(path.join(assets, file), 'utf-8');
 	const data2 = fs.readFileSync(path.join(assets, sourcemap), 'utf-8');
 
-	assert.match(data1, sourcemap, 'file has `sourcemap` reference');
-	assert.match(data2, file, 'sourcemap has `file` reference');
+	assert.match(data1, `sourceMappingURL=${sourcemap}`, 'file has `sourcemap` reference');
+	assert.match(data2, `"file":"${file}"`, 'sourcemap has `file` reference');
 });
 
 test('handles filenames that happen to contain .svelte', async () => {
@@ -534,8 +538,8 @@ test('handles filenames that happen to contain .svelte', async () => {
 	}
 
 	assert.fixture(
-		fs.readFileSync('test/filename-test/dist/bundle.css', 'utf-8'),
-		fs.readFileSync('test/filename-test/expected/bundle.css', 'utf-8')
+		normalize('test/filename-test/dist/bundle.css'),
+		normalize('test/filename-test/expected/bundle.css')
 	);
 });
 

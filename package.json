@@ -1,39 +1,28 @@
 {
-  "name": "rollup-plugin-svelte",
   "version": "6.0.2",
+  "name": "rollup-plugin-svelte",
   "description": "Compile Svelte components with Rollup",
-  "main": "index.js",
+  "repository": "sveltejs/rollup-plugin-svelte",
   "types": "index.d.ts",
+  "main": "index.js",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sveltejs/rollup-plugin-svelte/issues"
+  },
   "files": [
     "index.js",
     "index.d.ts",
     "README.md",
     "LICENSE"
   ],
+  "author": "Rich Harris",
   "scripts": {
     "lint": "eslint index.js",
     "test": "node test/index.js",
     "prepublishOnly": "npm run lint && npm test"
   },
-  "repository": "sveltejs/rollup-plugin-svelte",
-  "keywords": [
-    "svelte",
-    "rollup"
-  ],
-  "author": "Rich Harris",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/sveltejs/rollup-plugin-svelte/issues"
-  },
-  "homepage": "https://github.com/sveltejs/rollup-plugin-svelte#README",
-  "devDependencies": {
-    "eslint": "^6.8.0",
-    "locate-character": "^2.0.5",
-    "rollup": "^2.30.0",
-    "sander": "^0.6.0",
-    "source-map": "^0.7.3",
-    "svelte": "^3.24.0",
-    "uvu": "^0.3.1"
+  "engines": {
+    "node": ">=10"
   },
   "dependencies": {
     "require-relative": "^0.8.7",
@@ -44,7 +33,17 @@
     "svelte": ">=3.5.0",
     "rollup": ">=2.0.0"
   },
-  "engines": {
-    "node": ">=10"
-  }
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "locate-character": "^2.0.5",
+    "rollup": "^2.30.0",
+    "sander": "^0.6.0",
+    "source-map": "^0.7.3",
+    "svelte": "^3.24.0",
+    "uvu": "^0.3.1"
+  },
+  "keywords": [
+    "svelte",
+    "rollup"
+  ]
 }

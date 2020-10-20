@@ -1,5 +1,5 @@
-const fs = require('fs');
 const path = require('path');
+const { existsSync } = require('fs');
 const relative = require('require-relative');
 const { version } = require('svelte/package.json');
 const { createFilter } = require('rollup-pluginutils');
@@ -59,16 +59,6 @@ function tryResolve(pkg, importer) {
 	}
 }
 
-function exists(file) {
-	try {
-		fs.statSync(file);
-		return true;
-	} catch (err) {
-		if (err.code === 'ENOENT') return false;
-		throw err;
-	}
-}
-
 class CssWriter {
 	constructor(context, bundle, isDev, code, filename, map) {
 		this.code = code;
@@ -90,13 +80,15 @@ class CssWriter {
 
 		this.sourcemap = (file, mapping) => {
 			const ref = this.emit(file, this.code);
-			const filename = context.getFileName(ref);
+			const filename = context.getFileName(ref); // may be "assets/[name][ext]"
 
-			const mapfile = `${filename}.map`;
+			const mapfile = `${filename}.map`; // may be "assets/[name][ext]"
 			const toRelative = src => path.relative(path.dirname(file), src);
 
 			if (bundle[filename]) {
-				bundle[filename].source += `\n/*# sourceMappingURL=${mapfile} */`;
+				// use `basename` because files are siblings
+				// aka, avoid `sourceMappingURL=assets/bundle.css.map` from `assets/bundle.css`
+				bundle[filename].source += `\n/*# sourceMappingURL=${path.basename(mapfile)} */`;
 			} else {
 				// This should not ever happen, but just in case...
 				return this.warn(`Missing "${filename}" ("${file}") in bundle; skipping sourcemap!`);
@@ -104,13 +96,13 @@ class CssWriter {
 
 			const source = JSON.stringify({
 				...mapping,
-				file: filename,
+				file: path.basename(filename), //=> sibling file
 				sources: mapping.sources.map(toRelative),
 			}, null, isDev ? 2 : 0);
 
 			// use `fileName` to prevent additional Rollup hashing
 			context.emitFile({ type: 'asset', fileName: mapfile, source });
-		}
+		};
 	}
 
 	write(dest = this.filename, map = !!this.map) {
@@ -211,7 +203,7 @@ module.exports = function svelte(options = {}) {
 				if (pkg['svelte.root']) {
 					// TODO remove this. it's weird and unnecessary
 					const sub = path.resolve(dir, pkg['svelte.root'], parts.join('/'));
-					if (exists(sub)) return sub;
+					if (existsSync(sub)) return sub;
 				}
 			}
 		},
@@ -224,8 +216,9 @@ module.exports = function svelte(options = {}) {
 			if (!filter(id)) return null;
 
 			const extension = path.extname(id);
-
 			if (!~extensions.indexOf(extension)) return null;
+
+			const filename = path.relative(process.cwd(), id);
 
 			const dependencies = [];
 			let preprocessPromise;
@@ -246,12 +239,10 @@ module.exports = function svelte(options = {}) {
 					}
 					preprocessPromise = preprocess(
 						code,
-						Object.assign(preprocessOptions, { filename: id })
+						Object.assign(preprocessOptions, { filename })
 					).then(code => code.toString());
 				} else {
-					preprocessPromise = preprocess(code, options.preprocess, {
-						filename: id
-					}).then(processed => {
+					preprocessPromise = preprocess(code, options.preprocess, { filename }).then(processed => {
 						if (processed.dependencies) {
 							dependencies.push(...processed.dependencies);
 						}
@@ -273,11 +264,9 @@ module.exports = function svelte(options = {}) {
 
 				const compiled = compile(
 					code,
-					Object.assign(base_options, fixed_options, {
-						filename: id
-					}, major_version >= 3 ? null : {
+					Object.assign(base_options, fixed_options, { filename }, major_version >= 3 ? null : {
 						name: capitalize(sanitize(id)),
-						sourceMap: code.getMap ? code.getMap() : undefined
+            sourceMap: code.getMap ? code.getMap() : undefined
 					})
 				);
 
@@ -315,6 +304,7 @@ module.exports = function svelte(options = {}) {
 				return compiled.js;
 			});
 		},
+
 		/**
 		 * If css: true then outputs a single file with all CSS bundled together
 		 */
@@ -323,9 +313,9 @@ module.exports = function svelte(options = {}) {
 				// TODO would be nice if there was a more idiomatic way to do this in Rollup
 				let result = '';
 
-				const mappings = [];
-				const sourcesContent = [];
 				const sources = [];
+				const mappings = [];
+				const sourcesContent = config.sourcemapExcludeSources ? null : [];
 
 				const chunks = Array.from(cssLookup.keys()).sort().map(key => cssLookup.get(key));
 
@@ -335,8 +325,8 @@ module.exports = function svelte(options = {}) {
 
 					if (config.sourcemap && chunk.map) {
 						const len = sources.length;
-						config.sourcemapExcludeSources || sources.push(...chunk.map.sources);
-						config.sourcemapExcludeSources || sourcesContent.push(...chunk.map.sourcesContent);
+						sources.push(...chunk.map.sources);
+						if (sourcesContent) sourcesContent.push(...chunk.map.sourcesContent);
 
 						const decoded = decode(chunk.map.mappings);
 
