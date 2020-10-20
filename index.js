@@ -227,9 +227,9 @@ module.exports = function svelte(options = {}) {
 
 			const extension = path.extname(id);
 			if (!~extensions.indexOf(extension)) return null;
-			
+
 			const filename = path.relative(process.cwd(), id);
-			
+
 			const dependencies = [];
 			let preprocessPromise;
 			if (options.preprocess) {
@@ -313,7 +313,7 @@ module.exports = function svelte(options = {}) {
 				return compiled.js;
 			});
 		},
-		
+
 		/**
 		 * If css: true then outputs a single file with all CSS bundled together
 		 */
@@ -321,8 +321,8 @@ module.exports = function svelte(options = {}) {
 			if (css) {
 				// TODO would be nice if there was a more idiomatic way to do this in Rollup
 				let result = '';
-        
-        const sources = [];
+
+				const sources = [];
 				const mappings = [];
 				const sourcesContent = config.sourcemapExcludeSources ? null : [];
 
