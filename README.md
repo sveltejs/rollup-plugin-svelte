@@ -77,7 +77,12 @@ export default {
 
         // let Rollup handle all other warnings normally
         handler(warning);
-      }
+      },
+
+      // Pass in a specific version of Svelte, e.g. if you use
+      // npm aliases to install multiple versions you can import
+      // a specific version. Assume "svelte1" is `svelte@1.x` alias.
+      svelte: require('svelte1')
     })
   ]
 }

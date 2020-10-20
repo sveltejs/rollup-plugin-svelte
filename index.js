@@ -1,16 +1,20 @@
 const path = require('path');
 const { existsSync } = require('fs');
 const relative = require('require-relative');
-const { version } = require('svelte/package.json');
 const { createFilter } = require('rollup-pluginutils');
 const { encode, decode } = require('sourcemap-codec');
 
-const major_version = +version[0];
 const pkg_export_errors = new Set();
 
-const { compile, preprocess } = major_version >= 3
-	? require('svelte/compiler.js')
-	: require('svelte');
+const to_major = str => Number(str[0]);
+
+function autoload() {
+	const pkg = require('svelte/package.json');
+	const version = to_major(pkg.version);
+
+	const { compile, preprocess } = require(version >= 3 ? 'svelte/compiler.js' : 'svelte');
+	return { compile, preprocess, version };
+}
 
 function sanitize(input) {
 	return path
@@ -99,9 +103,11 @@ class CssWriter {
 	}
 }
 
-module.exports = function svelte(options = {}) {
-	const filter = createFilter(options.include, options.exclude);
+module.exports = function (options = {}) {
+	let { compile, preprocess, version } = options.svelte || autoload();
+	if (typeof version === 'string') version = to_major(version);
 
+	const filter = createFilter(options.include, options.exclude);
 	const extensions = options.extensions || ['.html', '.svelte'];
 
 	const fixed_options = {};
@@ -112,7 +118,7 @@ module.exports = function svelte(options = {}) {
 		fixed_options[key] = options[key];
 	});
 
-	if (major_version >= 3) {
+	if (version >= 3) {
 		fixed_options.format = 'esm';
 		fixed_options.sveltePath = options.sveltePath || 'svelte';
 	} else {
@@ -202,7 +208,7 @@ module.exports = function svelte(options = {}) {
 			const dependencies = [];
 			let preprocessPromise;
 			if (options.preprocess) {
-				if (major_version < 3) {
+				if (version < 3) {
 					const preprocessOptions = {};
 					for (const key in options.preprocess) {
 						preprocessOptions[key] = (...args) => {
@@ -237,7 +243,7 @@ module.exports = function svelte(options = {}) {
 			return preprocessPromise.then(code => {
 				let warnings = [];
 
-				const base_options = major_version < 3
+				const base_options = version < 3
 					? {
 						onwarn: warning => warnings.push(warning)
 					}
@@ -247,12 +253,12 @@ module.exports = function svelte(options = {}) {
 					code,
 					Object.assign(base_options, fixed_options, {
 						filename: id
-					}, major_version >= 3 ? null : {
+					}, version >= 3 ? null : {
 						name: capitalize(sanitize(id))
 					})
 				);
 
-				if (major_version >= 3) warnings = compiled.warnings || compiled.stats.warnings;
+				if (version >= 3) warnings = compiled.warnings || compiled.stats.warnings;
 
 				warnings.forEach(warning => {
 					if ((!options.css && !options.emitCss) && warning.code === 'css-unused-selector') return;
