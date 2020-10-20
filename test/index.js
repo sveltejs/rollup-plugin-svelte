@@ -117,7 +117,7 @@ test('can generate a CSS sourcemap – a la Rollup config', async () => {
 			plugin({
 				css: value => {
 					css = value;
-					css.write('test/sourcemap-test/dist/bundle.css');
+					css.write('bundle.css');
 				}
 			})
 		],
@@ -190,7 +190,7 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 			plugin({
 				css: value => {
 					css = value;
-					css.write('test/sourcemap-test/dist/bundle.css');
+					css.write('bundle.css');
 				}
 			})
 		],
@@ -207,8 +207,9 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 	});
 
 	assert.ok(css.map);
-	assert.is(css.map.sources.length, 0);
-	assert.is(css.map.sourcesContent.length, 0);
+	assert.is(css.map.sources.length, 2);
+	assert.is(css.map.sourcesContent, null);
+	assert.equal(css.map.sources, ['Bar.html', 'Foo.html']);
 });
 
 test('produces readable sourcemap output when `dev` is truthy', async () => {
