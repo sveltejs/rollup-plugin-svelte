@@ -312,9 +312,9 @@ module.exports = function svelte(options = {}) {
 				// TODO would be nice if there was a more idiomatic way to do this in Rollup
 				let result = '';
 
-				const mappings = [];
-				const sourcesContent = [];
 				const sources = [];
+				const mappings = [];
+				const sourcesContent = config.sourcemapExcludeSources ? null : [];
 
 				const chunks = Array.from(cssLookup.keys()).sort().map(key => cssLookup.get(key));
 
@@ -322,11 +322,10 @@ module.exports = function svelte(options = {}) {
 					if (!chunk.code) continue;
 					result += chunk.code + '\n';
 
-
 					if (config.sourcemap && chunk.map) {
 						const len = sources.length;
-						config.sourcemapExcludeSources || sources.push(chunk.map.sources[0]);
-						config.sourcemapExcludeSources || sourcesContent.push(chunk.map.sourcesContent[0]);
+						sources.push(chunk.map.sources[0]);
+						if (sourcesContent) sourcesContent.push(chunk.map.sourcesContent[0]);
 
 						const decoded = decode(chunk.map.mappings);
 
