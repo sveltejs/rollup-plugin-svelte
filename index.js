@@ -266,7 +266,7 @@ module.exports = function svelte(options = {}) {
 					code,
 					Object.assign(base_options, fixed_options, { filename }, major_version >= 3 ? null : {
 						name: capitalize(sanitize(id)),
-            sourceMap: code.getMap ? code.getMap() : undefined
+						sourceMap: code.getMap ? code.getMap() : undefined
 					})
 				);
 
