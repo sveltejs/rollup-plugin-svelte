@@ -8,5 +8,5 @@
 </style>
 
 <script>
-	import Bar from './Bar.html';
+	import Bar from './Bar.svelte';
 </script>

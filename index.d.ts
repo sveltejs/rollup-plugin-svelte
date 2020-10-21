@@ -19,8 +19,8 @@ type CssEmitter = (css: CssWriter) => any;
 
 interface Options extends CompileOptions {
   /**
-   * By default, all .svelte and .html files are compiled
-   * @default ['.html', '.svelte']
+   * By default, all ".svelte" files are compiled
+   * @default ['.svelte']
    */
   extensions?: string[];
 
