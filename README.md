@@ -56,18 +56,6 @@ export default {
       // your components to custom elements (aka web elements)
       customElement: false,
 
-      // Extract CSS into a single bundled file (recommended).
-      // See note below
-      css: function (css) {
-        console.log(css.code); // the concatenated CSS
-        console.log(css.map); // a sourcemap
-
-        // creates `main.css` and `main.css.map`
-        // using a falsy name will default to the bundle name
-        // — pass `false` as the second argument if you don't want the sourcemap
-        css.write('main.css');
-      },
-
       // Warnings are normally passed straight to Rollup. You can
       // optionally handle them here, for example to squelch
       // warnings with a particular code
@@ -120,11 +108,9 @@ and so on. Then, in `package.json`, set the `svelte` property to point to this `
 
 If your Svelte components contain `<style>` tags, by default the compiler will add JavaScript that injects those styles into the page when the component is rendered. That's not ideal, because it adds weight to your JavaScript, prevents styles from being fetched in parallel with your code, and can even cause CSP violations.
 
-A better option is to extract the CSS into a separate file. Using the `css` option as shown above would cause a `public/main.css` file to be generated each time the bundle is built (or rebuilt, if you're using rollup-watch), with the normal scoping rules applied.
+A better option is to emit the CSS styles into a virtual file (via `emitCss: true`), allowing another Rollup plugin – for example, [`rollup-plugin-css-only`](https://www.npmjs.com/package/rollup-plugin-css-only), [`rollup-plugin-postcss`](https://www.npmjs.com/package/rollup-plugin-postcss), etc. – to take responsibility for the new stylesheet.
 
-If you have other plugins processing your CSS (e.g. rollup-plugin-scss), and want your styles passed through to them to be bundled together, you can use `emitCss: true`.
-
-Alternatively, if you're handling styles in some other way and just want to prevent the CSS being added to your JavaScript bundle, use `css: false`.
+In fact, emitting CSS files _requires_ that you use a Rollup plugin to handle the CSS. Otherwise, your build(s) will fail!
 
 
 ## License

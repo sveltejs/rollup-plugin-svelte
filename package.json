@@ -26,8 +26,7 @@
   },
   "dependencies": {
     "require-relative": "^0.8.7",
-    "rollup-pluginutils": "^2.8.2",
-    "sourcemap-codec": "^1.4.8"
+    "rollup-pluginutils": "^2.8.2"
   },
   "peerDependencies": {
     "svelte": ">=3.5.0",
