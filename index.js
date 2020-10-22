@@ -227,15 +227,15 @@ module.exports = function (options = {}) {
 
 				if (config.sourcemap && chunk.map) {
 					const len = sources.length;
-					sources.push(chunk.map.sources[0]);
-					if (sourcesContent) sourcesContent.push(chunk.map.sourcesContent[0]);
+					sources.push(...chunk.map.sources);
+					if (sourcesContent) sourcesContent.push(...chunk.map.sourcesContent);
 
 					const decoded = decode(chunk.map.mappings);
 
 					if (len > 0) {
 						decoded.forEach(line => {
 							line.forEach(segment => {
-								segment[1] = len;
+								segment[1] += len;
 							});
 						});
 					}
