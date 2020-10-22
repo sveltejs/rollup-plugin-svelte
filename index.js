@@ -94,7 +94,7 @@ module.exports = function (options = {}) {
 
 	for (let key in rest) {
 		if (plugin_options.has(key)) continue;
-		console.warn(`${PREFIX} Unknown "${key}" option. Please use \`compilerOptions\` for any Svelte compiler configuration.`);
+		console.warn(`${PREFIX} Unknown "${key}" option. Please use "compilerOptions" for any Svelte compiler configuration.`);
 	}
 
 	const css_cache = new Map(); // [filename]:[chunk]
@@ -208,7 +208,7 @@ module.exports = function (options = {}) {
 		 */
 		generateBundle(config, bundle) {
 			if (pkg_export_errors.size > 0) {
-				console.warn(`\n${PREFIX} The following packages did not export their \`package.json\` file so we could not check the \`svelte\` field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n`);
+				console.warn(`\n${PREFIX} The following packages did not export their \`package.json\` file so we could not check the "svelte" field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n`);
 				console.warn(Array.from(pkg_export_errors, s => `- ${s}`).join('\n') + '\n');
 			}
 
