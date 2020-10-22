@@ -4,11 +4,13 @@ import { CompileOptions } from 'svelte/types/compiler/interfaces';
 
 type SourceMap = Omit<Mapping, 'toString' | 'toUrl'>;
 
+type WarningHandler = (warning: RollupWarning | string) => void;
+
 declare class CssWriter {
   code: string;
   filename: string;
+  warn: WarningHandler;
   map: false | SourceMap;
-  warn: RollupWarning;
   write(file: string, map?: boolean): void;
   emit(name: string, source: string): string;
   sourcemap(file: string, sourcemap: SourceMap): void;
