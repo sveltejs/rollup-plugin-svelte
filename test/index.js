@@ -214,7 +214,9 @@ test('produces readable sourcemap output when `dev` is truthy', async () => {
 		input: 'test/sourcemap-test/src/main.js',
 		plugins: [
 			plugin({
-				dev: true,
+				compilerOptions: {
+					dev: true
+				},
 				css: value => {
 					css = value;
 					css.write('bundle.css');
