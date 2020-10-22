@@ -3,14 +3,10 @@ const path = require('path');
 const { test } = require('uvu');
 const assert = require('uvu/assert');
 const { SourceMapConsumer } = require('source-map');
-const { getLocator } = require('locate-character');
 const { rollup } = require('rollup');
 const sander = require('sander');
 
 const plugin = require('..');
-
-// TODO(lukeed) do this within uvu?
-const normalize = file => fs.readFileSync(file, 'utf8').replace(/\r?\n/g, '\n');
 
 test('resolves using pkg.svelte', () => {
 	const { resolveId } = plugin();
@@ -270,9 +266,9 @@ test('handles filenames that happen to contain .svelte', async () => {
 		throw err;
 	}
 
-	assert.fixture(
-		normalize('test/filename-test/dist/bundle.css'),
-		normalize('test/filename-test/expected/bundle.css')
+	assert.match(
+		fs.readFileSync('test/filename-test/dist/bundle.css', 'utf8'),
+		'h1.svelte-bt9zrl{color:red}'
 	);
 });
 
