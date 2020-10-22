@@ -168,8 +168,8 @@ module.exports = function (options = {}) {
 			const dependencies = [];
 			const filename = path.relative(process.cwd(), id);
 
-			if (options.preprocess) {
-				const processed = await preprocess(code, options.preprocess, { filename });
+			if (rest.preprocess) {
+				const processed = await preprocess(code, rest.preprocess, { filename });
 				if (processed.dependencies) dependencies.push(...processed.dependencies);
 				code = processed.code;
 			}
