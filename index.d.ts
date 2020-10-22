@@ -73,10 +73,7 @@ interface Options extends CompileOptions {
   /**
    * let Rollup handle all other warnings normally
    */
-  onwarn?: (
-    warning: RollupWarning,
-    handler: (w: RollupWarning | string) => void
-  ) => void;
+  onwarn?(warning: RollupWarning, handler: WarningHandler): void;
 }
 
 export default function svelte(options?: Options): Plugin;
