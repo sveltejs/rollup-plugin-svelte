@@ -44,25 +44,16 @@ interface Options {
   //   }
   // },
 
-  /**
-   * Emit CSS as "files" for other plugins to process
-   * @default false
-   */
+  /** Emit CSS as "files" for other plugins to process */
   emitCss: boolean;
 
-  /**
-   * Extract CSS into a separate file (recommended).
-   */
+  /** Extract CSS into a separate file (recommended) */
   css: false | CssEmitter;
 
-  /**
-   * Options passed to `svelte.compile` method.
-   */
+  /** Options passed to `svelte.compile` method. */
   compilerOptions: CompileOptions;
 
-  /**
-   * let Rollup handle all other warnings normally
-   */
+  /** Custom warnings handler; defers to Rollup as default. */
   onwarn(warning: RollupWarning, handler: WarningHandler): void;
 }
 
