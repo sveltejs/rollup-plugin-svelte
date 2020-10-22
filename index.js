@@ -4,11 +4,13 @@ const { createFilter } = require('rollup-pluginutils');
 const { compile, preprocess } = require('svelte/compiler');
 const { encode, decode } = require('sourcemap-codec');
 
+const PREFIX = '[rollup-plugin-svelte]';
 const pkg_export_errors = new Set();
 
 const plugin_options = new Set([
 	'include', 'exclude', 'extensions',
-	'emitCss', 'preprocess', 'onwarn',
+	'preprocess', 'onwarn',
+	'emitCss', 'css',
 ]);
 
 function to_entry_css(bundle) {
@@ -29,7 +31,7 @@ class CssWriter {
 			sources: map.sources,
 			sourcesContent: map.sourcesContent,
 			names: [],
-			mappings: map.mappings
+			mappings: encode(map.mappings)
 		};
 
 		this.warn = context.warn;
@@ -78,22 +80,25 @@ class CssWriter {
 	}
 }
 
-/** @returns {import('rollup').Plugin} */
+/**
+ * @param [options] {Partial<import('.').Options>}
+ * @returns {import('rollup').Plugin}
+ */
 module.exports = function (options = {}) {
-	const extensions = options.extensions || ['.svelte'];
-	const filter = createFilter(options.include, options.exclude);
+	const { compilerOptions={}, ...rest } = options;
+	const extensions = rest.extensions || ['.svelte'];
+	const filter = createFilter(rest.include, rest.exclude);
 
-	/** @type {import('svelte/types/compiler/interfaces').ModuleFormat} */
-	const format = 'esm', config = { format };
+	compilerOptions.format = 'esm';
+	const isDev = !!compilerOptions.dev;
 
-	for (let key in options) {
-		// forward `svelte/compiler` options
+	for (let key in rest) {
 		if (plugin_options.has(key)) continue;
-		config[key] = config[key] || options[key];
+		console.warn(`${PREFIX} Unknown "${key}" option. Please use "compilerOptions" for any Svelte compiler configuration.`);
 	}
 
 	const css_cache = new Map(); // [filename]:[chunk]
-	const { css, emitCss, onwarn } = options;
+	const { css, emitCss, onwarn } = rest;
 
 	const ctype = typeof css;
 	const toWrite = ctype === 'function' && css;
@@ -103,7 +108,7 @@ module.exports = function (options = {}) {
 
 	// block svelte's inline CSS if writer
 	const external_css = !!(toWrite || emitCss);
-	if (external_css) config.css = false;
+	if (external_css) compilerOptions.css = false;
 
 	return {
 		name: 'svelte',
@@ -163,13 +168,13 @@ module.exports = function (options = {}) {
 			const dependencies = [];
 			const filename = path.relative(process.cwd(), id);
 
-			if (options.preprocess) {
-				const processed = await preprocess(code, options.preprocess, { filename });
+			if (rest.preprocess) {
+				const processed = await preprocess(code, rest.preprocess, { filename });
 				if (processed.dependencies) dependencies.push(...processed.dependencies);
 				code = processed.code;
 			}
 
-			const compiled = compile(code, { ...config, filename });
+			const compiled = compile(code, { ...compilerOptions, filename });
 
 			(compiled.warnings || []).forEach(warning => {
 				if (!css && !emitCss && warning.code === 'css-unused-selector') return;
@@ -203,7 +208,7 @@ module.exports = function (options = {}) {
 		 */
 		generateBundle(config, bundle) {
 			if (pkg_export_errors.size > 0) {
-				console.warn('\nrollup-plugin-svelte: The following packages did not export their `package.json` file so we could not check the `svelte` field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n');
+				console.warn(`\n${PREFIX} The following packages did not export their \`package.json\` file so we could not check the "svelte" field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n`);
 				console.warn(Array.from(pkg_export_errors, s => `- ${s}`).join('\n') + '\n');
 			}
 
@@ -239,13 +244,8 @@ module.exports = function (options = {}) {
 				}
 			});
 
-			toWrite(
-				new CssWriter(this, bundle, !!options.dev, result, config.sourcemap && {
-					sources,
-					sourcesContent,
-					mappings: encode(mappings)
-				})
-			);
+			const sourceMap = config.sourcemap && { sources, sourcesContent, mappings };
+			toWrite(new CssWriter(this, bundle, isDev, result, sourceMap));
 		}
 	};
 };
