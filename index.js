@@ -1,68 +1,29 @@
 const path = require('path');
-const { existsSync } = require('fs');
 const relative = require('require-relative');
-const { version } = require('svelte/package.json');
 const { createFilter } = require('rollup-pluginutils');
+const { compile, preprocess } = require('svelte/compiler');
 const { encode, decode } = require('sourcemap-codec');
 
-const major_version = +version[0];
+const PREFIX = '[rollup-plugin-svelte]';
 const pkg_export_errors = new Set();
 
-const { compile, preprocess } = major_version >= 3
-	? require('svelte/compiler.js')
-	: require('svelte');
+const plugin_options = new Set([
+	'include', 'exclude', 'extensions',
+	'preprocess', 'onwarn',
+	'emitCss', 'css',
+]);
 
-function sanitize(input) {
-	return path
-		.basename(input)
-		.replace(path.extname(input), '')
-		.replace(/[^a-zA-Z_$0-9]+/g, '_')
-		.replace(/^_/, '')
-		.replace(/_$/, '')
-		.replace(/^(\d)/, '_$1');
-}
-
-function capitalize(str) {
-	return str[0].toUpperCase() + str.slice(1);
-}
-
-const pluginOptions = {
-	include: true,
-	exclude: true,
-	extensions: true,
-	emitCss: true,
-	preprocess: true,
-
-	// legacy — we might want to remove/change these in a future version
-	onwarn: true,
-	shared: true
-};
-
-function tryRequire(id) {
-	try {
-		return require(id);
-	} catch (err) {
-		return null;
-	}
-}
-
-function tryResolve(pkg, importer) {
-	try {
-		return relative.resolve(pkg, importer);
-	} catch (err) {
-		if (err.code === 'MODULE_NOT_FOUND') return null;
-		if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
-			pkg_export_errors.add(pkg.replace(/\/package.json$/, ''));
-			return null;
-		}
-		throw err;
+function to_entry_css(bundle) {
+	for (let file in bundle) {
+		let { name } = path.parse(file);
+		return name + '.css';
 	}
 }
 
 class CssWriter {
-	constructor(context, bundle, isDev, code, filename, map) {
+	constructor(context, bundle, isDev, code, map) {
 		this.code = code;
-		this.filename = filename;
+		this.filename = to_entry_css(bundle);
 
 		this.map = map && {
 			version: 3,
@@ -70,7 +31,7 @@ class CssWriter {
 			sources: map.sources,
 			sourcesContent: map.sourcesContent,
 			names: [],
-			mappings: map.mappings
+			mappings: encode(map.mappings)
 		};
 
 		this.warn = context.warn;
@@ -119,244 +80,172 @@ class CssWriter {
 	}
 }
 
-module.exports = function svelte(options = {}) {
-	const filter = createFilter(options.include, options.exclude);
+/**
+ * @param [options] {Partial<import('.').Options>}
+ * @returns {import('rollup').Plugin}
+ */
+module.exports = function (options = {}) {
+	const { compilerOptions={}, ...rest } = options;
+	const extensions = rest.extensions || ['.svelte'];
+	const filter = createFilter(rest.include, rest.exclude);
 
-	const extensions = options.extensions || ['.html', '.svelte'];
+	compilerOptions.format = 'esm';
+	const isDev = !!compilerOptions.dev;
 
-	const fixed_options = {};
-
-	Object.keys(options).forEach(key => {
-		// add all options except include, exclude, extensions, and shared
-		if (pluginOptions[key]) return;
-		fixed_options[key] = options[key];
-	});
-
-	if (major_version >= 3) {
-		fixed_options.format = 'esm';
-		fixed_options.sveltePath = options.sveltePath || 'svelte';
-	} else {
-		fixed_options.format = 'es';
-		fixed_options.shared = require.resolve(options.shared || 'svelte/shared.js');
+	for (let key in rest) {
+		if (plugin_options.has(key)) continue;
+		console.warn(`${PREFIX} Unknown "${key}" option. Please use "compilerOptions" for any Svelte compiler configuration.`);
 	}
 
-	// handle CSS extraction
-	if ('css' in options) {
-		if (typeof options.css !== 'function' && typeof options.css !== 'boolean') {
-			throw new Error('options.css must be a boolean or a function');
-		}
+	const css_cache = new Map(); // [filename]:[chunk]
+	const { css, emitCss, onwarn } = rest;
+
+	const ctype = typeof css;
+	const toWrite = ctype === 'function' && css;
+	if (css != null && !toWrite && ctype !== 'boolean') {
+		throw new Error('options.css must be a boolean or a function');
 	}
 
-	let css = options.css && typeof options.css === 'function'
-		? options.css
-		: null;
-
-	// A map from css filename to css contents
-	// If css: true we output all contents
-	// If emitCss: true we virtually resolve these imports
-	const cssLookup = new Map();
-
-	if (css || options.emitCss) {
-		fixed_options.css = false;
-	}
+	// block svelte's inline CSS if writer
+	const external_css = !!(toWrite || emitCss);
+	if (external_css) compilerOptions.css = false;
 
 	return {
 		name: 'svelte',
 
 		/**
-		 * Returns CSS contents for an id
-		 */
-		load(id) {
-			if (!cssLookup.has(id)) return null;
-			return cssLookup.get(id);
-		},
-
-		/**
-		 * Returns id for import
+		 * Resolve an import's full filepath.
 		 */
 		resolveId(importee, importer) {
-			if (cssLookup.has(importee)) { return importee; }
-			if (!importer || importee[0] === '.' || importee[0] === '\0' || path.isAbsolute(importee))
-				return null;
+			if (css_cache.has(importee)) return importee;
+			if (!importer || importee[0] === '.' || importee[0] === '\0' || path.isAbsolute(importee)) return null;
 
 			// if this is a bare import, see if there's a valid pkg.svelte
 			const parts = importee.split('/');
-			let name = parts.shift();
-			if (name[0] === '@') name += `/${parts.shift()}`;
 
-			const resolved = tryResolve(
-				`${name}/package.json`,
-				path.dirname(importer)
-			);
-			if (!resolved) return null;
-			const pkg = tryRequire(resolved);
-			if (!pkg) return null;
+			let dir, pkg, name = parts.shift();
+			if (name[0] === '@') {
+				name += `/${parts.shift()}`;
+			}
 
-			const dir = path.dirname(resolved);
-
-			if (parts.length === 0) {
-				// use pkg.svelte
-				if (pkg.svelte) {
-					return path.resolve(dir, pkg.svelte);
+			try {
+				const file = `${name}/package.json`;
+				const resolved = relative.resolve(file, path.dirname(importer));
+				dir = path.dirname(resolved);
+				pkg = require(resolved);
+			} catch (err) {
+				if (err.code === 'MODULE_NOT_FOUND') return null;
+				if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
+					pkg_export_errors.add(name);
+					return null;
 				}
-			} else {
-				if (pkg['svelte.root']) {
-					// TODO remove this. it's weird and unnecessary
-					const sub = path.resolve(dir, pkg['svelte.root'], parts.join('/'));
-					if (existsSync(sub)) return sub;
-				}
+				throw err;
+			}
+
+			// use pkg.svelte
+			if (parts.length === 0 && pkg.svelte) {
+				return path.resolve(dir, pkg.svelte);
 			}
 		},
 
 		/**
-		 * Transforms a .svelte file into a .js file
-		 * Adds a static import for virtual css file when emitCss: true
+		 * Returns CSS contents for a file, if ours
 		 */
-		transform(code, id) {
+		load(id) {
+			return css_cache.get(id) || null;
+		},
+
+		/**
+		 * Transforms a `.svelte` file into a `.js` file.
+		 * NOTE: If `emitCss: true`, appends a static `import` for virtual CSS file.
+		 */
+		async transform(code, id) {
 			if (!filter(id)) return null;
 
 			const extension = path.extname(id);
 			if (!~extensions.indexOf(extension)) return null;
 
+			const dependencies = [];
 			const filename = path.relative(process.cwd(), id);
 
-			const dependencies = [];
-			let preprocessPromise;
-			if (options.preprocess) {
-				if (major_version < 3) {
-					const preprocessOptions = {};
-					for (const key in options.preprocess) {
-						preprocessOptions[key] = (...args) => {
-							return Promise.resolve(options.preprocess[key](...args)).then(
-								resp => {
-									if (resp && resp.dependencies) {
-										dependencies.push(...resp.dependencies);
-									}
-									return resp;
-								}
-							);
-						};
-					}
-					preprocessPromise = preprocess(
-						code,
-						Object.assign(preprocessOptions, { filename })
-					).then(code => code.toString());
-				} else {
-					preprocessPromise = preprocess(code, options.preprocess, { filename }).then(processed => {
-						if (processed.dependencies) {
-							dependencies.push(...processed.dependencies);
-						}
-						return processed.toString();
-					});
-				}
-			} else {
-				preprocessPromise = Promise.resolve(code);
+			if (rest.preprocess) {
+				const processed = await preprocess(code, rest.preprocess, { filename });
+				if (processed.dependencies) dependencies.push(...processed.dependencies);
+				code = processed.code;
 			}
 
-			return preprocessPromise.then(code => {
-				let warnings = [];
+			const compiled = compile(code, { ...compilerOptions, filename });
 
-				const base_options = major_version < 3
-					? {
-						onwarn: warning => warnings.push(warning)
-					}
-					: {};
-
-				const compiled = compile(
-					code,
-					Object.assign(base_options, fixed_options, { filename }, major_version >= 3 ? null : {
-						name: capitalize(sanitize(id)),
-						sourceMap: code.getMap ? code.getMap() : undefined
-					})
-				);
-
-				if (major_version >= 3) warnings = compiled.warnings || compiled.stats.warnings;
-
-				warnings.forEach(warning => {
-					if ((!options.css && !options.emitCss) && warning.code === 'css-unused-selector') return;
-
-					if (options.onwarn) {
-						options.onwarn(warning, warning => this.warn(warning));
-					} else {
-						this.warn(warning);
-					}
-				});
-
-				if ((css || options.emitCss) && compiled.css.code) {
-					let fname = id.replace(new RegExp(`\\${extension}$`), '.css');
-
-					if (options.emitCss) {
-						const source_map_comment = `/*# sourceMappingURL=${compiled.css.map.toUrl()} */`;
-						compiled.css.code += `\n${source_map_comment}`;
-
-						compiled.js.code += `\nimport ${JSON.stringify(fname)};\n`;
-					}
-
-					cssLookup.set(fname, compiled.css);
-				}
-
-				if (this.addWatchFile) {
-					dependencies.forEach(dependency => this.addWatchFile(dependency));
-				} else {
-					compiled.js.dependencies = dependencies;
-				}
-
-				return compiled.js;
+			(compiled.warnings || []).forEach(warning => {
+				if (!css && !emitCss && warning.code === 'css-unused-selector') return;
+				if (onwarn) onwarn(warning, this.warn);
+				else this.warn(warning);
 			});
+
+			if (external_css && compiled.css.code) {
+				const fname = id.replace(new RegExp(`\\${extension}$`), '.css');
+
+				if (emitCss) {
+					compiled.js.code += `\nimport ${JSON.stringify(fname)};\n`;
+					compiled.css.code += `\n/*# sourceMappingURL=${compiled.css.map.toUrl()} */`;
+				}
+
+				css_cache.set(fname, compiled.css);
+			}
+
+			if (this.addWatchFile) {
+				dependencies.forEach(this.addWatchFile);
+			} else {
+				compiled.js.dependencies = dependencies;
+			}
+
+			return compiled.js;
 		},
 
 		/**
-		 * If css: true then outputs a single file with all CSS bundled together
+		 * Write to CSS file if given `options.css` function.
+		 * TODO: is there a better way to concat/append into Rollup asset?
 		 */
 		generateBundle(config, bundle) {
-			if (css) {
-				// TODO would be nice if there was a more idiomatic way to do this in Rollup
-				let result = '';
-
-				const sources = [];
-				const mappings = [];
-				const sourcesContent = config.sourcemapExcludeSources ? null : [];
-
-				const chunks = Array.from(cssLookup.keys()).sort().map(key => cssLookup.get(key));
-
-				for (let chunk of chunks) {
-					if (!chunk.code) continue;
-					result += chunk.code + '\n';
-
-					if (config.sourcemap && chunk.map) {
-						const len = sources.length;
-						sources.push(...chunk.map.sources);
-						if (sourcesContent) sourcesContent.push(...chunk.map.sourcesContent);
-
-						const decoded = decode(chunk.map.mappings);
-
-						if (len > 0) {
-							decoded.forEach(line => {
-								line.forEach(segment => {
-									segment[1] += len;
-								});
-							});
-						}
-
-						mappings.push(...decoded);
-					}
-				}
-
-				const filename = Object.keys(bundle)[0].split('.').shift() + '.css';
-
-				const writer = new CssWriter(this, bundle, !!options.dev, result, filename, config.sourcemap && {
-					sources,
-					sourcesContent,
-					mappings: encode(mappings)
-				});
-
-				css(writer);
+			if (pkg_export_errors.size > 0) {
+				console.warn(`\n${PREFIX} The following packages did not export their \`package.json\` file so we could not check the "svelte" field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n`);
+				console.warn(Array.from(pkg_export_errors, s => `- ${s}`).join('\n') + '\n');
 			}
 
-			if (pkg_export_errors.size < 1) return;
+			if (!toWrite) return;
 
-			console.warn('\nrollup-plugin-svelte: The following packages did not export their `package.json` file so we could not check the `svelte` field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n');
-			console.warn(Array.from(pkg_export_errors).map(s => `- ${s}`).join('\n') + '\n');
+			let result = '';
+			const sources = [];
+			const sourcesContent = config.sourcemapExcludeSources ? null : [];
+			const mappings = [];
+
+			[...css_cache.keys()].sort().forEach(file => {
+				const chunk = css_cache.get(file);
+				if (!chunk.code) return;
+
+				result += chunk.code + '\n';
+
+				if (config.sourcemap && chunk.map) {
+					const len = sources.length;
+					sources.push(...chunk.map.sources);
+					if (sourcesContent) sourcesContent.push(...chunk.map.sourcesContent);
+
+					const decoded = decode(chunk.map.mappings);
+
+					if (len > 0) {
+						decoded.forEach(line => {
+							line.forEach(segment => {
+								segment[1] += len;
+							});
+						});
+					}
+
+					mappings.push(...decoded);
+				}
+			});
+
+			const sourceMap = config.sourcemap && { sources, sourcesContent, mappings };
+			toWrite(new CssWriter(this, bundle, isDev, result, sourceMap));
 		}
 	};
 };
