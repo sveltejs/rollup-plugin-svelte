@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## Unreleased
+
+* Use `require('svelte/compiler')` rather than `require('svelte/compiler.js')` to work with new Svelte exports map
+
 ## 6.1.0
 
 * feat: allow custom Svelte compilers via new `svelte` option: ([#124](https://github.com/sveltejs/rollup-plugin-svelte/pull/124))
