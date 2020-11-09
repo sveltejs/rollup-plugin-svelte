@@ -12,7 +12,7 @@ function autoload() {
 	const pkg = require('svelte/package.json');
 	const version = to_major(pkg.version);
 
-	const { compile, preprocess } = require(version >= 3 ? 'svelte/compiler.js' : 'svelte');
+	const { compile, preprocess } = require(version >= 3 ? 'svelte/compiler' : 'svelte');
 	return { compile, preprocess, version };
 }
 
