@@ -68,7 +68,7 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 
 	const bundle = await rollup({
 		input: 'test/sourcemap-test/src/main.js',
-		plugins: [ plugin() ],
+		plugins: [ plugin({ emitCss: false }) ],
 		external: ['svelte/internal']
 	});
 
@@ -136,9 +136,7 @@ test('preprocesses components', async () => {
 });
 
 test('emits a CSS file', async () => {
-	const { load, transform } = plugin({
-		emitCss: true
-	});
+	const { load, transform } = plugin();
 
 	const transformed = await transform(`<h1>Hello!</h1>
 
@@ -165,9 +163,7 @@ test('emits a CSS file', async () => {
 });
 
 test('properly escapes CSS paths', async () => {
-	const { load, transform } = plugin({
-		emitCss: true
-	});
+	const { load, transform } = plugin();
 
 	const transformed = await transform(`<h1>Hello!</h1>
 
