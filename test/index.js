@@ -216,7 +216,7 @@ test('intercepts warnings', async () => {
 	assert.equal(handled.map(w => w.code), ['a11y-hidden']);
 });
 
-test('handles filenames that happen to contain .svelte', async () => {
+test('handles filenames that happen to contain ".svelte"', async () => {
 	sander.rimrafSync('test/filename-test/dist');
 	sander.mkdirSync('test/filename-test/dist');
 
