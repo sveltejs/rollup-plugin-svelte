@@ -29,8 +29,7 @@ module.exports = function (options = {}) {
 
 	// [filename]:[chunk]
 	const cache_emit = new Map;
-	const { onwarn } = rest;
-	const emitCss = (typeof rest.emitCss === 'undefined') ? true : rest.emitCss;
+	const { onwarn, emitCss=true } = rest;
 
 	if (emitCss) {
 		if (compilerOptions.css) {
