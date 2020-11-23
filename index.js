@@ -112,7 +112,6 @@ module.exports = function (options = {}) {
 
 			if (emitCss && compiled.css.code) {
 				const fname = id.replace(new RegExp(`\\${extension}$`), '.css');
-				compiled.css.code += `\n/*# sourceMappingURL=${compiled.css.map.toUrl()} */`;
 				compiled.js.code += `\nimport ${JSON.stringify(fname)};\n`;
 				cache_emit.set(fname, compiled.css);
 			}
