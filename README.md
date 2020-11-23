@@ -17,6 +17,7 @@ Note that we need to install Svelte as well as the plugin, as it's a 'peer depen
 ```js
 // rollup.config.js
 import svelte from 'rollup-plugin-svelte';
+import resolve from '@rollup/plugin-node-resolve';
 
 export default {
   input: 'src/main.js',
@@ -66,10 +67,15 @@ export default {
         // let Rollup handle all other warnings normally
         handler(warning);
       }
-    })
+    }),
+    // see NOTICE below
+    resolve({ browser: true }),
+    // ...
   ]
 }
 ```
+
+> **NOTICE:** You will need additional Rollup plugins. <br>Alone, this plugin translates Svelte components into CSS and JavaScript files. <br>You will need to include [`@rollup/plugin-node-resolve`](https://www.npmjs.com/package/@rollup/plugin-node-resolve) – and probably [`@rollup/plugin-commonjs`](https://www.npmjs.com/package/@rollup/plugin-commonjs) – in your Rollup config.
 
 
 ## Preprocessing and dependencies
