@@ -49,24 +49,12 @@ export default {
         }
       },
 
-      // Emit CSS as "files" for other plugins to process
-      emitCss: true,
+      // Emit CSS as "files" for other plugins to process. default is true
+      emitCss: false,
 
       // You can optionally set 'customElement' to 'true' to compile
       // your components to custom elements (aka web elements)
       customElement: false,
-
-      // Extract CSS into a single bundled file (recommended).
-      // See note below
-      css: function (css) {
-        console.log(css.code); // the concatenated CSS
-        console.log(css.map); // a sourcemap
-
-        // creates `main.css` and `main.css.map`
-        // using a falsy name will default to the bundle name
-        // — pass `false` as the second argument if you don't want the sourcemap
-        css.write('main.css');
-      },
 
       // Warnings are normally passed straight to Rollup. You can
       // optionally handle them here, for example to squelch
@@ -118,14 +106,9 @@ and so on. Then, in `package.json`, set the `svelte` property to point to this `
 
 ## Extracting CSS
 
-If your Svelte components contain `<style>` tags, by default the compiler will add JavaScript that injects those styles into the page when the component is rendered. That's not ideal, because it adds weight to your JavaScript, prevents styles from being fetched in parallel with your code, and can even cause CSP violations.
+By default (when `emitCss: true`) the CSS styles will be emitted into a virtual file, allowing another Rollup plugin – for example, [`rollup-plugin-css-only`](https://www.npmjs.com/package/rollup-plugin-css-only), [`rollup-plugin-postcss`](https://www.npmjs.com/package/rollup-plugin-postcss), etc. – to take responsibility for the new stylesheet. In fact, emitting CSS files _requires_ that you use a Rollup plugin to handle the CSS. Otherwise, your build(s) will fail! This is because this plugin will add an `import` statement to import the emitted CSS file. It's not valid JS to import a CSS file into a JS file, but it allows the CSS to be linked to its respective JS file and is a common pattern that other Rollup CSS plugins know how to handle.
 
-A better option is to extract the CSS into a separate file. Using the `css` option as shown above would cause a `public/main.css` file to be generated each time the bundle is built (or rebuilt, if you're using rollup-watch), with the normal scoping rules applied.
-
-If you have other plugins processing your CSS (e.g. rollup-plugin-scss), and want your styles passed through to them to be bundled together, you can use `emitCss: true`.
-
-Alternatively, if you're handling styles in some other way and just want to prevent the CSS being added to your JavaScript bundle, use `css: false`.
-
+If you set `emitCss: false` and your Svelte components contain `<style>` tags, the compiler will add JavaScript that injects those styles into the page when the component is rendered. That's not the default, because it adds weight to your JavaScript, prevents styles from being fetched in parallel with your code, and can even cause CSP violations.
 
 ## License
 

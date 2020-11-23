@@ -44,11 +44,8 @@ interface Options {
   //   }
   // },
 
-  /** Emit CSS as "files" for other plugins to process */
+  /** Emit Svelte styles as virtual CSS files for other plugins to process. */
   emitCss: boolean;
-
-  /** Extract CSS into a separate file (recommended) */
-  css: false | CssEmitter;
 
   /** Options passed to `svelte.compile` method. */
   compilerOptions: CompileOptions;
