@@ -262,7 +262,7 @@ test('handles filenames that happen to contain .svelte', async () => {
 		throw err;
 	}
 
-	assert.match(
+	assert.is(
 		fs.readFileSync('test/filename-test/dist/bundle.css', 'utf8'),
 		'h1.svelte-bt9zrl{color:red}'
 	);
