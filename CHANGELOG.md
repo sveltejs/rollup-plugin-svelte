@@ -2,10 +2,13 @@
 
 ## 7.0.0
 
-* Require Svelte 3.5+ and Rollup 2.x+ ([#138](https://github.com/sveltejs/rollup-plugin-svelte/pull/138), [#142](https://github.com/sveltejs/rollup-plugin-svelte/pull/142))
-* Remove `css` option ([#147](https://github.com/sveltejs/rollup-plugin-svelte/pull/147))
+* New minimum version requirements ([#138](https://github.com/sveltejs/rollup-plugin-svelte/pull/138), [#142](https://github.com/sveltejs/rollup-plugin-svelte/pull/142)):
+    * Rollup 2+
+    * Svelte 3.5+ (Svelte 2 is no longer supported)
+    * Node 10+
+* Breaking: Offload CSS handling to Rollup — you will now need an external plugin like `rollup-plugin-css-only` to extract your styles to `.css` files [as demonstrated in the template](https://github.com/sveltejs/template/blob/5b1135c286f7a649daa99825a077586655051649/rollup.config.js#L48) ([#147](https://github.com/sveltejs/rollup-plugin-svelte/pull/147))
+* Breaking: Options to be passed directly to the Svelte compiler must now go under a `compilerOptions` key in the plugin configuration object ([#145](https://github.com/sveltejs/rollup-plugin-svelte/pull/145))
 * Extend `CompileOptions` interface directly ([#126](https://github.com/sveltejs/rollup-plugin-svelte/pull/126))
-* Use `compilerOptions` for `svelte.compile` config ([#145](https://github.com/sveltejs/rollup-plugin-svelte/pull/145))
 * Pass relative `filename` to svelte compiler ([#131](https://github.com/sveltejs/rollup-plugin-svelte/pull/131))
 * Link `sourcemap` with source correctly ([#140](https://github.com/sveltejs/rollup-plugin-svelte/pull/140))
 * Respect `sourcemapExcludeSources` Rollup config ([#93](https://github.com/sveltejs/rollup-plugin-svelte/pull/93))
