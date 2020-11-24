@@ -96,13 +96,15 @@ module.exports = function (options = {}) {
 			const dependencies = [];
 			const filename = path.relative(process.cwd(), id);
 
+			let map;
 			if (rest.preprocess) {
 				const processed = await preprocess(code, rest.preprocess, { filename });
 				if (processed.dependencies) dependencies.push(...processed.dependencies);
+				if (processed.map) map = processed.map;
 				code = processed.code;
 			}
 
-			const compiled = compile(code, { ...compilerOptions, filename });
+			const compiled = compile(code, { ...compilerOptions, filename, sourcemap: map });
 
 			(compiled.warnings || []).forEach(warning => {
 				if (!emitCss && warning.code === 'css-unused-selector') return;
