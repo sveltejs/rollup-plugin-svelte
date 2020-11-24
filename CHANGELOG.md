@@ -1,5 +1,16 @@
 # rollup-plugin-svelte changelog
 
+## 7.0.0
+
+* Require Svelte 3.5+ and Rollup 2.x+ ([#138](https://github.com/sveltejs/rollup-plugin-svelte/pull/138), [#142](https://github.com/sveltejs/rollup-plugin-svelte/pull/142))
+* Remove `css` option ([#147](https://github.com/sveltejs/rollup-plugin-svelte/pull/147))
+* Extend `CompileOptions` interface directly ([#126](https://github.com/sveltejs/rollup-plugin-svelte/pull/126))
+* Use `compilerOptions` for `svelte.compile` config ([#145](https://github.com/sveltejs/rollup-plugin-svelte/pull/145))
+* Pass relative `filename` to svelte compiler ([#131](https://github.com/sveltejs/rollup-plugin-svelte/pull/131))
+* Link `sourcemap` with source correctly ([#140](https://github.com/sveltejs/rollup-plugin-svelte/pull/140))
+* Respect `sourcemapExcludeSources` Rollup config ([#93](https://github.com/sveltejs/rollup-plugin-svelte/pull/93))
+* Keep keep all sourcemaps from chunk ([#44](https://github.com/sveltejs/rollup-plugin-svelte/pull/44))
+
 ## 6.1.1
 
 * Use `require('svelte/compiler')` rather than `require('svelte/compiler.js')` to work with new Svelte exports map
