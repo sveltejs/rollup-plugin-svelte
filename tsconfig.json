@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"lib": ["es2020"],
+		"target": "es2020",
+
+		"declaration": true,
+
+		"noEmitOnError": true,
+		"noErrorTruncation": true,
+
+		"module": "esnext",
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+
+		"strict": true,
+		"noImplicitThis": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true
+	}
+}

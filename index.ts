@@ -1,28 +1,69 @@
-const path = require('path');
-const relative = require('require-relative');
-const { createFilter } = require('rollup-pluginutils');
-const { compile, preprocess } = require('svelte/compiler');
+import * as path from 'path';
+import * as relative from 'require-relative';
+import { createFilter } from 'rollup-pluginutils';
+import { compile, preprocess } from 'svelte/compiler';
+import type { Plugin, PluginImpl, RollupWarning } from 'rollup';
+import type { CompileOptions } from 'svelte/types/compiler/interfaces';
+import type { PreprocessorGroup } from 'svelte/types/compiler/preprocess';
 
 const PREFIX = '[rollup-plugin-svelte]';
 const pkg_export_errors = new Set();
 
 const plugin_options = new Set([
-	'include', 'exclude', 'extensions',
-	'preprocess', 'onwarn', 'emitCss',
+	'emitCss',
+	'exclude',
+	'extensions',
+	'include',
+	'onwarn',
+	'preprocess'
 ]);
 
-/**
- * @param [options] {Partial<import('.').Options>}
- * @returns {import('rollup').Plugin}
- */
-module.exports = function (options = {}) {
+type Arrayable<T> = T | T[];
+type WarningHandler = (warning: RollupWarning | string) => void;
+
+export interface Options {
+  /** One or more minimatch patterns */
+  include?: Arrayable<string>;
+
+  /** One or more minimatch patterns */
+  exclude?: Arrayable<string>;
+
+  /**
+   * By default, all ".svelte" files are compiled
+   * @default ['.svelte']
+   */
+  extensions?: string[];
+
+  /**
+   * Optionally, preprocess components with svelte.preprocess:
+   * @see https://svelte.dev/docs#svelte_preprocess
+   */
+  preprocess?: Arrayable<PreprocessorGroup>;
+  // {
+  //   style: ({ content }) => {
+  //     return transformStyles(content);
+  //   }
+  // },
+
+  /** Emit Svelte styles as virtual CSS files for other plugins to process. */
+  emitCss?: boolean;
+
+  /** Options passed to `svelte.compile` method. */
+  compilerOptions?: CompileOptions;
+
+  /** Custom warnings handler; defers to Rollup as default. */
+  onwarn?: (warning: RollupWarning, handler: WarningHandler) => void;
+}
+
+
+const plugin_factory: PluginImpl<Options> = function (options = {}) {
 	const { compilerOptions={}, ...rest } = options;
 	const extensions = rest.extensions || ['.svelte'];
 	const filter = createFilter(rest.include, rest.exclude);
 
 	compilerOptions.format = 'esm';
 
-	for (let key in rest) {
+	for (const key in rest) {
 		if (plugin_options.has(key)) continue;
 		console.warn(`${PREFIX} Unknown "${key}" option. Please use "compilerOptions" for any Svelte compiler configuration.`);
 	}
@@ -38,7 +79,7 @@ module.exports = function (options = {}) {
 		compilerOptions.css = false;
 	}
 
-	return {
+	const plugin_svelte: Plugin = {
 		name: 'svelte',
 
 		/**
@@ -52,7 +93,7 @@ module.exports = function (options = {}) {
 			const parts = importee.split('/');
 
 			let dir, pkg, name = parts.shift();
-			if (name[0] === '@') {
+			if (name && name[0] === '@') {
 				name += `/${parts.shift()}`;
 			}
 
@@ -87,7 +128,7 @@ module.exports = function (options = {}) {
 		 * Transforms a `.svelte` file into a `.js` file.
 		 * NOTE: If `emitCss`, append static `import` to virtual CSS file.
 		 */
-		async transform(code, id) {
+		async transform(this, code, id) {
 			if (!filter(id)) return null;
 
 			const extension = path.extname(id);
@@ -135,4 +176,7 @@ module.exports = function (options = {}) {
 			}
 		}
 	};
+	return plugin_svelte;
 };
+
+export default plugin_factory;

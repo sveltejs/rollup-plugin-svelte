@@ -1,4 +1,6 @@
 .DS_Store
 node_modules
 !test/node_modules
-dist
+dist/
+/index.js
+/index.d.ts
