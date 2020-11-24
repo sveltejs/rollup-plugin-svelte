@@ -1,24 +1,10 @@
-import { Plugin, RollupWarning, SourceMap as Mapping } from 'rollup';
+import { Plugin, RollupWarning } from 'rollup';
 import { PreprocessorGroup } from 'svelte/types/compiler/preprocess';
 import { CompileOptions } from 'svelte/types/compiler/interfaces';
 
 type Arrayable<T> = T | T[];
-type SourceMap = Omit<Mapping, 'toString' | 'toUrl'>;
 
 type WarningHandler = (warning: RollupWarning | string) => void;
-
-declare class CssWriter {
-  code: string;
-  filename: string;
-  warn: WarningHandler;
-  map: false | SourceMap;
-  write(file: string, map?: boolean): void;
-  emit(name: string, source: string): string;
-  sourcemap(file: string, sourcemap: SourceMap): void;
-  toString(): string;
-}
-
-type CssEmitter = (css: CssWriter) => any;
 
 interface Options {
   /** One or more minimatch patterns */
