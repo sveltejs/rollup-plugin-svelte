@@ -1,6 +1,16 @@
 # rollup-plugin-svelte changelog
 
-## Unreleased
+## 6.1.1
+
+* Use `require('svelte/compiler')` rather than `require('svelte/compiler.js')` to work with new Svelte exports map
+
+## 6.1.0
+
+* feat: allow custom Svelte compilers via new `svelte` option: ([#124](https://github.com/sveltejs/rollup-plugin-svelte/pull/124))
+* fix: use native `fs.existsSync` method: ([`50e03e5`](https://github.com/sveltejs/rollup-plugin-svelte/commit/50e03e5))
+* chore: Power CI via GitHub Action ([`61ead9a..23e83a4`](https://github.com/sveltejs/rollup-plugin-svelte/compare/61ead9a..23e83a4))
+
+## 6.0.2
 
 * Added default value to CssWriter.write map option ([#135](https://github.com/sveltejs/rollup-plugin-svelte/pull/135))
 * Do not warn about missing unused css selectors if both css and emitCss are false ([#127](https://github.com/sveltejs/rollup-plugin-svelte/pull/127))
