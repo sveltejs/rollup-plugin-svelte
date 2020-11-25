@@ -33,12 +33,12 @@
     "rollup": ">=2.0.0"
   },
   "devDependencies": {
-    "eslint": "^6.8.0",
-    "rollup": "^2.30.0",
+    "eslint": "^7.14.0",
+    "rollup": "^2.33.3",
     "sander": "^0.6.0",
     "source-map": "^0.7.3",
-    "svelte": "^3.24.0",
-    "uvu": "^0.3.1"
+    "svelte": "^3.30.0",
+    "uvu": "^0.4.1"
   },
   "keywords": [
     "svelte",

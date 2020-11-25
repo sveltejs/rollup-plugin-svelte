@@ -95,14 +95,16 @@ module.exports = function (options = {}) {
 
 			const dependencies = [];
 			const filename = path.relative(process.cwd(), id);
+			const svelte_options = { ...compilerOptions, filename };
 
 			if (rest.preprocess) {
 				const processed = await preprocess(code, rest.preprocess, { filename });
 				if (processed.dependencies) dependencies.push(...processed.dependencies);
+				if (processed.map) svelte_options.sourcemap = processed.map;
 				code = processed.code;
 			}
 
-			const compiled = compile(code, { ...compilerOptions, filename });
+			const compiled = compile(code, svelte_options);
 
 			(compiled.warnings || []).forEach(warning => {
 				if (!emitCss && warning.code === 'css-unused-selector') return;
