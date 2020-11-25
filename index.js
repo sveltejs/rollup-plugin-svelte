@@ -7,8 +7,12 @@ const PREFIX = '[rollup-plugin-svelte]';
 const pkg_export_errors = new Set();
 
 const plugin_options = new Set([
-	'include', 'exclude', 'extensions',
-	'preprocess', 'onwarn', 'emitCss',
+	'emitCss',
+	'exclude',
+	'extensions',
+	'include',
+	'onwarn',
+	'preprocess'
 ]);
 
 /**
@@ -22,7 +26,7 @@ module.exports = function (options = {}) {
 
 	compilerOptions.format = 'esm';
 
-	for (let key in rest) {
+	for (const key in rest) {
 		if (plugin_options.has(key)) continue;
 		console.warn(`${PREFIX} Unknown "${key}" option. Please use "compilerOptions" for any Svelte compiler configuration.`);
 	}
@@ -52,7 +56,7 @@ module.exports = function (options = {}) {
 			const parts = importee.split('/');
 
 			let dir, pkg, name = parts.shift();
-			if (name[0] === '@') {
+			if (name && name[0] === '@') {
 				name += `/${parts.shift()}`;
 			}
 
