@@ -1,7 +1,9 @@
 const path = require('path');
 const relative = require('require-relative');
 const { createFilter } = require('rollup-pluginutils');
-const { compile, preprocess } = require('svelte/compiler');
+const { compile, preprocess, walk } = require('svelte/compiler');
+const { createMakeHot } = require('svelte-hmr');
+const { appendCompatNollup } = require('rollup-plugin-hot-nollup');
 
 const PREFIX = '[rollup-plugin-svelte]';
 const pkg_export_errors = new Set();
@@ -12,7 +14,8 @@ const plugin_options = new Set([
 	'extensions',
 	'include',
 	'onwarn',
-	'preprocess'
+	'preprocess',
+	'hot',
 ]);
 
 /**
@@ -33,7 +36,7 @@ module.exports = function (options = {}) {
 
 	// [filename]:[chunk]
 	const cache_emit = new Map;
-	const { onwarn, emitCss=true } = rest;
+	const { onwarn, emitCss=true, hot: hotOptions } = rest;
 
 	if (emitCss) {
 		if (compilerOptions.css) {
@@ -42,8 +45,28 @@ module.exports = function (options = {}) {
 		compilerOptions.css = false;
 	}
 
+	const makeHot = hotOptions && createMakeHot({ walk });
+
+	if (hotOptions) {
+		if (!compilerOptions.dev) {
+			console.warn(`${PREFIX} Forcing \`"compilerOptions.dev": true\` because "hot" is truthy.`);
+			compilerOptions.dev = true;
+		}
+		if (hotOptions.nollup == null) {
+			hotOptions.nollup = !!process.env.NOLLUP;
+		}
+	}
+
 	return {
 		name: 'svelte',
+
+		// append compat transform plugin for Nollup's HMR API
+		...hotOptions && hotOptions.nollup && {
+			options: appendCompatNollup(name, {
+				include: rest.include,
+				exclude: rest.exclude,
+			}),
+		},
 
 		/**
 		 * Resolve an import's full filepath.
@@ -120,6 +143,20 @@ module.exports = function (options = {}) {
 				const fname = id.replace(new RegExp(`\\${extension}$`), '.css');
 				compiled.js.code += `\nimport ${JSON.stringify(fname)};\n`;
 				cache_emit.set(fname, compiled.css);
+			}
+
+			if (hotOptions) {
+				compiled.js.code = makeHot({
+					id,
+					compiledCode: compiled.js.code,
+					hotOptions: {
+						injectCss: !rest.emitCss,
+						...hotOptions,
+					},
+					compiled,
+					originalCode: code,
+					compileOptions: compilerOptions,
+				});
 			}
 
 			if (this.addWatchFile) {

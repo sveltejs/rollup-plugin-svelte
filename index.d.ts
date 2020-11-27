@@ -38,6 +38,52 @@ interface Options {
 
   /** Custom warnings handler; defers to Rollup as default. */
   onwarn(warning: RollupWarning, handler: WarningHandler): void;
+
+  /** Enable/configure HMR */
+  hot?: {
+    /**
+     * Enable state preservation when a component is updated by HMR for every
+     * components.
+     * @default false
+     */
+    preserveState: boolean;
+
+    /**
+     * If this string appears anywhere in your component's code, then local
+     * state won't be preserved, even when noPreserveState is false.
+     * @default '@hmr:reset'
+     */
+    noPreserveStateKey: string;
+
+    /**
+     * If this string appears next to a `let` variable, the value of this
+     * variable will be preserved accross HMR updates.
+     * @default '@hmr:keep'
+     */
+     preserveStateKey: string;
+
+    /**
+     * Prevent doing a full reload on next HMR update after fatal error.
+     * @default false
+     */
+     noReload: boolean;
+
+     /**
+      * Try to recover after runtime errors in component init.
+      * @default true
+      */
+     optimistic: boolean;
+
+     noDisableCss: boolean;
+     injectCss: boolean;
+     cssEjectDelay: number;
+
+     /**
+      * Nollup compatibility mode.
+      * @default !!process.env.NOLLUP
+      */
+     nollup: boolean;
+  }
 }
 
 export default function svelte(options?: Partial<Options>): Plugin;
