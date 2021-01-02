@@ -56,7 +56,7 @@ export default {
         handler(warning);
       },
 
-      // You can pass any of the Svelte compiler oiptions
+      // You can pass any of the Svelte compiler options
       compilerOptions: {
 
         // By default, the client-side compiler is used. You
@@ -70,6 +70,13 @@ export default {
         // You can optionally set 'customElement' to 'true' to compile
         // your components to custom elements (aka web elements)
         customElement: false
+      },
+
+      // Enable hot module replacement
+      hot: true,
+      // Or, with options (see https://github.com/rixo/svelte-hmr#options):
+      hot: {
+        preserveLocalState: true
       }
     }),
     // see NOTICE below
@@ -119,6 +126,16 @@ and so on. Then, in `package.json`, set the `svelte` property to point to this `
 By default (when `emitCss: true`) the CSS styles will be emitted into a virtual file, allowing another Rollup plugin – for example, [`rollup-plugin-css-only`](https://www.npmjs.com/package/rollup-plugin-css-only), [`rollup-plugin-postcss`](https://www.npmjs.com/package/rollup-plugin-postcss), etc. – to take responsibility for the new stylesheet. In fact, emitting CSS files _requires_ that you use a Rollup plugin to handle the CSS. Otherwise, your build(s) will fail! This is because this plugin will add an `import` statement to import the emitted CSS file. It's not valid JS to import a CSS file into a JS file, but it allows the CSS to be linked to its respective JS file and is a common pattern that other Rollup CSS plugins know how to handle.
 
 If you set `emitCss: false` and your Svelte components contain `<style>` tags, the compiler will add JavaScript that injects those styles into the page when the component is rendered. That's not the default, because it adds weight to your JavaScript, prevents styles from being fetched in parallel with your code, and can even cause CSP violations.
+
+## Hot module replacement
+
+In an effort to simplify the ecosystem, this plugin currently includes HMR support via [svelte-hmr](https://github.com/rixo/svelte-hmr). This is a temporary situation, since the community solution will be replaced by the official one once implemented in Svelte's core, and this implementation might differ.
+
+What this option does is adding `esm-hmr` compatible HMR handlers (see [there](https://github.com/rixo/svelte-hmr#whats-hmr-by-the-way) for an in-depth explanation) to the compiled components code.
+
+By itself, this option won't give you HMR support out of the box, because Rollup doesn't come with a dev server. This option is meant to be used in combination with some [esm-hmr](https://github.com/snowpackjs/esm-hmr) compliant solution, for example [rollup-plugin-hot](https://github.com/rixo/rollup-plugin-hot). You can also use [Nollup](), that aims to be a very fast Rollup compatible dev server with HMR support, but you'll also need some compatibility plugin (like [rollup-plugin-hot-nollup](https://github.com/rixo/rollup-plugin-hot-nollup)) because Nollup implements its own HMR API.
+
+While using the community implementation, you can pass any of [svelte-hmr's options](https://github.com/rixo/svelte-hmr#options) to the `hot` option of this plugin.
 
 ## License
 
