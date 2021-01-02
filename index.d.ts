@@ -77,12 +77,6 @@ interface Options {
      noDisableCss: boolean;
      injectCss: boolean;
      cssEjectDelay: number;
-
-     /**
-      * Nollup compatibility mode.
-      * @default !!process.env.NOLLUP
-      */
-     nollup: boolean;
   }
 }
 

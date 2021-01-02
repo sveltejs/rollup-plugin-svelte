@@ -3,7 +3,6 @@ const relative = require('require-relative');
 const { createFilter } = require('rollup-pluginutils');
 const { compile, preprocess, walk } = require('svelte/compiler');
 const { createMakeHot } = require('svelte-hmr');
-const { appendCompatNollup } = require('rollup-plugin-hot-nollup');
 
 const PREFIX = '[rollup-plugin-svelte]';
 const pkg_export_errors = new Set();
@@ -59,14 +58,6 @@ module.exports = function (options = {}) {
 
 	return {
 		name: 'svelte',
-
-		// append compat transform plugin for Nollup's HMR API
-		...hotOptions && hotOptions.nollup && {
-			options: appendCompatNollup(name, {
-				include: rest.include,
-				exclude: rest.exclude,
-			}),
-		},
 
 		/**
 		 * Resolve an import's full filepath.
