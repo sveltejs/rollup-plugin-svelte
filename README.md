@@ -56,7 +56,7 @@ export default {
         handler(warning);
       },
 
-      // You can pass any of the Svelte compiler oiptions
+      // You can pass any of the Svelte compiler options
       compilerOptions: {
 
         // By default, the client-side compiler is used. You
