@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## Unreleased
+
+* Preprocessor sourcemap support ([#157](https://github.com/sveltejs/rollup-plugin-svelte/pull/157))
+
 ## 7.0.0
 
 * New minimum version requirements ([#138](https://github.com/sveltejs/rollup-plugin-svelte/pull/138), [#142](https://github.com/sveltejs/rollup-plugin-svelte/pull/142)):
