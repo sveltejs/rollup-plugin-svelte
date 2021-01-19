@@ -131,7 +131,7 @@ If you set `emitCss: false` and your Svelte components contain `<style>` tags, t
 
 In an effort to simplify the ecosystem, this plugin currently includes HMR support via [svelte-hmr](https://github.com/rixo/svelte-hmr). This is a temporary situation, since the community solution will be replaced by the official one once implemented in Svelte's core, and this implementation might differ.
 
-What this option does is adding `esm-hmr` compatible HMR handlers (see [there](https://github.com/rixo/svelte-hmr#whats-hmr-by-the-way) for an in-depth explanation) to the compiled components code.
+What this option does is add `esm-hmr` compatible HMR handlers (see [there](https://github.com/rixo/svelte-hmr#whats-hmr-by-the-way) for an in-depth explanation) to the compiled components code.
 
 By itself, this option won't give you HMR support out of the box, because Rollup doesn't come with a dev server. This option is meant to be used in combination with some [esm-hmr](https://github.com/snowpackjs/esm-hmr) compliant solution, for example [rollup-plugin-hot](https://github.com/rixo/rollup-plugin-hot). You can also use [Nollup](), that aims to be a very fast Rollup compatible dev server with HMR support, but you'll also need some compatibility plugin (like [rollup-plugin-hot-nollup](https://github.com/rixo/rollup-plugin-hot-nollup)) because Nollup implements its own HMR API.
 
