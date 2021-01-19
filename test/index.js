@@ -9,56 +9,56 @@ const sander = require('sander');
 const plugin = require('..');
 
 test('resolves using pkg.svelte', () => {
-	const { resolveId } = plugin();
+	const p = plugin();
 	assert.is(
-		resolveId('widget', path.resolve('test/foo/main.js')),
+		p.resolveId('widget', path.resolve('test/foo/main.js')),
 		path.resolve('test/node_modules/widget/src/Widget.svelte')
 	);
 });
 
 test('ignores built-in modules', () => {
-	const { resolveId } = plugin();
+	const p = plugin();
 	assert.ok(
-		resolveId('path', path.resolve('test/foo/main.js')) == null
+		p.resolveId('path', path.resolve('test/foo/main.js')) == null
 	);
 });
 
 test('ignores esm modules that do not export package.json', () => {
-	const { resolveId } = plugin();
+	const p = plugin();
 	assert.ok(
-		resolveId('esm-no-pkg-export', path.resolve('test/foo/main.js')) == null
+		p.resolveId('esm-no-pkg-export', path.resolve('test/foo/main.js')) == null
 	);
 });
 
 test('resolves esm module that exports package.json', () => {
-	const { resolveId } = plugin();
+	const p = plugin();
 	assert.is(
-		resolveId('esm-component', path.resolve('test/foo/main.js')),
+		p.resolveId('esm-component', path.resolve('test/foo/main.js')),
 		path.resolve('test/node_modules/esm-component/src/Component.svelte')
 	);
 });
 
 test('ignores virtual modules', () => {
-	const { resolveId } = plugin();
+	const p = plugin();
 	assert.ok(
-		resolveId('path', path.resolve('\0some-plugin-generated-module')) == null
+		p.resolveId('path', path.resolve('\0some-plugin-generated-module')) == null
 	);
 });
 
 test('supports component name assignment', async () => {
-	const { transform } = plugin();
-	const index = await transform('', 'index.svelte');
+	const p = plugin();
+	const index = await p.transform('', 'index.svelte');
 
 	assert.is.not(index.code.indexOf('class Index extends SvelteComponent'), -1);
 
-	const card = await transform('', 'card/index.svelte');
+	const card = await p.transform('', 'card/index.svelte');
 	assert.is(card.code.indexOf('class Index extends SvelteComponent'), -1);
 	assert.is.not(card.code.indexOf('class Card extends SvelteComponent'), -1);
 });
 
 test('creates a {code, map, dependencies} object, excluding the AST etc', async () => {
-	const { transform } = plugin();
-	const compiled = await transform('', 'test.svelte');
+	const p = plugin();
+	const compiled = await p.transform('', 'test.svelte');
 	assert.equal(Object.keys(compiled), ['code', 'map', 'dependencies']);
 });
 
@@ -91,11 +91,11 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 });
 
 test('squelches "unused CSS" warnings if `emitCss: false`', () => {
-	const { transform } = plugin({
+	const p = plugin({
 		emitCss: false
 	});
 
-	transform.call({
+	p.transform.call({
 		warn: warning => {
 			throw new Error(warning.message);
 		}
@@ -110,7 +110,7 @@ test('squelches "unused CSS" warnings if `emitCss: false`', () => {
 });
 
 test('preprocesses components', async () => {
-	const { transform } = plugin({
+	const p = plugin({
 		preprocess: {
 			markup: ({ content, filename }) => {
 				return {
@@ -124,7 +124,7 @@ test('preprocesses components', async () => {
 		}
 	});
 
-	const { code, dependencies } = await transform(`
+	const { code, dependencies } = await p.transform(`
 		<h1>Hello __REPLACEME__!</h1>
 		<h2>file: __FILENAME__</h2>
 		<style>h1 { color: red; }</style>
@@ -136,9 +136,9 @@ test('preprocesses components', async () => {
 });
 
 test('emits a CSS file', async () => {
-	const { load, transform } = plugin();
+	const p = plugin();
 
-	const transformed = await transform(`<h1>Hello!</h1>
+	const transformed = await p.transform(`<h1>Hello!</h1>
 
 	<style>
 		h1 {
@@ -148,7 +148,7 @@ test('emits a CSS file', async () => {
 
 	assert.ok(transformed.code.indexOf(`import "path/to/Input.css";`) !== -1);
 
-	const css = load('path/to/Input.css');
+	const css = p.load('path/to/Input.css');
 
 	const smc = await new SourceMapConsumer(css.map);
 
@@ -163,9 +163,9 @@ test('emits a CSS file', async () => {
 });
 
 test('properly escapes CSS paths', async () => {
-	const { load, transform } = plugin();
+	const p = plugin();
 
-	const transformed = await transform(`<h1>Hello!</h1>
+	const transformed = await p.transform(`<h1>Hello!</h1>
 
 	<style>
 		h1 {
@@ -175,7 +175,7 @@ test('properly escapes CSS paths', async () => {
 
 	assert.ok(transformed.code.indexOf(`import "path\\\\t'o\\\\Input.css";`) !== -1);
 
-	const css = load(`path\\t'o\\Input.css`);
+	const css = p.load(`path\\t'o\\Input.css`);
 
 	const smc = await new SourceMapConsumer(css.map);
 
@@ -193,7 +193,7 @@ test('intercepts warnings', async () => {
 	const warnings = [];
 	const handled = [];
 
-	const { transform } = plugin({
+	const p = plugin({
 		onwarn(warning, handler) {
 			warnings.push(warning);
 
@@ -203,7 +203,7 @@ test('intercepts warnings', async () => {
 		}
 	});
 
-	await transform.call({
+	await p.transform.call({
 		warn: warning => {
 			handled.push(warning);
 		}
