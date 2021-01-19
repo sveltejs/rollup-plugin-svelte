@@ -51,9 +51,6 @@ module.exports = function (options = {}) {
 			console.warn(`${PREFIX} Forcing \`"compilerOptions.dev": true\` because "hot" is truthy.`);
 			compilerOptions.dev = true;
 		}
-		if (hotOptions.nollup == null) {
-			hotOptions.nollup = !!process.env.NOLLUP;
-		}
 	}
 
 	return {
