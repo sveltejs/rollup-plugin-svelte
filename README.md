@@ -134,7 +134,7 @@ This plugin currently includes HMR support via community supported [svelte-hmr](
 
 What this option does is add `esm-hmr` compatible HMR handlers (see [there](https://github.com/rixo/svelte-hmr#whats-hmr-by-the-way) for an in-depth explanation) to the compiled components code.
 
-### HMR options
+### Options
 
 For now (while using the community implementation), you can pass any of [svelte-hmr's options](https://github.com/rixo/svelte-hmr#options) to the `hot` option of this plugin.
 
