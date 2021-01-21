@@ -1,5 +1,5 @@
 {
-  "version": "7.0.0",
+  "version": "7.1.0",
   "name": "rollup-plugin-svelte",
   "description": "Compile Svelte components with Rollup",
   "repository": "sveltejs/rollup-plugin-svelte",
