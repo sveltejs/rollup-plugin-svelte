@@ -127,15 +127,44 @@ By default (when `emitCss: true`) the CSS styles will be emitted into a virtual 
 
 If you set `emitCss: false` and your Svelte components contain `<style>` tags, the compiler will add JavaScript that injects those styles into the page when the component is rendered. That's not the default, because it adds weight to your JavaScript, prevents styles from being fetched in parallel with your code, and can even cause CSP violations.
 
+
 ## Hot module replacement
 
-In an effort to simplify the ecosystem, this plugin currently includes HMR support via [svelte-hmr](https://github.com/rixo/svelte-hmr). This is a temporary situation, since the community solution will be replaced by the official one once implemented in Svelte's core, and this implementation might differ.
+This plugin currently includes HMR support via community supported [svelte-hmr](https://github.com/rixo/svelte-hmr). This will be replaced by the official implementation once it is supported by Svelte's compiler itself.
 
 What this option does is add `esm-hmr` compatible HMR handlers (see [there](https://github.com/rixo/svelte-hmr#whats-hmr-by-the-way) for an in-depth explanation) to the compiled components code.
 
-By itself, this option won't give you HMR support out of the box, because Rollup doesn't come with a dev server. This option is meant to be used in combination with some [esm-hmr](https://github.com/snowpackjs/esm-hmr) compliant solution, for example [rollup-plugin-hot](https://github.com/rixo/rollup-plugin-hot). You can also use [Nollup](), that aims to be a very fast Rollup compatible dev server with HMR support, but you'll also need some compatibility plugin (like [rollup-plugin-hot-nollup](https://github.com/rixo/rollup-plugin-hot-nollup)) because Nollup implements its own HMR API.
+### HMR options
 
-While using the community implementation, you can pass any of [svelte-hmr's options](https://github.com/rixo/svelte-hmr#options) to the `hot` option of this plugin.
+For now (while using the community implementation), you can pass any of [svelte-hmr's options](https://github.com/rixo/svelte-hmr#options) to the `hot` option of this plugin.
+
+### HMR with Rollup
+
+By itself, this option won't give you HMR support out of the box with Rollup, because Rollup doesn't come with a dev server. If you want to enable HMR in a Rollup project, you'll need a HMR plugin like [rollup-plugin-hot](https://github.com/rixo/rollup-plugin-hot). Or you can use [Nollup](https://github.com/PepsRyuu/nollup), a Rollup compatible dev server intended for faster rebuild during development (note that you'd also need a `esm-hmr` compatibility plugin with Nollup, like [this](https://github.com/rixo/rollup-plugin-hot-nollup)).
+
+### HMR with Vite
+
+This plugin can also be used directly with Vite 2, that supports a subset of Rollup plugin API, and has native HMR.
+
+Example of the minimal config you need to enable Svelte HMR in Vite 2:
+
+`vite.config.js`
+
+```js
+import svelte from 'rollup-plugin-svelte'
+
+export default {
+  plugins: [
+    svelte({
+      // NOTE that dev and hot should be disabled for production build
+      dev: true,
+      hot: true,
+      emitCss: false,
+    }),
+  ],
+}
+```
+
 
 ## License
 
