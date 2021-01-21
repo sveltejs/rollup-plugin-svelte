@@ -35,7 +35,7 @@ module.exports = function (options = {}) {
 
 	// [filename]:[chunk]
 	const cache_emit = new Map;
-	const { onwarn, emitCss=true, hot: hotOptions } = rest;
+	const { onwarn, emitCss=true } = rest;
 
 	if (emitCss) {
 		if (compilerOptions.css) {
@@ -44,14 +44,12 @@ module.exports = function (options = {}) {
 		compilerOptions.css = false;
 	}
 
-	const makeHot = hotOptions && createMakeHot({ walk });
-
-	if (hotOptions) {
-		if (!compilerOptions.dev) {
-			console.warn(`${PREFIX} Forcing \`"compilerOptions.dev": true\` because "hot" is truthy.`);
-			compilerOptions.dev = true;
-		}
+	if (rest.hot && !compilerOptions.dev) {
+		console.info(`${PREFIX} Disabling HMR because "dev" option is disabled.`);
+		rest.hot = false;
 	}
+
+	const makeHot = rest.hot && createMakeHot({ walk });
 
 	return {
 		name: 'svelte',
@@ -133,13 +131,13 @@ module.exports = function (options = {}) {
 				cache_emit.set(fname, compiled.css);
 			}
 
-			if (hotOptions) {
+			if (makeHot) {
 				compiled.js.code = makeHot({
 					id,
 					compiledCode: compiled.js.code,
 					hotOptions: {
 						injectCss: !rest.emitCss,
-						...hotOptions,
+						...rest.hot,
 					},
 					compiled,
 					originalCode: code,
