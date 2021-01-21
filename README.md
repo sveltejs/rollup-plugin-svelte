@@ -134,13 +134,32 @@ This plugin currently includes HMR support via community supported [svelte-hmr](
 
 What this option does is add `esm-hmr` compatible HMR handlers (see [there](https://github.com/rixo/svelte-hmr#whats-hmr-by-the-way) for an in-depth explanation) to the compiled components code.
 
+By itself, this won't give you HMR out of the box with Rollup, because Rollup doesn't come with a dev server. See bellow for some HMR solutions with Rollup, or usage in HMR-enabled Vite.
+
+Note that the `dev` compiler option is required for HMR. **If `compilerOptions.dev` is not set or falsy, the `hot` option will be disabled too.** (Which is probably what you want for a production build.)
+
 ### Options
 
 For now (while using the community implementation), you can pass any of [svelte-hmr's options](https://github.com/rixo/svelte-hmr#options) to the `hot` option of this plugin.
 
+For example:
+
+```js
+svelte({
+  compilerOptions: {
+    dev: true,
+  },
+  hot: {
+    preserveLocalState: true,
+  }
+})
+```
+
 ### HMR with Rollup
 
-By itself, this option won't give you HMR support out of the box with Rollup, because Rollup doesn't come with a dev server. If you want to enable HMR in a Rollup project, you'll need a HMR plugin like [rollup-plugin-hot](https://github.com/rixo/rollup-plugin-hot). Or you can use [Nollup](https://github.com/PepsRyuu/nollup), a Rollup compatible dev server intended for faster rebuild during development (note that you'd also need a `esm-hmr` compatibility plugin with Nollup, like [this](https://github.com/rixo/rollup-plugin-hot-nollup)).
+Rollup doesn't support HMR natively, because it doesn't even come with a dev server. If you want to enable HMR in a Rollup project, you'll need a HMR plugin like [rollup-plugin-hot](https://github.com/rixo/rollup-plugin-hot).
+
+Or you can use [Nollup](https://github.com/PepsRyuu/nollup), a Rollup compatible dev server intended for faster rebuild during development (note that you'd also need a `esm-hmr` compatibility plugin with Nollup, like [this](https://github.com/rixo/rollup-plugin-hot-nollup)).
 
 ### HMR with Vite
 
@@ -156,8 +175,9 @@ import svelte from 'rollup-plugin-svelte'
 export default {
   plugins: [
     svelte({
-      // NOTE that dev and hot should be disabled for production build
-      dev: true,
+      compilerOptions: {
+        dev: true, // should be disabled for production build
+      },
       hot: true,
       emitCss: false,
     }),
