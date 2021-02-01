@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "require-relative": "^0.8.7",
-    "rollup-pluginutils": "^2.8.2"
+    "@rollup/pluginutils": "^4.1.0"
   },
   "peerDependencies": {
     "svelte": ">=3.5.0",
