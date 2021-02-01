@@ -1,6 +1,6 @@
 const path = require('path');
 const relative = require('require-relative');
-const { createFilter } = require('rollup-pluginutils');
+const { createFilter } = require('@rollup/pluginutils');
 const { compile, preprocess } = require('svelte/compiler');
 
 const PREFIX = '[rollup-plugin-svelte]';
