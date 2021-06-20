@@ -50,6 +50,7 @@ module.exports = function (options = {}) {
 		 */
 		resolveId(importee, importer) {
 			if (cache_emit.has(importee)) return importee;
+			if (importee === 'svelte' && compilerOptions.generate === 'ssr') return this.resolve('svelte/ssr', importer, { skipSelf: true });
 			if (!importer || importee[0] === '.' || importee[0] === '\0' || path.isAbsolute(importee)) return null;
 
 			// if this is a bare import, see if there's a valid pkg.svelte
