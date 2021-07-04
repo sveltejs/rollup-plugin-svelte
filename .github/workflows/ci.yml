@@ -3,16 +3,16 @@ name: CI
 on:
   push:
     paths-ignore:
-      - '*.md'
-      - 'LICENSE'
-      - 'index.d.ts'
+      - "*.md"
+      - "LICENSE"
+      - "index.d.ts"
     branches:
       - master
   pull_request:
     paths-ignore:
-      - '*.md'
-      - 'LICENSE'
-      - 'index.d.ts'
+      - "*.md"
+      - "LICENSE"
+      - "index.d.ts"
     branches:
       - master
 
@@ -26,17 +26,18 @@ jobs:
         nodejs: [10, 12, 14]
         os: [ubuntu-latest, windows-latest, macOS-latest]
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.nodejs }}
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.nodejs }}
+          cache: npm
 
-    - name: Install
-      run: npm ci
+      - name: Install
+        run: npm ci
 
-    - name: Linter
-      if: matrix.os != 'windows-latest'
-      run: npm run lint
+      - name: Linter
+        if: matrix.os != 'windows-latest'
+        run: npm run lint
 
-    - name: Test
-      run: npm test
+      - name: Test
+        run: npm test
