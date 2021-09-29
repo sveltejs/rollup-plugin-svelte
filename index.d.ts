@@ -6,6 +6,15 @@ type Arrayable<T> = T | T[];
 
 type WarningHandler = (warning: RollupWarning | string) => void;
 
+/**
+ * Since Rollup bundles as ESM, we don't allow compilation to be CJS.
+ * You can instead configure Rollup to build your whole bundle as non-ESM
+ * using the `format` option on `output`.
+ * See: https://github.com/sveltejs/rollup-plugin-svelte/issues/190#issuecomment-930298165
+ */
+type OverridenModuleFormat = "esm"
+type OverridenCompileOptions = Omit<CompileOptions, "format"> & { format?: OverridenModuleFormat }
+
 interface Options {
   /** One or more minimatch patterns */
   include: Arrayable<string>;
@@ -34,7 +43,7 @@ interface Options {
   emitCss: boolean;
 
   /** Options passed to `svelte.compile` method. */
-  compilerOptions: CompileOptions;
+  compilerOptions: OverridenCompileOptions;
 
   /** Custom warnings handler; defers to Rollup as default. */
   onwarn(warning: RollupWarning, handler: WarningHandler): void;
