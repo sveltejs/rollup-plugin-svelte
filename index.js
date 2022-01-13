@@ -136,8 +136,15 @@ module.exports = function (options = {}) {
 		 */
 		generateBundle() {
 			if (pkg_export_errors.size > 0) {
-				console.warn(`\n${PREFIX} The following packages did not export their \`package.json\` file so we could not check the "svelte" field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n`);
-				console.warn(Array.from(pkg_export_errors, s => `- ${s}`).join('\n') + '\n');
+				const pkg_warning = `\n${PREFIX} The following packages did not export their \`package.json\` file so we could not check the "svelte" field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n`;
+				const pkg_exports = Array.from(pkg_export_errors, s => `- ${s}`).join('\n') + '\n';
+				const warning = pkg_warning + '\n' + pkg_exports;
+
+				if (onwarn) {
+					onwarn(warning, this.warn);
+				} else {
+					console.warn(warning);
+				}
 			}
 		}
 	};
