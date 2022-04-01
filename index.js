@@ -144,7 +144,7 @@ module.exports = function (options = {}) {
 				}
 
 				if(errors.length) {
-					console.warn(`\n${PREFIX} The following packages did not export their \`package.json\` file so we could not check the "svelte" field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n`);
+					console.warn(`\n${PREFIX} The following packages did not export their \`package.json\` file so we could not check the "svelte" field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file. If you wish to ignore this warning, use the option ignoreExportsWarn in your rollup config file.\n`);
 					console.warn(errors.map(s => `- ${s}`).join('\n') + '\n');
 				}
 			}
