@@ -12,7 +12,8 @@ const plugin_options = new Set([
 	'extensions',
 	'include',
 	'onwarn',
-	'preprocess'
+	'preprocess',
+	'ignoreExportsWarn'
 ]);
 
 /**
@@ -136,8 +137,16 @@ module.exports = function (options = {}) {
 		 */
 		generateBundle() {
 			if (pkg_export_errors.size > 0) {
-				console.warn(`\n${PREFIX} The following packages did not export their \`package.json\` file so we could not check the "svelte" field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n`);
-				console.warn(Array.from(pkg_export_errors, s => `- ${s}`).join('\n') + '\n');
+				let errors = Array.from(pkg_export_errors);
+
+				if(Array.isArray(rest.ignoreExportsWarn)) {
+					errors = errors.filter(p => !rest.ignoreExportsWarn.includes(p));
+				}
+
+				if(errors.length) {
+					console.warn(`\n${PREFIX} The following packages did not export their \`package.json\` file so we could not check the "svelte" field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file.\n`);
+					console.warn(errors.map(s => `- ${s}`).join('\n') + '\n');
+				}
 			}
 		}
 	};

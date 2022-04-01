@@ -38,6 +38,11 @@ interface Options {
 
   /** Custom warnings handler; defers to Rollup as default. */
   onwarn(warning: RollupWarning, handler: WarningHandler): void;
+
+  /** Ignore warnings regarding packages not exporting their package.json file 
+   * by adding the package name to this array.
+   */
+	ignoreExportsWarn: string[];
 }
 
 export default function svelte(options?: Partial<Options>): Plugin;

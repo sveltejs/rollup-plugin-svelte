@@ -56,6 +56,10 @@ export default {
         handler(warning);
       },
 
+      // Ignore warnings regarding packages not exporting their package.json file 
+      // by adding the package name to this array.
+      ignoreExportsWarn: [];
+
       // You can pass any of the Svelte compiler options
       compilerOptions: {
 
