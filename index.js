@@ -1,10 +1,10 @@
 const path = require('path');
+const fs = require('fs');
 const relative = require('require-relative');
 const { createFilter } = require('@rollup/pluginutils');
 const { compile, preprocess } = require('svelte/compiler');
 
 const PREFIX = '[rollup-plugin-svelte]';
-const pkg_export_errors = new Set();
 
 const plugin_options = new Set([
 	'emitCss',
@@ -12,9 +12,54 @@ const plugin_options = new Set([
 	'extensions',
 	'include',
 	'onwarn',
-	'preprocess',
-	'ignoreExportsWarn'
+	'preprocess'
 ]);
+
+const parsePkg = function(dir) {
+	const pkgFile = path.join(dir, 'package.json');
+
+	try {
+		return JSON.parse(fs.readFileSync(pkgFile, 'utf-8'));
+	} catch (e) {
+		return false;
+	}
+}
+
+const findPkg = function(name, importer) {
+	let dir, pkg;
+
+	try {
+		const file = `${name}/package.json`;
+		const resolved = relative.resolve(file, path.dirname(importer));
+		dir = path.dirname(resolved);
+		pkg = require(resolved);
+	} catch (err) {
+		if (err.code === 'MODULE_NOT_FOUND') return {pkg: null, dir};
+		if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
+			dir = path.dirname(relative.resolve(name));
+			
+			while (dir) {
+				pkg = parsePkg(dir);
+
+				if (pkg && pkg.name === name) {
+					return {pkg, dir};
+				}
+
+				const parent = path.dirname(dir);
+				if (parent === dir) {
+					break;
+				}
+				dir = parent;
+			}
+
+			return {pkg: null, dir};
+		}
+
+		throw err;
+	}
+
+	return {pkg, dir};
+}
 
 /**
  * @param [options] {Partial<import('.').Options>}
@@ -56,27 +101,15 @@ module.exports = function (options = {}) {
 			// if this is a bare import, see if there's a valid pkg.svelte
 			const parts = importee.split('/');
 
-			let dir, pkg, name = parts.shift();
+			let name = parts.shift();
 			if (name && name[0] === '@') {
 				name += `/${parts.shift()}`;
 			}
 
-			try {
-				const file = `${name}/package.json`;
-				const resolved = relative.resolve(file, path.dirname(importer));
-				dir = path.dirname(resolved);
-				pkg = require(resolved);
-			} catch (err) {
-				if (err.code === 'MODULE_NOT_FOUND') return null;
-				if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
-					pkg_export_errors.add(name);
-					return null;
-				}
-				throw err;
-			}
+			const {pkg, dir} = findPkg(name, importer);
 
 			// use pkg.svelte
-			if (parts.length === 0 && pkg.svelte) {
+			if (parts.length === 0 && pkg && pkg.svelte) {
 				return path.resolve(dir, pkg.svelte);
 			}
 		},
@@ -130,24 +163,6 @@ module.exports = function (options = {}) {
 			}
 
 			return compiled.js;
-		},
-
-		/**
-		 * All resolutions done; display warnings wrt `package.json` access.
-		 */
-		generateBundle() {
-			if (pkg_export_errors.size > 0) {
-				let errors = Array.from(pkg_export_errors);
-
-				if(Array.isArray(rest.ignoreExportsWarn)) {
-					errors = errors.filter(p => !rest.ignoreExportsWarn.includes(p));
-				}
-
-				if(errors.length) {
-					console.warn(`\n${PREFIX} The following packages did not export their \`package.json\` file so we could not check the "svelte" field. If you had difficulties importing svelte components from a package, then please contact the author and ask them to export the package.json file. If you wish to ignore this warning, use the option ignoreExportsWarn in your rollup config file.\n`);
-					console.warn(errors.map(s => `- ${s}`).join('\n') + '\n');
-				}
-			}
 		}
 	};
 };
