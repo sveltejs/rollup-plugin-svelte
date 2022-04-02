@@ -25,18 +25,20 @@ const parsePkg = function(dir) {
 	}
 }
 
+const getDir = (file, importer) => relative.resolve(file, path.dirname(importer));
+
 const findPkg = function(name, importer) {
 	let dir, pkg;
 
 	try {
 		const file = `${name}/package.json`;
-		const resolved = relative.resolve(file, path.dirname(importer));
+		const resolved = getDir(file, importer);
 		dir = path.dirname(resolved);
 		pkg = require(resolved);
 	} catch (err) {
 		if (err.code === 'MODULE_NOT_FOUND') return {pkg: null, dir};
 		if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
-			dir = path.dirname(relative.resolve(name));
+			dir = path.dirname(getDir(name, importer));
 			
 			while (dir) {
 				pkg = parsePkg(dir);
