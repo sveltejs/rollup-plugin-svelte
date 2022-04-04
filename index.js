@@ -15,7 +15,7 @@ const plugin_options = new Set([
 	'preprocess'
 ]);
 
-const parsePkg = function(dir) {
+const parse_pkg = function(dir) {
 	const pkgFile = path.join(dir, 'package.json');
 
 	try {
@@ -25,23 +25,23 @@ const parsePkg = function(dir) {
 	}
 }
 
-const getDir = (file, importer) => relative.resolve(file, path.dirname(importer));
+const get_dir = (file, importer) => relative.resolve(file, path.dirname(importer));
 
-const findPkg = function(name, importer) {
+const find_pkg = function(name, importer) {
 	let dir, pkg;
 
 	try {
 		const file = `${name}/package.json`;
-		const resolved = getDir(file, importer);
+		const resolved = get_dir(file, importer);
 		dir = path.dirname(resolved);
 		pkg = require(resolved);
 	} catch (err) {
 		if (err.code === 'MODULE_NOT_FOUND') return {pkg: null, dir};
 		if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
-			dir = path.dirname(getDir(name, importer));
+			dir = path.dirname(get_dir(file, importer));
 			
 			while (dir) {
-				pkg = parsePkg(dir);
+				pkg = parse_pkg(dir);
 
 				if (pkg && pkg.name === name) {
 					return {pkg, dir};
@@ -108,7 +108,7 @@ module.exports = function (options = {}) {
 				name += `/${parts.shift()}`;
 			}
 
-			const {pkg, dir} = findPkg(name, importer);
+			const {pkg, dir} = find_pkg(name, importer);
 
 			// use pkg.svelte
 			if (parts.length === 0 && pkg && pkg.svelte) {
