@@ -16,10 +16,10 @@ const plugin_options = new Set([
 ]);
 
 const parse_pkg = function(dir) {
-	const pkgFile = path.join(dir, 'package.json');
+	const pkg_file = path.join(dir, 'package.json');
 
 	try {
-		return JSON.parse(fs.readFileSync(pkgFile, 'utf-8'));
+		return JSON.parse(fs.readFileSync(pkg_file, 'utf-8'));
 	} catch (e) {
 		return false;
 	}
