@@ -1,4 +1,4 @@
-> Undecided yet what bundler to use? We suggest using [SvelteKit](https://kit.svelte.dev), or Vite with [vite-plugin-svelte](https://github.com/sveltejs/vite-plugin-svelte/).
+> Undecided yet what bundler to use? We suggest using [SvelteKit](https://kit.svelte.dev) or Vite with [vite-plugin-svelte](https://github.com/sveltejs/vite-plugin-svelte/).
 
 # rollup-plugin-svelte [![CI](https://github.com/sveltejs/rollup-plugin-svelte/workflows/CI/badge.svg)](https://github.com/sveltejs/rollup-plugin-svelte/actions)
 
