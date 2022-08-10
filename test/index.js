@@ -86,9 +86,9 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 	assert.ok(map);
 	assert.is(map.file, 'bundle.js');
 	assert.is(map.sources.length, 3);
-	assert.ok(map.sources.indexOf('../src/main.js') >= 0);
-	assert.ok(map.sources.indexOf('../src/Foo.svelte') >= 0);
-	assert.ok(map.sources.indexOf('../src/Bar.svelte') >= 0);
+	assert.ok(map.sources.includes('../src/main.js'));
+	assert.ok(map.sources.includes('../src/Foo.svelte'));
+	assert.ok(map.sources.includes('../src/Bar.svelte'));
 	assert.is(map.sourcesContent, null);
 });
 
