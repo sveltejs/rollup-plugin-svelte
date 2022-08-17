@@ -37,7 +37,7 @@ export default {
       include: 'src/components/**/*.svelte',
 
       // Optionally, preprocess components with svelte.preprocess:
-      // https://svelte.dev/docs#svelte_preprocess
+      // https://svelte.dev/docs#compile-time-svelte-preprocess
       preprocess: {
         style: ({ content }) => {
           return transformStyles(content);
