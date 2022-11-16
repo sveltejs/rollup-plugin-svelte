@@ -75,7 +75,11 @@ export default {
       }
     }),
     // see NOTICE below
-    resolve({ browser: true }),
+    resolve({
+      browser: true,
+      exportConditions: ['svelte'],
+      extensions: ['.svelte']
+    }),
     // ...
   ]
 }
@@ -89,22 +93,26 @@ export default {
 If you are using the `preprocess` feature, then your callback responses may — in addition to the `code` and `map` values described in the Svelte compile docs — also optionally include a `dependencies` array. This should be the paths of additional files that the preprocessor result in some way depends upon. In Rollup 0.61+ in watch mode, any changes to these additional files will also trigger re-builds.
 
 
-## `pkg.svelte`
+## `svelte` exports condition
 
-If you're importing a component from your node_modules folder, and that component's package.json has a `"svelte"` property...
+If you're importing a component from your node_modules folder, and that component's `package.json` has a `"svelte"` property in its `exports` condition...
 
 ```js
 {
   "name": "some-component",
 
   // this means 'some-component' resolves to 'some-component/src/SomeComponent.svelte'
-  "svelte": "src/MyComponent.svelte"
+  "exports": {
+    ".": {
+      "svelte": "./src/MyComponent.svelte"
+    }
+  }
 }
 ```
 
-...then this plugin will ensure that your app imports the *uncompiled* component source code. That will result in a smaller, faster app (because code is deduplicated, and shared functions get optimized quicker), and makes it less likely that you'll run into bugs caused by your app using a different version of Svelte to the component.
+...then this plugin together with `@rollup/plugin-node-resolve` will ensure that your app imports the *uncompiled* component source code. That will result in a smaller, faster app (because code is deduplicated, and shared functions get optimized quicker), and makes it less likely that you'll run into bugs caused by your app using a different version of Svelte to the component.
 
-Conversely, if you're *publishing* a component to npm, you should ship the uncompiled source (together with the compiled distributable, for people who aren't using Svelte elsewhere in their app) and include the `"svelte"` property in your package.json.
+Conversely, if you're *publishing* a component to npm, you should ship the uncompiled source (together with the compiled distributable, for people who aren't using Svelte elsewhere in their app) and include the `"svelte"` property in the `exports` of your `package.json`.
 
 If you are publishing a package containing multiple components, you can create an `index.js` file that re-exports all the components, like this:
 
@@ -113,7 +121,7 @@ export { default as Component1 } from './Component1.svelte';
 export { default as Component2 } from './Component2.svelte';
 ```
 
-and so on. Then, in `package.json`, set the `svelte` property to point to this `index.js` file.
+and so on. Then, in `package.json`, set the `svelte` condition to point to this `index.js` file. Or you may create an export for each individual Svelte file. Using a single `index.js` which exports all files will allow multiple components to be imported with a single line, but may load more slowly during development. An export per file may load more quickly during development but require a separate import statement for each file.
 
 
 ## Extracting CSS
