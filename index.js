@@ -1,6 +1,5 @@
 const path = require('path');
 const fs = require('fs');
-const relative = require('require-relative');
 const { createFilter } = require('@rollup/pluginutils');
 const { compile, preprocess } = require('svelte/compiler');
 
@@ -14,56 +13,6 @@ const plugin_options = new Set([
 	'onwarn',
 	'preprocess'
 ]);
-
-const parse_pkg = function (dir) {
-	const pkg_file = path.join(dir, 'package.json');
-
-	try {
-		return JSON.parse(fs.readFileSync(pkg_file, 'utf-8'));
-	} catch (e) {
-		return false;
-	}
-};
-
-const get_dir = (file, importer) =>
-	relative.resolve(file, path.dirname(importer));
-
-const find_pkg = function (name, importer) {
-	let dir, pkg;
-
-	const file = `${name}/package.json`;
-
-	try {
-		const resolved = get_dir(file, importer);
-		dir = path.dirname(resolved);
-		pkg = require(resolved);
-	} catch (err) {
-		if (err.code === 'MODULE_NOT_FOUND') return { pkg: null, dir };
-		if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
-			dir = path.dirname(get_dir(file, importer));
-
-			while (dir) {
-				pkg = parse_pkg(dir);
-
-				if (pkg && pkg.name === name) {
-					return { pkg, dir };
-				}
-
-				const parent = path.dirname(dir);
-				if (parent === dir) {
-					break;
-				}
-				dir = parent;
-			}
-
-			return { pkg: null, dir };
-		}
-
-		throw err;
-	}
-
-	return { pkg, dir };
-};
 
 /**
  * @param [options] {Partial<import('.').Options>}
@@ -120,11 +69,18 @@ module.exports = function (options = {}) {
 				name += `/${parts.shift()}`;
 			}
 
-			const { pkg, dir } = find_pkg(name, importer);
+			if (parts.length > 0) return;
 
-			// use pkg.svelte
-			if (parts.length === 0 && pkg && pkg.svelte) {
-				return path.resolve(dir, pkg.svelte);
+			let search_dir = importer;
+			while (search_dir !== (search_dir = path.dirname(search_dir))) {
+				const dir = path.join(search_dir, 'node_modules', name);
+				const file = path.join(dir, 'package.json');
+				if (fs.existsSync(file)) {
+					const pkg = JSON.parse(fs.readFileSync(file, 'utf-8'));
+					if (pkg.svelte) {
+						return path.resolve(dir, pkg.svelte);
+					}
+				}
 			}
 		},
 
