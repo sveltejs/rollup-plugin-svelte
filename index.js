@@ -15,7 +15,7 @@ const plugin_options = new Set([
 	'preprocess'
 ]);
 
-const parse_pkg = function(dir) {
+const parse_pkg = function (dir) {
 	const pkg_file = path.join(dir, 'package.json');
 
 	try {
@@ -23,28 +23,30 @@ const parse_pkg = function(dir) {
 	} catch (e) {
 		return false;
 	}
-}
+};
 
-const get_dir = (file, importer) => relative.resolve(file, path.dirname(importer));
+const get_dir = (file, importer) =>
+	relative.resolve(file, path.dirname(importer));
 
-const find_pkg = function(name, importer) {
+const find_pkg = function (name, importer) {
 	let dir, pkg;
 
+	const file = `${name}/package.json`;
+
 	try {
-		const file = `${name}/package.json`;
 		const resolved = get_dir(file, importer);
 		dir = path.dirname(resolved);
 		pkg = require(resolved);
 	} catch (err) {
-		if (err.code === 'MODULE_NOT_FOUND') return {pkg: null, dir};
+		if (err.code === 'MODULE_NOT_FOUND') return { pkg: null, dir };
 		if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
 			dir = path.dirname(get_dir(file, importer));
-			
+
 			while (dir) {
 				pkg = parse_pkg(dir);
 
 				if (pkg && pkg.name === name) {
-					return {pkg, dir};
+					return { pkg, dir };
 				}
 
 				const parent = path.dirname(dir);
@@ -54,21 +56,21 @@ const find_pkg = function(name, importer) {
 				dir = parent;
 			}
 
-			return {pkg: null, dir};
+			return { pkg: null, dir };
 		}
 
 		throw err;
 	}
 
-	return {pkg, dir};
-}
+	return { pkg, dir };
+};
 
 /**
  * @param [options] {Partial<import('.').Options>}
  * @returns {import('rollup').Plugin}
  */
 module.exports = function (options = {}) {
-	const { compilerOptions={}, ...rest } = options;
+	const { compilerOptions = {}, ...rest } = options;
 	const extensions = rest.extensions || ['.svelte'];
 	const filter = createFilter(rest.include, rest.exclude);
 
@@ -76,16 +78,20 @@ module.exports = function (options = {}) {
 
 	for (const key in rest) {
 		if (plugin_options.has(key)) continue;
-		console.warn(`${PREFIX} Unknown "${key}" option. Please use "compilerOptions" for any Svelte compiler configuration.`);
+		console.warn(
+			`${PREFIX} Unknown "${key}" option. Please use "compilerOptions" for any Svelte compiler configuration.`
+		);
 	}
 
 	// [filename]:[chunk]
-	const cache_emit = new Map;
-	const { onwarn, emitCss=true } = rest;
+	const cache_emit = new Map();
+	const { onwarn, emitCss = true } = rest;
 
 	if (emitCss) {
 		if (compilerOptions.css) {
-			console.warn(`${PREFIX} Forcing \`"compilerOptions.css": false\` because "emitCss" was truthy.`);
+			console.warn(
+				`${PREFIX} Forcing \`"compilerOptions.css": false\` because "emitCss" was truthy.`
+			);
 		}
 		compilerOptions.css = false;
 	}
@@ -98,7 +104,13 @@ module.exports = function (options = {}) {
 		 */
 		resolveId(importee, importer) {
 			if (cache_emit.has(importee)) return importee;
-			if (!importer || importee[0] === '.' || importee[0] === '\0' || path.isAbsolute(importee)) return null;
+			if (
+				!importer ||
+				importee[0] === '.' ||
+				importee[0] === '\0' ||
+				path.isAbsolute(importee)
+			)
+				return null;
 
 			// if this is a bare import, see if there's a valid pkg.svelte
 			const parts = importee.split('/');
@@ -108,7 +120,7 @@ module.exports = function (options = {}) {
 				name += `/${parts.shift()}`;
 			}
 
-			const {pkg, dir} = find_pkg(name, importer);
+			const { pkg, dir } = find_pkg(name, importer);
 
 			// use pkg.svelte
 			if (parts.length === 0 && pkg && pkg.svelte) {
@@ -139,14 +151,15 @@ module.exports = function (options = {}) {
 
 			if (rest.preprocess) {
 				const processed = await preprocess(code, rest.preprocess, { filename });
-				if (processed.dependencies) dependencies.push(...processed.dependencies);
+				if (processed.dependencies)
+					dependencies.push(...processed.dependencies);
 				if (processed.map) svelte_options.sourcemap = processed.map;
 				code = processed.code;
 			}
 
 			const compiled = compile(code, svelte_options);
 
-			(compiled.warnings || []).forEach(warning => {
+			(compiled.warnings || []).forEach((warning) => {
 				if (!emitCss && warning.code === 'css-unused-selector') return;
 				if (onwarn) onwarn(warning, this.warn);
 				else this.warn(warning);
