@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 7.1.2
+
+- Fix package resolution ([#205](https://github.com/sveltejs/rollup-plugin-svelte/pull/205))
+
 ## 7.1.1
 
 - Resolve `package.json` files manually ([#198](https://github.com/sveltejs/rollup-plugin-svelte/pull/198))
