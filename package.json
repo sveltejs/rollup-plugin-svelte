@@ -25,7 +25,6 @@
 		"node": ">=10"
 	},
 	"dependencies": {
-		"require-relative": "^0.8.7",
 		"@rollup/pluginutils": "^4.1.0"
 	},
 	"peerDependencies": {
