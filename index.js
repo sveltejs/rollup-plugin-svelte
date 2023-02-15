@@ -75,10 +75,11 @@ module.exports = function (options = {}) {
 			const entry = parts.join('/') || '.';
 
 			let pkg;
+			let dir;
 
 			let search_dir = importer;
 			while (search_dir !== (search_dir = path.dirname(search_dir))) {
-				const dir = path.join(search_dir, 'node_modules', name);
+				dir = path.join(search_dir, 'node_modules', name);
 				const file = path.join(dir, 'package.json');
 				if (fs.existsSync(file)) {
 					pkg = JSON.parse(fs.readFileSync(file, 'utf-8'));
@@ -100,7 +101,7 @@ module.exports = function (options = {}) {
 						resolve(pkg, entry, { conditions: ['svelte'] });
 
 						if (!warned) {
-							console.error(`\n\u001B[1m\u001B[31mWARNING: Your @rollup/plugin-node-resolve configuration's 'exportConditions' array should include 'svelte'. See https://github.com/sveltejs/rollup-plugin-svelte#svelte-exports-condition for more information\u001B[39m\u001B[22m\n'`);
+							console.error('\n\u001B[1m\u001B[31mWARNING: Your @rollup/plugin-node-resolve configuration\'s \'exportConditions\' array should include \'svelte\'. See https://github.com/sveltejs/rollup-plugin-svelte#svelte-exports-condition for more information\u001B[39m\u001B[22m\n');
 							warned = true;
 						}
 					} catch (e) {
