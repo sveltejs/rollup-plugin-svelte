@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const { resolve } = require('resolve.exports');
 const { createFilter } = require('@rollup/pluginutils');
 const { compile, preprocess } = require('svelte/compiler');
 
@@ -13,6 +14,8 @@ const plugin_options = new Set([
 	'onwarn',
 	'preprocess'
 ]);
+
+let warned = false;
 
 /**
  * @param [options] {Partial<import('.').Options>}
@@ -51,7 +54,7 @@ module.exports = function (options = {}) {
 		/**
 		 * Resolve an import's full filepath.
 		 */
-		resolveId(importee, importer) {
+		async resolveId(importee, importer) {
 			if (cache_emit.has(importee)) return importee;
 			if (
 				!importer ||
@@ -69,16 +72,39 @@ module.exports = function (options = {}) {
 				name += `/${parts.shift()}`;
 			}
 
-			if (parts.length > 0) return;
+			const entry = parts.join('/') || '.';
+
+			let pkg;
 
 			let search_dir = importer;
 			while (search_dir !== (search_dir = path.dirname(search_dir))) {
 				const dir = path.join(search_dir, 'node_modules', name);
 				const file = path.join(dir, 'package.json');
 				if (fs.existsSync(file)) {
-					const pkg = JSON.parse(fs.readFileSync(file, 'utf-8'));
-					if (pkg.svelte) {
-						return path.resolve(dir, pkg.svelte);
+					pkg = JSON.parse(fs.readFileSync(file, 'utf-8'));
+					break;
+				}
+			}
+
+			if (pkg) {
+				// resolve pkg.svelte first
+				if (entry === '.' && pkg.svelte) {
+					return path.resolve(dir, pkg.svelte);
+				}
+
+				const resolved = await this.resolve(importee, importer, { skipSelf: true });
+
+				// if we can't resolve this import without the `svelte` condition, warn the user
+				if (!resolved) {
+					try {
+						resolve(pkg, entry, { conditions: ['svelte'] });
+
+						if (!warned) {
+							console.error(`\n\u001B[1m\u001B[31mWARNING: Your @rollup/plugin-node-resolve configuration's 'exportConditions' array should include 'svelte'. See https://github.com/sveltejs/rollup-plugin-svelte#svelte-exports-condition for more information\u001B[39m\u001B[22m\n'`);
+							warned = true;
+						}
+					} catch (e) {
+						// do nothing, this isn't a Svelte library
 					}
 				}
 			}
