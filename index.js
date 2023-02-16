@@ -87,27 +87,27 @@ module.exports = function (options = {}) {
 				}
 			}
 
-			if (pkg) {
-				// resolve pkg.svelte first for backwards compatibility
-				// we should resolve it after exports longer-term
-				if (entry === '.' && pkg.svelte) {
-					return path.resolve(dir, pkg.svelte);
-				}
+			if (!pkg) return;
 
-				const resolved = await this.resolve(importee, importer, { skipSelf: true });
+			// resolve pkg.svelte first for backwards compatibility
+			// we should resolve it after exports longer-term
+			if (entry === '.' && pkg.svelte) {
+				return path.resolve(dir, pkg.svelte);
+			}
 
-				// if we can't resolve this import without the `svelte` condition, warn the user
-				if (!resolved) {
-					try {
-						resolve(pkg, entry, { conditions: ['svelte'] });
+			const resolved = await this.resolve(importee, importer, { skipSelf: true });
 
-						if (!warned) {
-							console.error('\n\u001B[1m\u001B[31mWARNING: Your @rollup/plugin-node-resolve configuration\'s \'exportConditions\' array should include \'svelte\'. See https://github.com/sveltejs/rollup-plugin-svelte#svelte-exports-condition for more information\u001B[39m\u001B[22m\n');
-							warned = true;
-						}
-					} catch (e) {
-						// do nothing, this isn't a Svelte library
+			// if we can't resolve this import without the `svelte` condition, warn the user
+			if (!resolved) {
+				try {
+					resolve(pkg, entry, { conditions: ['svelte'] });
+
+					if (!warned) {
+						console.error('\n\u001B[1m\u001B[31mWARNING: Your @rollup/plugin-node-resolve configuration\'s \'exportConditions\' array should include \'svelte\'. See https://github.com/sveltejs/rollup-plugin-svelte#svelte-exports-condition for more information\u001B[39m\u001B[22m\n');
+						warned = true;
 					}
+				} catch (e) {
+					// do nothing, this isn't a Svelte library
 				}
 			}
 		},
