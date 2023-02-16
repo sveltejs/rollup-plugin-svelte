@@ -110,7 +110,7 @@ If you're importing a component from your node_modules folder, and that componen
 }
 ```
 
-...then this plugin together with `@rollup/plugin-node-resolve` (and its `exportConditions` option containing the `'svelte'` condition) will ensure that your app imports the *uncompiled* component source code. That will result in a smaller, faster app (because code is deduplicated, and shared functions get optimized quicker), and makes it less likely that you'll run into bugs caused by your app using a different version of Svelte to the component.
+...then this plugin together with `@rollup/plugin-node-resolve` (and its `exportConditions` option containing the `'svelte'` condition – see configuration example above) will ensure that your app imports the *uncompiled* component source code. That will result in a smaller, faster app (because code is deduplicated, and shared functions get optimized quicker), and makes it less likely that you'll run into bugs caused by your app using a different version of Svelte to the component.
 
 Conversely, if you're *publishing* a component to npm, you should ship the uncompiled source (together with the compiled distributable, for people who aren't using Svelte elsewhere in their app) and include the `"svelte"` property in the `exports` of your `package.json`.
 
