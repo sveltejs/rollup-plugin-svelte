@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 7.1.3
+
+- Warn if `svelte` export condition is missing ([#206](https://github.com/sveltejs/rollup-plugin-svelte/pull/206))
+
 ## 7.1.2
 
 - Fix package resolution ([#205](https://github.com/sveltejs/rollup-plugin-svelte/pull/205))
