@@ -88,7 +88,8 @@ module.exports = function (options = {}) {
 			}
 
 			if (pkg) {
-				// resolve pkg.svelte first
+				// resolve pkg.svelte first for backwards compatibility
+				// we should resolve it after exports longer-term
 				if (entry === '.' && pkg.svelte) {
 					return path.resolve(dir, pkg.svelte);
 				}
