@@ -8,40 +8,44 @@ const sander = require('sander');
 
 const plugin = require('..');
 
-test('resolves using pkg.svelte', () => {
+const context = {
+	resolve: () => 'resolved'
+};
+
+test('resolves using pkg.svelte', async () => {
 	const p = plugin();
 	assert.is(
-		p.resolveId('widget', path.resolve('test/foo/main.js')),
+		await p.resolveId.call(context, 'widget', path.resolve('test/foo/main.js')),
 		path.resolve('test/node_modules/widget/src/Widget.svelte')
 	);
 });
 
-test('ignores built-in modules', () => {
-	const p = plugin();
-	assert.ok(
-		p.resolveId('path', path.resolve('test/foo/main.js')) == null
-	);
-});
-
-test('ignores esm modules that do not export package.json', () => {
-	const p = plugin();
-	assert.ok(
-		p.resolveId('esm-no-pkg-export', path.resolve('test/foo/main.js')) == null
-	);
-});
-
-test('resolves esm module that exports package.json', () => {
+test('ignores built-in modules', async () => {
 	const p = plugin();
 	assert.is(
-		p.resolveId('esm-component', path.resolve('test/foo/main.js')),
+		await p.resolveId.call(context, 'path', path.resolve('test/foo/main.js')), undefined
+	);
+});
+
+test('ignores esm modules that do not export package.json', async () => {
+	const p = plugin();
+	assert.is(
+		await p.resolveId.call(context, 'esm-no-pkg-export', path.resolve('test/foo/main.js')), undefined
+	);
+});
+
+test('resolves esm module that exports package.json', async () => {
+	const p = plugin();
+	assert.is(
+		await p.resolveId.call(context, 'esm-component', path.resolve('test/foo/main.js')),
 		path.resolve('test/node_modules/esm-component/src/Component.svelte')
 	);
 });
 
-test('ignores virtual modules', () => {
+test('ignores virtual modules', async () => {
 	const p = plugin();
-	assert.ok(
-		p.resolveId('path', path.resolve('\0some-plugin-generated-module')) == null
+	assert.is(
+		await p.resolveId.call(context, 'path', path.resolve('\0some-plugin-generated-module')), undefined
 	);
 });
 
