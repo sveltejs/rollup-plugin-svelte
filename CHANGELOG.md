@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 7.1.4
+
+- Forward options to `this.resolve` ([#208](https://github.com/sveltejs/rollup-plugin-svelte/pull/208))
+
 ## 7.1.3
 
 - Warn if `svelte` export condition is missing ([#206](https://github.com/sveltejs/rollup-plugin-svelte/pull/206))
