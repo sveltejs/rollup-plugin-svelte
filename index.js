@@ -54,7 +54,7 @@ module.exports = function (options = {}) {
 		/**
 		 * Resolve an import's full filepath.
 		 */
-		async resolveId(importee, importer) {
+		async resolveId(importee, importer, options) {
 			if (cache_emit.has(importee)) return importee;
 			if (
 				!importer ||
@@ -95,7 +95,7 @@ module.exports = function (options = {}) {
 				return path.resolve(dir, pkg.svelte);
 			}
 
-			const resolved = await this.resolve(importee, importer, { skipSelf: true });
+			const resolved = await this.resolve(importee, importer, { skipSelf: true, ...options });
 
 			// if we can't resolve this import without the `svelte` condition, warn the user
 			if (!resolved) {
