@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const { resolve } = require('resolve.exports');
 const { createFilter } = require('@rollup/pluginutils');
-const { compile, preprocess } = require('svelte/compiler');
+const { compile, preprocess, VERSION } = require('svelte/compiler');
 
 const PREFIX = '[rollup-plugin-svelte]';
 
@@ -12,7 +12,7 @@ const plugin_options = new Set([
 	'extensions',
 	'include',
 	'onwarn',
-	'preprocess'
+	'preprocess',
 ]);
 
 let warned = false;
@@ -26,7 +26,9 @@ module.exports = function (options = {}) {
 	const extensions = rest.extensions || ['.svelte'];
 	const filter = createFilter(rest.include, rest.exclude);
 
-	compilerOptions.format = 'esm';
+	if (VERSION[0] === '3') {
+		compilerOptions.format = 'esm';
+	}
 
 	for (const key in rest) {
 		if (plugin_options.has(key)) continue;
@@ -56,12 +58,7 @@ module.exports = function (options = {}) {
 		 */
 		async resolveId(importee, importer, options) {
 			if (cache_emit.has(importee)) return importee;
-			if (
-				!importer ||
-				importee[0] === '.' ||
-				importee[0] === '\0' ||
-				path.isAbsolute(importee)
-			)
+			if (!importer || importee[0] === '.' || importee[0] === '\0' || path.isAbsolute(importee))
 				return null;
 
 			// if this is a bare import, see if there's a valid pkg.svelte
@@ -103,7 +100,9 @@ module.exports = function (options = {}) {
 					resolve(pkg, entry, { conditions: ['svelte'] });
 
 					if (!warned) {
-						console.error('\n\u001B[1m\u001B[31mWARNING: Your @rollup/plugin-node-resolve configuration\'s \'exportConditions\' array should include \'svelte\'. See https://github.com/sveltejs/rollup-plugin-svelte#svelte-exports-condition for more information\u001B[39m\u001B[22m\n');
+						console.error(
+							'\n\u001B[1m\u001B[31mWARNING: Your @rollup/plugin-node-resolve configuration\'s \'exportConditions\' array should include \'svelte\'. See https://github.com/sveltejs/rollup-plugin-svelte#svelte-exports-condition for more information\u001B[39m\u001B[22m\n'
+						);
 						warned = true;
 					}
 				} catch (e) {
@@ -135,8 +134,7 @@ module.exports = function (options = {}) {
 
 			if (rest.preprocess) {
 				const processed = await preprocess(code, rest.preprocess, { filename });
-				if (processed.dependencies)
-					dependencies.push(...processed.dependencies);
+				if (processed.dependencies) dependencies.push(...processed.dependencies);
 				if (processed.map) svelte_options.sourcemap = processed.map;
 				code = processed.code;
 			}
@@ -162,6 +160,6 @@ module.exports = function (options = {}) {
 			}
 
 			return compiled.js;
-		}
+		},
 	};
 };

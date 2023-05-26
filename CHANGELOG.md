@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 7.1.5
+
+- Get ready for Svelte 4
+
 ## 7.1.4
 
 - Forward options to `this.resolve` ([#208](https://github.com/sveltejs/rollup-plugin-svelte/pull/208))
