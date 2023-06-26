@@ -43,7 +43,7 @@ module.exports = function (options = {}) {
 
 	if (emitCss) {
 		const [majorVer, minorVer] = VERSION.split('.');
-		const cssOptionValue = majorVer > 3 || (majorVer >= 2 && minorVer >= 53) ? 'external' : true;
+		const cssOptionValue = majorVer > 3 || (majorVer >= 3 && minorVer >= 53) ? 'external' : true;
 		if (compilerOptions.css) {
 			console.warn(
 				`${PREFIX} Forcing \`"compilerOptions.css": ${typeof cssOptionValue === 'string' ? `"${cssOptionValue}"` : cssOptionValue}\` because "emitCss" was truthy.`
