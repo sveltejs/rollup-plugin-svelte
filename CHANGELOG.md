@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 7.1.6
+
+- Adjust inferred `css` option for Svelte 4
+
 ## 7.1.5
 
 - Get ready for Svelte 4

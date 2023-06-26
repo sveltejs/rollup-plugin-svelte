@@ -46,7 +46,9 @@ module.exports = function (options = {}) {
 		const cssOptionValue = majorVer > 3 ? 'external' : false;
 		if (compilerOptions.css) {
 			console.warn(
-				`${PREFIX} Forcing \`"compilerOptions.css": ${typeof cssOptionValue === 'string' ? `"${cssOptionValue}"` : cssOptionValue}\` because "emitCss" was truthy.`
+				`${PREFIX} Forcing \`"compilerOptions.css": ${
+					typeof cssOptionValue === 'string' ? `"${cssOptionValue}"` : cssOptionValue
+				}\` because "emitCss" was truthy.`
 			);
 		}
 		compilerOptions.css = cssOptionValue;
@@ -103,7 +105,7 @@ module.exports = function (options = {}) {
 
 					if (!warned) {
 						console.error(
-							'\n\u001B[1m\u001B[31mWARNING: Your @rollup/plugin-node-resolve configuration\'s \'exportConditions\' array should include \'svelte\'. See https://github.com/sveltejs/rollup-plugin-svelte#svelte-exports-condition for more information\u001B[39m\u001B[22m\n'
+							"\n\u001B[1m\u001B[31mWARNING: Your @rollup/plugin-node-resolve configuration's 'exportConditions' array should include 'svelte'. See https://github.com/sveltejs/rollup-plugin-svelte#svelte-exports-condition for more information\u001B[39m\u001B[22m\n"
 						);
 						warned = true;
 					}

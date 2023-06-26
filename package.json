@@ -1,5 +1,5 @@
 {
-	"version": "7.1.5",
+	"version": "7.1.6",
 	"name": "rollup-plugin-svelte",
 	"description": "Compile Svelte components with Rollup",
 	"repository": "sveltejs/rollup-plugin-svelte",
@@ -34,6 +34,7 @@
 	},
 	"devDependencies": {
 		"eslint": "^7.14.0",
+		"eslint-config-prettier": "^8.8.0",
 		"rollup": "^2.33.3",
 		"sander": "^0.6.0",
 		"source-map": "^0.7.3",
