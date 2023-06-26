@@ -42,12 +42,14 @@ module.exports = function (options = {}) {
 	const { onwarn, emitCss = true } = rest;
 
 	if (emitCss) {
+		const [majorVer, minorVer] = VERSION.split('.');
+		const cssOptionValue = majorVer > 3 || (majorVer >= 2 && minorVer >= 53) ? 'external' : true;
 		if (compilerOptions.css) {
 			console.warn(
-				`${PREFIX} Forcing \`"compilerOptions.css": "external"\` because "emitCss" was truthy.`
+				`${PREFIX} Forcing \`"compilerOptions.css": ${typeof cssOptionValue === 'string' ? `"${cssOptionValue}"` : cssOptionValue}\` because "emitCss" was truthy.`
 			);
 		}
-		compilerOptions.css = 'external';
+		compilerOptions.css = cssOptionValue;
 	}
 
 	return {
