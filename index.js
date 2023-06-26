@@ -44,10 +44,10 @@ module.exports = function (options = {}) {
 	if (emitCss) {
 		if (compilerOptions.css) {
 			console.warn(
-				`${PREFIX} Forcing \`"compilerOptions.css": false\` because "emitCss" was truthy.`
+				`${PREFIX} Forcing \`"compilerOptions.css": "external"\` because "emitCss" was truthy.`
 			);
 		}
-		compilerOptions.css = false;
+		compilerOptions.css = 'external';
 	}
 
 	return {
