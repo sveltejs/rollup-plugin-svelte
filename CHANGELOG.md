@@ -3,6 +3,7 @@
 ## 7.2.0
 
 - Support compiling `svelte.js/ts` files in Svelte 5
+- Prevent crash when `css` is `null` in Svelte 5 ([#216](https://github.com/sveltejs/rollup-plugin-svelte/issues/216))
 
 ## 7.1.6
 

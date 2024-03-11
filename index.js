@@ -169,7 +169,7 @@ module.exports = function (options = {}) {
 				else this.warn(warning);
 			});
 
-			if (emitCss && compiled.css.code) {
+			if (emitCss && compiled.css && compiled.css.code) {
 				const fname = id.replace(new RegExp(`\\${extension}$`), '.css');
 				compiled.js.code += `\nimport ${JSON.stringify(fname)};\n`;
 				cache_emit.set(fname, compiled.css);
