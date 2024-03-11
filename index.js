@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const { resolve } = require('resolve.exports');
 const { createFilter } = require('@rollup/pluginutils');
-const { compile, preprocess, VERSION } = require('svelte/compiler');
+const svelte = require('svelte/compiler');
 
 const PREFIX = '[rollup-plugin-svelte]';
 
@@ -26,7 +26,7 @@ module.exports = function (options = {}) {
 	const extensions = rest.extensions || ['.svelte'];
 	const filter = createFilter(rest.include, rest.exclude);
 
-	if (VERSION[0] === '3') {
+	if (svelte.VERSION[0] === '3') {
 		compilerOptions.format = 'esm';
 	}
 
@@ -42,7 +42,7 @@ module.exports = function (options = {}) {
 	const { onwarn, emitCss = true } = rest;
 
 	if (emitCss) {
-		const [majorVer] = VERSION.split('.');
+		const [majorVer] = svelte.VERSION.split('.');
 		const cssOptionValue = majorVer > 3 ? 'external' : false;
 		if (compilerOptions.css) {
 			console.warn(
@@ -129,6 +129,24 @@ module.exports = function (options = {}) {
 		async transform(code, id) {
 			if (!filter(id)) return null;
 
+			if (
+				Number(svelte.VERSION.split('.')[0]) >= 5 &&
+				(id.endsWith('.svelte.js') || id.endsWith('.svelte.ts'))
+			) {
+				const compiled = svelte.compileModule(code, {
+					filename: id,
+					dev: compilerOptions.dev,
+					generate: compilerOptions.generate,
+				});
+
+				(compiled.warnings || []).forEach((warning) => {
+					if (onwarn) onwarn(warning, this.warn);
+					else this.warn(warning);
+				});
+
+				return compiled.js;
+			}
+
 			const extension = path.extname(id);
 			if (!~extensions.indexOf(extension)) return null;
 
@@ -137,13 +155,13 @@ module.exports = function (options = {}) {
 			const svelte_options = { ...compilerOptions, filename };
 
 			if (rest.preprocess) {
-				const processed = await preprocess(code, rest.preprocess, { filename });
+				const processed = await svelte.preprocess(code, rest.preprocess, { filename });
 				if (processed.dependencies) dependencies.push(...processed.dependencies);
 				if (processed.map) svelte_options.sourcemap = processed.map;
 				code = processed.code;
 			}
 
-			const compiled = compile(code, svelte_options);
+			const compiled = svelte.compile(code, svelte_options);
 
 			(compiled.warnings || []).forEach((warning) => {
 				if (!emitCss && warning.code === 'css-unused-selector') return;

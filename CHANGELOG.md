@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 7.2.0
+
+- Support compiling `svelte.js/ts` files in Svelte 5
+
 ## 7.1.6
 
 - Adjust inferred `css` option for Svelte 4
