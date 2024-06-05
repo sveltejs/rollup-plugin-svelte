@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 7.2.1
+
+- Silence Svelte 5 version of unused CSS warning code if `emitCss` is `false`
+
 ## 7.2.0
 
 - Support compiling `svelte.js/ts` files in Svelte 5

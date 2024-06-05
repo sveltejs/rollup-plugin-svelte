@@ -6,6 +6,8 @@ const svelte = require('svelte/compiler');
 
 const PREFIX = '[rollup-plugin-svelte]';
 
+const majorVersion = Number(svelte.VERSION.split('.')[0]);
+
 const plugin_options = new Set([
 	'emitCss',
 	'exclude',
@@ -26,7 +28,7 @@ module.exports = function (options = {}) {
 	const extensions = rest.extensions || ['.svelte'];
 	const filter = createFilter(rest.include, rest.exclude);
 
-	if (svelte.VERSION[0] === '3') {
+	if (majorVersion === 3) {
 		compilerOptions.format = 'esm';
 	}
 
@@ -42,8 +44,7 @@ module.exports = function (options = {}) {
 	const { onwarn, emitCss = true } = rest;
 
 	if (emitCss) {
-		const [majorVer] = svelte.VERSION.split('.');
-		const cssOptionValue = majorVer > 3 ? 'external' : false;
+		const cssOptionValue = majorVersion > 3 ? 'external' : false;
 		if (compilerOptions.css) {
 			console.warn(
 				`${PREFIX} Forcing \`"compilerOptions.css": ${
@@ -129,10 +130,7 @@ module.exports = function (options = {}) {
 		async transform(code, id) {
 			if (!filter(id)) return null;
 
-			if (
-				Number(svelte.VERSION.split('.')[0]) >= 5 &&
-				(id.endsWith('.svelte.js') || id.endsWith('.svelte.ts'))
-			) {
+			if (majorVersion > 4 && (id.endsWith('.svelte.js') || id.endsWith('.svelte.ts'))) {
 				const compiled = svelte.compileModule(code, {
 					filename: id,
 					dev: compilerOptions.dev,
@@ -164,9 +162,18 @@ module.exports = function (options = {}) {
 			const compiled = svelte.compile(code, svelte_options);
 
 			(compiled.warnings || []).forEach((warning) => {
-				if (!emitCss && warning.code === 'css-unused-selector') return;
-				if (onwarn) onwarn(warning, this.warn);
-				else this.warn(warning);
+				if (
+					!emitCss &&
+					(warning.code === 'css-unused-selector' || warning.code === 'css_unused_selector')
+				) {
+					return;
+				}
+
+				if (onwarn) {
+					onwarn(warning, this.warn);
+				} else {
+					this.warn(warning);
+				}
 			});
 
 			if (emitCss && compiled.css && compiled.css.code) {

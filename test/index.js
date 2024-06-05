@@ -5,8 +5,10 @@ const assert = require('uvu/assert');
 const { SourceMapConsumer } = require('source-map');
 const { rollup } = require('rollup');
 const sander = require('sander');
-
+const { VERSION } = require('svelte/compiler');
 const plugin = require('..');
+
+const isSvelte5Plus = Number(VERSION.split('.')[0]) >= 5;
 
 const context = {
 	resolve: () => 'resolved',
@@ -53,11 +55,17 @@ test('supports component name assignment', async () => {
 	const p = plugin();
 	const index = await p.transform('', 'index.svelte');
 
-	assert.is.not(index.code.indexOf('class Index extends SvelteComponent'), -1);
+	assert.ok(
+		index.code.includes(isSvelte5Plus ? 'function Index(' : 'class Index extends SvelteComponent')
+	);
 
 	const card = await p.transform('', 'card/index.svelte');
-	assert.is(card.code.indexOf('class Index extends SvelteComponent'), -1);
-	assert.is.not(card.code.indexOf('class Card extends SvelteComponent'), -1);
+	assert.not.ok(
+		card.code.includes(isSvelte5Plus ? 'function Index(' : 'class Index extends SvelteComponent')
+	);
+	assert.ok(
+		card.code.includes(isSvelte5Plus ? 'function Card(' : 'class Card extends SvelteComponent')
+	);
 });
 
 test('creates a {code, map, dependencies} object, excluding the AST etc', async () => {
@@ -73,7 +81,7 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 	const bundle = await rollup({
 		input: 'test/sourcemap-test/src/main.js',
 		plugins: [plugin({ emitCss: false })],
-		external: ['svelte/internal'],
+		external: ['svelte/internal', 'svelte/internal/client', 'svelte/internal/disclose-version'],
 	});
 
 	const { output } = await bundle.generate({
@@ -81,7 +89,11 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 		sourcemap: true,
 		sourcemapExcludeSources: true,
 		file: 'test/sourcemap-test/dist/bundle.js',
-		globals: { 'svelte/internal': 'svelte' },
+		globals: {
+			'svelte/internal': 'svelte', // Svelte 3/4
+			'svelte/internal/client': 'svelte', // Svelte 5+
+			'svelte/internal/discloseVersion': 'discloseVersion', // Svelte 4+
+		},
 		assetFileNames: '[name][extname]',
 	});
 
@@ -89,10 +101,16 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 
 	assert.ok(map);
 	assert.is(map.file, 'bundle.js');
-	assert.is(map.sources.length, 3);
-	assert.ok(map.sources.includes('../src/main.js'));
-	assert.ok(map.sources.includes('../src/Foo.svelte'));
-	assert.ok(map.sources.includes('../src/Bar.svelte'));
+	if (isSvelte5Plus) {
+		// Svelte 5 has less mappings right now, maybe we can make it so that it has all three sources referenced at some point
+		assert.is(map.sources.length, 1);
+		assert.ok(map.sources.includes('../src/main.js'));
+	} else {
+		assert.is(map.sources.length, 3);
+		assert.ok(map.sources.includes('../src/main.js'));
+		assert.ok(map.sources.includes('../src/Foo.svelte'));
+		assert.ok(map.sources.includes('../src/Bar.svelte'));
+	}
 	assert.is(map.sourcesContent, null);
 });
 
@@ -160,15 +178,14 @@ test('emits a CSS file', async () => {
 		`path/to/Input.svelte`
 	);
 
-	assert.ok(transformed.code.indexOf(`import "path/to/Input.css";`) !== -1);
+	assert.ok(transformed.code.includes(`import "path/to/Input.css";`));
 
 	const css = p.load('path/to/Input.css');
-
 	const smc = await new SourceMapConsumer(css.map);
 
 	const loc = smc.originalPositionFor({
-		line: 1,
-		column: 0,
+		line: isSvelte5Plus ? 2 : 1,
+		column: isSvelte5Plus ? 2 : 0,
 	});
 
 	assert.is(loc.source, 'Input.svelte');
@@ -197,8 +214,8 @@ test('properly escapes CSS paths', async () => {
 	const smc = await new SourceMapConsumer(css.map);
 
 	const loc = smc.originalPositionFor({
-		line: 1,
-		column: 0,
+		line: isSvelte5Plus ? 2 : 1,
+		column: isSvelte5Plus ? 2 : 0,
 	});
 
 	assert.is(loc.source, 'Input.svelte');
@@ -214,7 +231,7 @@ test('intercepts warnings', async () => {
 		onwarn(warning, handler) {
 			warnings.push(warning);
 
-			if (warning.code === 'a11y-hidden') {
+			if (warning.code === 'a11y-hidden' || warning.code === 'a11y_hidden') {
 				handler(warning);
 			}
 		},
@@ -227,7 +244,7 @@ test('intercepts warnings', async () => {
 			},
 		},
 		`
-		<h1 aria-hidden>Hello world!</h1>
+		<h1 aria-hidden="true">Hello world!</h1>
 		<marquee>wheee!!!</marquee>
 	`,
 		'test.svelte'
@@ -235,11 +252,13 @@ test('intercepts warnings', async () => {
 
 	assert.equal(
 		warnings.map((w) => w.code),
-		['a11y-hidden', 'a11y-distracting-elements']
+		isSvelte5Plus
+			? ['a11y_hidden', 'a11y_distracting_elements']
+			: ['a11y-hidden', 'a11y-distracting-elements']
 	);
 	assert.equal(
 		handled.map((w) => w.code),
-		['a11y-hidden']
+		isSvelte5Plus ? ['a11y_hidden'] : ['a11y-hidden']
 	);
 });
 
@@ -274,13 +293,17 @@ test('handles filenames that happen to contain ".svelte"', async () => {
 					},
 				},
 			],
-			external: ['svelte/internal'],
+			external: ['svelte/internal', 'svelte/internal/client', 'svelte/internal/disclose-version'],
 		});
 
 		await bundle.write({
 			format: 'iife',
 			file: 'test/filename-test/dist/bundle.js',
-			globals: { 'svelte/internal': 'svelte' },
+			globals: {
+				'svelte/internal': 'svelte', // Svelte 3/4
+				'svelte/internal/client': 'svelte', // Svelte 5+
+				'svelte/internal/discloseVersion': 'discloseVersion', // Svelte 4+
+			},
 			assetFileNames: '[name].[ext]',
 			sourcemap: true,
 		});
@@ -289,9 +312,9 @@ test('handles filenames that happen to contain ".svelte"', async () => {
 		throw err;
 	}
 
-	assert.is(
+	assert.match(
 		fs.readFileSync('test/filename-test/dist/bundle.css', 'utf8'),
-		'h1.svelte-bt9zrl{color:red}'
+		/h1\.svelte-bt9zrl\s*{\s*color:\s*red;?\s*}/
 	);
 });
 
@@ -304,13 +327,16 @@ test.skip('handles ".svelte.ts/js" files', async () => {
 		const bundle = await rollup({
 			input: 'test/filename-test2/src/main.js',
 			plugins: [plugin({})],
-			external: ['svelte/internal'],
+			external: ['svelte/internal/client', 'svelte/internal/disclose-version'],
 		});
 
 		await bundle.write({
 			format: 'iife',
 			file: 'test/filename-test2/dist/bundle.js',
-			globals: { 'svelte/internal': 'svelte' },
+			globals: {
+				'svelte/internal/client': 'svelte',
+				'svelte/internal/discloseVersion': 'discloseVersion',
+			},
 			assetFileNames: '[name].[ext]',
 			sourcemap: true,
 		});
@@ -356,7 +382,7 @@ test('allows ".html" extension if configured', async () => {
 	try {
 		const bundle = await rollup({
 			input: 'test/node_modules/widget/index.js',
-			external: ['svelte/internal'],
+			external: ['svelte/internal', 'svelte/internal/client', 'svelte/internal/disclose-version'],
 			plugins: [
 				plugin({
 					extensions: ['.html'],
@@ -367,7 +393,11 @@ test('allows ".html" extension if configured', async () => {
 		await bundle.write({
 			format: 'iife',
 			file: 'test/node_modules/widget/dist/bundle.js',
-			globals: { 'svelte/internal': 'svelte' },
+			globals: {
+				'svelte/internal': 'svelte', // Svelte 3/4
+				'svelte/internal/client': 'svelte', // Svelte 5+
+				'svelte/internal/discloseVersion': 'discloseVersion', // Svelte 4+
+			},
 			assetFileNames: '[name].[ext]',
 			sourcemap: true,
 		});

@@ -1,5 +1,5 @@
 {
-	"version": "7.2.0",
+	"version": "7.2.1",
 	"name": "rollup-plugin-svelte",
 	"description": "Compile Svelte components with Rollup",
 	"repository": "sveltejs/rollup-plugin-svelte",
@@ -38,7 +38,7 @@
 		"rollup": "^2.33.3",
 		"sander": "^0.6.0",
 		"source-map": "^0.7.3",
-		"svelte": "^3.49.0",
+		"svelte": "^4.0.0",
 		"uvu": "^0.4.1"
 	},
 	"keywords": [
