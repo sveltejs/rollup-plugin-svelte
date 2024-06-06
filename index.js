@@ -17,6 +17,8 @@ const plugin_options = new Set([
 	'preprocess',
 ]);
 
+const svelte_module_regex = /\.svelte(\.[^./\\]+)*\.(js|ts)$/;
+
 let warned = false;
 
 /**
@@ -130,7 +132,7 @@ module.exports = function (options = {}) {
 		async transform(code, id) {
 			if (!filter(id)) return null;
 
-			if (majorVersion > 4 && (id.endsWith('.svelte.js') || id.endsWith('.svelte.ts'))) {
+			if (majorVersion > 4 && svelte_module_regex.test(id)) {
 				const compiled = svelte.compileModule(code, {
 					filename: id,
 					dev: compilerOptions.dev,

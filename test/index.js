@@ -319,7 +319,9 @@ test('handles filenames that happen to contain ".svelte"', async () => {
 });
 
 // Needs Svelte 5
-test.skip('handles ".svelte.ts/js" files', async () => {
+test('handles ".svelte.ts/js" files', async () => {
+	if (!isSvelte5Plus) return;
+
 	sander.rimrafSync('test/filename-test2/dist');
 	sander.mkdirSync('test/filename-test2/dist');
 
