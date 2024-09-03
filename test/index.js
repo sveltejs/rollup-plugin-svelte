@@ -4,7 +4,6 @@ const { test } = require('uvu');
 const assert = require('uvu/assert');
 const { SourceMapConsumer } = require('source-map');
 const { rollup } = require('rollup');
-const sander = require('sander');
 const { VERSION } = require('svelte/compiler');
 const plugin = require('..');
 
@@ -75,8 +74,8 @@ test('creates a {code, map, dependencies} object, excluding the AST etc', async 
 });
 
 test('respects `sourcemapExcludeSources` Rollup option', async () => {
-	sander.rimrafSync('test/sourcemap-test/dist');
-	sander.mkdirSync('test/sourcemap-test/dist');
+	fs.rmSync('test/sourcemap-test/dist', { recursive: true, force: true  });
+	fs.mkdirSync('test/sourcemap-test/dist', { recursive: true });
 
 	const bundle = await rollup({
 		input: 'test/sourcemap-test/src/main.js',
@@ -263,8 +262,8 @@ test('intercepts warnings', async () => {
 });
 
 test('handles filenames that happen to contain ".svelte"', async () => {
-	sander.rimrafSync('test/filename-test/dist');
-	sander.mkdirSync('test/filename-test/dist');
+	fs.rmSync('test/filename-test/dist', { recursive: true, force: true  });
+	fs.mkdirSync('test/filename-test/dist', { recursive: true });
 
 	try {
 		const bundle = await rollup({
@@ -322,8 +321,8 @@ test('handles filenames that happen to contain ".svelte"', async () => {
 test('handles ".svelte.ts/js" files', async () => {
 	if (!isSvelte5Plus) return;
 
-	sander.rimrafSync('test/filename-test2/dist');
-	sander.mkdirSync('test/filename-test2/dist');
+	fs.rmSync('test/filename-test2/dist', { recursive: true, force: true  });
+	fs.mkdirSync('test/filename-test2/dist', { recursive: true });
 
 	try {
 		const bundle = await rollup({
@@ -351,8 +350,8 @@ test('handles ".svelte.ts/js" files', async () => {
 });
 
 test('ignores ".html" extension by default', async () => {
-	sander.rimrafSync('test/node_modules/widget/dist');
-	sander.mkdirSync('test/node_modules/widget/dist');
+	fs.rmSync('test/node_modules/widget/dist', { recursive: true, force: true  });
+	fs.mkdirSync('test/node_modules/widget/dist', { recursive: true });
 
 	try {
 		const bundle = await rollup({
@@ -378,8 +377,8 @@ test('ignores ".html" extension by default', async () => {
 });
 
 test('allows ".html" extension if configured', async () => {
-	sander.rimrafSync('test/node_modules/widget/dist');
-	sander.mkdirSync('test/node_modules/widget/dist');
+	fs.rmSync('test/node_modules/widget/dist', { recursive: true, force: true  });
+	fs.mkdirSync('test/node_modules/widget/dist', { recursive: true });
 
 	try {
 		const bundle = await rollup({
