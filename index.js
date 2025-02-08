@@ -45,17 +45,17 @@ module.exports = function (options = {}) {
 	const cache_emit = new Map();
 	const { onwarn, emitCss = true } = rest;
 
-	if (emitCss) {
-		const cssOptionValue = majorVersion > 3 ? 'external' : false;
-		if (compilerOptions.css) {
-			console.warn(
-				`${PREFIX} Forcing \`"compilerOptions.css": ${
-					typeof cssOptionValue === 'string' ? `"${cssOptionValue}"` : cssOptionValue
-				}\` because "emitCss" was truthy.`
-			);
-		}
-		compilerOptions.css = cssOptionValue;
+	// Override `compilerOptions.css` based on `emitCss`
+	const cssOptionValue =
+		majorVersion > 3 ? (emitCss ? 'external' : 'injected') : emitCss ? false : true;
+	if (compilerOptions.css !== undefined && compilerOptions.css !== cssOptionValue) {
+		console.warn(
+			`${PREFIX} Forcing "compilerOptions.css": ${
+				typeof cssOptionValue === 'string' ? `"${cssOptionValue}"` : cssOptionValue
+			} because "emitCss" was ${emitCss ? 'truthy' : 'falsy'}.`
+		);
 	}
+	compilerOptions.css = cssOptionValue;
 
 	return {
 		name: 'svelte',
