@@ -74,7 +74,7 @@ test('creates a {code, map, dependencies} object, excluding the AST etc', async 
 });
 
 test('respects `sourcemapExcludeSources` Rollup option', async () => {
-	fs.rmSync('test/sourcemap-test/dist', { recursive: true, force: true  });
+	fs.rmSync('test/sourcemap-test/dist', { recursive: true, force: true });
 	fs.mkdirSync('test/sourcemap-test/dist', { recursive: true });
 
 	const bundle = await rollup({
@@ -102,8 +102,9 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 	assert.is(map.file, 'bundle.js');
 	if (isSvelte5Plus) {
 		// Svelte 5 has less mappings right now, maybe we can make it so that it has all three sources referenced at some point
-		assert.is(map.sources.length, 1);
+		assert.is(map.sources.length, 2);
 		assert.ok(map.sources.includes('../src/main.js'));
+		assert.ok(map.sources.includes('../src/Foo.svelte'));
 	} else {
 		assert.is(map.sources.length, 3);
 		assert.ok(map.sources.includes('../src/main.js'));
@@ -262,7 +263,7 @@ test('intercepts warnings', async () => {
 });
 
 test('handles filenames that happen to contain ".svelte"', async () => {
-	fs.rmSync('test/filename-test/dist', { recursive: true, force: true  });
+	fs.rmSync('test/filename-test/dist', { recursive: true, force: true });
 	fs.mkdirSync('test/filename-test/dist', { recursive: true });
 
 	try {
@@ -321,7 +322,7 @@ test('handles filenames that happen to contain ".svelte"', async () => {
 test('handles ".svelte.ts/js" files', async () => {
 	if (!isSvelte5Plus) return;
 
-	fs.rmSync('test/filename-test2/dist', { recursive: true, force: true  });
+	fs.rmSync('test/filename-test2/dist', { recursive: true, force: true });
 	fs.mkdirSync('test/filename-test2/dist', { recursive: true });
 
 	try {
@@ -350,7 +351,7 @@ test('handles ".svelte.ts/js" files', async () => {
 });
 
 test('ignores ".html" extension by default', async () => {
-	fs.rmSync('test/node_modules/widget/dist', { recursive: true, force: true  });
+	fs.rmSync('test/node_modules/widget/dist', { recursive: true, force: true });
 	fs.mkdirSync('test/node_modules/widget/dist', { recursive: true });
 
 	try {
@@ -377,7 +378,7 @@ test('ignores ".html" extension by default', async () => {
 });
 
 test('allows ".html" extension if configured', async () => {
-	fs.rmSync('test/node_modules/widget/dist', { recursive: true, force: true  });
+	fs.rmSync('test/node_modules/widget/dist', { recursive: true, force: true });
 	fs.mkdirSync('test/node_modules/widget/dist', { recursive: true });
 
 	try {
