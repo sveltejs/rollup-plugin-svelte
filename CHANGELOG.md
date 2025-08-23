@@ -1,5 +1,9 @@
 # rollup-plugin-svelte changelog
 
+## 7.2.3
+
+- Svelte 5: Set `css` compiler option to `"inject"` when `emitCss` plugin option is `false`
+
 ## 7.2.2
 
 - Svelte 5: Compile `.svelte.xxx.js/ts` files
