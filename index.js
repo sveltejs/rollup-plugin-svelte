@@ -55,6 +55,8 @@ module.exports = function (options = {}) {
 			);
 		}
 		compilerOptions.css = cssOptionValue;
+	} else if (majorVersion > 4) {
+		compilerOptions.css = 'injected';
 	}
 
 	return {

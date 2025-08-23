@@ -114,6 +114,25 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 	assert.is(map.sourcesContent, null);
 });
 
+test('injects CSS with `emitCss: false', async () => {
+	const p = plugin({emitCss: false});
+
+	const transformed = await p.transform(
+		`
+			<h1>Hello!</h1>
+
+			<style>
+				h1 {
+					color: red;
+				}
+			</style>
+		`,
+		'test.svelte'
+	);
+
+	assert.ok(transformed.code.includes('color:red'));
+});
+
 test('squelches "unused CSS" warnings if `emitCss: false`', () => {
 	const p = plugin({
 		emitCss: false,
