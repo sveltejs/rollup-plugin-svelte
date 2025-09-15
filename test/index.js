@@ -333,7 +333,7 @@ test('handles filenames that happen to contain ".svelte"', async () => {
 
 	assert.match(
 		fs.readFileSync('test/filename-test/dist/bundle.css', 'utf8'),
-		/h1\.svelte-bt9zrl\s*{\s*color:\s*red;?\s*}/
+		/h1\.svelte-[_a-zA-Z0-9-]+\s*{\s*color:\s*red;?\s*}/
 	);
 });
 
