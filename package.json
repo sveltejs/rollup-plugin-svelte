@@ -33,7 +33,7 @@
 		"svelte": ">=3.5.0"
 	},
 	"devDependencies": {
-		"eslint": "^7.14.0",
+		"eslint": "^9.39.1",
 		"eslint-config-prettier": "^8.8.0",
 		"rollup": "^2.33.3",
 		"source-map": "^0.7.3",
