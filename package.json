@@ -34,7 +34,7 @@
 	},
 	"devDependencies": {
 		"eslint": "^8.57.1",
-		"eslint-config-prettier": "^9.1.2",
+		"eslint-config-prettier": "^10.1.8",
 		"rollup": "^2.33.3",
 		"source-map": "^0.7.3",
 		"svelte": "^4.0.0",
