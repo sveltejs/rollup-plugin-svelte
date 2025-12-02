@@ -100,17 +100,10 @@ test('respects `sourcemapExcludeSources` Rollup option', async () => {
 
 	assert.ok(map);
 	assert.is(map.file, 'bundle.js');
-	if (isSvelte5Plus) {
-		// Svelte 5 has less mappings right now, maybe we can make it so that it has all three sources referenced at some point
-		assert.is(map.sources.length, 2);
-		assert.ok(map.sources.includes('../src/main.js'));
-		assert.ok(map.sources.includes('../src/Foo.svelte'));
-	} else {
-		assert.is(map.sources.length, 3);
-		assert.ok(map.sources.includes('../src/main.js'));
-		assert.ok(map.sources.includes('../src/Foo.svelte'));
-		assert.ok(map.sources.includes('../src/Bar.svelte'));
-	}
+	assert.is(map.sources.length, 3);
+	assert.ok(map.sources.includes('../src/main.js'));
+	assert.ok(map.sources.includes('../src/Foo.svelte'));
+	assert.ok(map.sources.includes('../src/Bar.svelte'));
 	assert.is(map.sourcesContent, null);
 });
 
