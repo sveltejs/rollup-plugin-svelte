@@ -114,7 +114,7 @@ module.exports = function (options = {}) {
 						);
 						warned = true;
 					}
-				} catch (e) {
+				} catch {
 					// do nothing, this isn't a Svelte library
 				}
 			}
